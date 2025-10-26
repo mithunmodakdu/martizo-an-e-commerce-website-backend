@@ -12,7 +12,7 @@ export enum EIsActive {
 
 export interface IAuthProvider {
   provider: string;
-  providerIdP: string;
+  providerId: string;
 }
 
 export interface IUser {
