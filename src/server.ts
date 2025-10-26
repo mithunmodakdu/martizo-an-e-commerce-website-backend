@@ -1,20 +1,20 @@
+/* eslint-disable no-console */
 import { Server } from "http";
 import mongoose from "mongoose";
 import app from "./app";
-import 'dotenv/config'
+import { envVars } from "./app/config/env";
 
 let server : Server;
-
 
 const startServer = async() => {
   try {
     
-    await mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mcynqnr.mongodb.net/martizoDB?retryWrites=true&w=majority&appName=Cluster0`);
+    await mongoose.connect(envVars.DB_URL);
 
     console.log("Connected to database successfully.");
 
-    server = app.listen(5000, () => {
-      console.log("Martizo server is listening on the port 5000")
+    server = app.listen(envVars.PORT, () => {
+      console.log(`Martizo server is listening on the port ${envVars.PORT} `)
     })
 
   } catch (error) {
@@ -23,4 +23,52 @@ const startServer = async() => {
 }
 
 startServer();
+
+process.on("unhandledRejection", (error) => {
+  console.log("Unhandled rejection detected. Server is shutting down...", error);
+
+  if(server){
+    server.close(() => {
+      process.exit(1);
+    });   
+  }
+
+  process.exit(1);
+})
+
+process.on("uncaughtException", (error) => {
+  console.log("Uncaught exception occurred. Server is shutting down...", error );
+
+  if(server){
+    server.close(() => {
+      process.exit(1);
+    })
+  }
+
+  process.exit(1);
+})
+
+process.on("SIGTERM", () => {
+  console.log("SIGTERM signal received. Server is shutting down...")
+
+  if(server){
+    server.close(() => {
+      process.exit(1);
+    })
+  }
+
+  process.exit(1);
+})
+
+process.on("SIGINT", () => {
+  console.log("SIGINT signal received. Server is shutting down... ");
+
+  if(server){
+    server.close(() => {
+      process.exit(1);
+    })
+  }
+
+  process.exit(1);
+})
 
