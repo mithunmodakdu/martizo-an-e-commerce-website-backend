@@ -9,6 +9,18 @@ const createUser = async(payload : Partial<IUser>) => {
   return user;
 }
 
+const getAllUsers = async() => {
+  const users = await User.find();
+  const countTotalUsers = await User.countDocuments();
+  return {
+    data: users,
+    meta: {
+      total: countTotalUsers
+    }
+  };
+}
+
 export const UserServices = {
-  createUser
+  createUser,
+  getAllUsers
 }
