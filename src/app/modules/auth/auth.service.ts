@@ -3,6 +3,8 @@ import { IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 import httpStatusCodes from "http-status-codes";
 import bcryptjs from "bcryptjs";
+import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
+import { envVars } from "../../config/env";
 
 const credentialsLogin = async(payload : Partial<IUser>) => {
   const {email, password} = payload;
@@ -19,8 +21,17 @@ const credentialsLogin = async(payload : Partial<IUser>) => {
     throw new AppError(httpStatusCodes.BAD_REQUEST, "Password is incorrect.")
   }
 
+  const jwtPayload = {
+    userId: isUserExist._id,
+    email: isUserExist.email,
+    role: isUserExist.role
+  }
+
+  const accessToken = jwt.sign(jwtPayload as JwtPayload , envVars.JWT_SECRET as string, {expiresIn: envVars.JWT_EXPIRE_TIME} as SignOptions);
+
   return {
-    email: isUserExist.email
+    email: isUserExist.email,
+    accessToken
   }
 }
 
