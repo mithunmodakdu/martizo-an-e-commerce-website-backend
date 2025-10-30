@@ -1,9 +1,10 @@
 import AppError from "../../errorHelpers/AppError";
-import { IAuthProvider, IUser } from "./user.interface";
+import { ERole, IAuthProvider, IUser } from "./user.interface";
 import { User } from "./user.model";
 import httpStatusCodes from "http-status-codes";
 import bcryptjs from "bcryptjs";
 import { envVars } from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
 
 const createUser = async(payload : Partial<IUser>) => {
   const {email, password, ...rest} = payload;
@@ -31,6 +32,43 @@ const createUser = async(payload : Partial<IUser>) => {
   return user;
 }
 
+const updateUser = async(userId: string, payload: Partial<IUser>, decodedToken: JwtPayload) =>{
+  
+  const isUserExist = await User.findById(userId);
+  
+  if(!isUserExist){
+    throw new AppError(httpStatusCodes.NOT_FOUND,"User does not exist.")
+  }
+
+  if(payload.email){
+    throw new AppError(httpStatusCodes.FORBIDDEN, "You can not change your email.")
+  }
+
+  if(payload.role){
+    if(decodedToken.role === ERole.USER){
+      throw new AppError(httpStatusCodes.FORBIDDEN, "Its forbidden for you to change the role.")
+    }
+
+    if(payload.role === ERole.SUPER_ADMIN && decodedToken.role === ERole.ADMIN){
+      throw new AppError(httpStatusCodes.FORBIDDEN, "Its forbidden for you to change the role.")
+    }
+  }
+
+  if(payload.isActive || payload.isDeleted || payload.isVerified){
+    if(decodedToken.role === ERole.USER){
+      throw new AppError(httpStatusCodes.FORBIDDEN, "Its forbidden for you to update this.")
+    }
+  }
+
+  if(payload.password){
+    payload.password = await bcryptjs.hash(payload.password, Number(envVars.BCRYPT_SALT_ROUND));
+  }
+
+  const newUpdatedUser = await User.findByIdAndUpdate(userId, payload, {new: true, runValidators: true});
+
+  return newUpdatedUser;
+}
+
 const getAllUsers = async() => {
   const users = await User.find();
   const countTotalUsers = await User.countDocuments();
@@ -44,5 +82,6 @@ const getAllUsers = async() => {
 
 export const UserServices = {
   createUser,
+  updateUser,
   getAllUsers
 }
