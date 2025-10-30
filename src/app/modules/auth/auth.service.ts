@@ -28,7 +28,6 @@ const credentialsLogin = async(payload : Partial<IUser>) => {
     role: isUserExist.role
   }
 
-  // const accessToken = jwt.sign(jwtPayload as JwtPayload , envVars.JWT_SECRET as string, {expiresIn: envVars.JWT_EXPIRE_TIME} as SignOptions);
   const accessToken = generateToken(jwtPayload as JwtPayload , envVars.JWT_SECRET as string, envVars.JWT_EXPIRE_TIME as string)
 
   return {
