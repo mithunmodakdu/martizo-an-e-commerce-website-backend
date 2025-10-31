@@ -8,6 +8,16 @@ const credentialsLogin = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
     const loginInfo = await AuthServices.credentialsLogin(req.body);
 
+    res.cookie("accessToken", loginInfo.accessToken, {
+      httpOnly: true,
+      secure: false
+    })
+
+    res.cookie("refreshToken", loginInfo.refreshToken, {
+      httpOnly: true,
+      secure: false
+    })
+
     sendResponse(res, {
       statusCode: httpStatusCodes.OK,
       success: true,
@@ -19,7 +29,8 @@ const credentialsLogin = catchAsync(
 
 const getNewAccessToken = catchAsync(
    async(req: Request, res: Response, next: NextFunction) => {
-    const refreshToken = req.headers.authorization;
+    // const refreshToken = req.headers.authorization;
+    const refreshToken = req.cookies.refreshToken;
     const newAccessToken = await AuthServices.getNewAccessToken(refreshToken as string);
 
     sendResponse(res, {
