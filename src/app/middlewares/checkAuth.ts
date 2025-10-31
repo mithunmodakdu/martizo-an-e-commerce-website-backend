@@ -21,6 +21,8 @@ export const checkAuth = (...authRoles : string[]) => async(req: Request, res: R
       throw new AppError(httpStatusCodes.FORBIDDEN, "This route is forbidden for you.")
     }
 
+    req.user = verifiedToken;
+
     next()
   } catch (error) {
     next(error)
