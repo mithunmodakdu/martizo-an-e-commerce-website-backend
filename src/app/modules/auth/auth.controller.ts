@@ -24,6 +24,7 @@ const getNewAccessToken = catchAsync(
    async(req: Request, res: Response, next: NextFunction) => {
     // const refreshToken = req.headers.authorization;
     const refreshToken = req.cookies.refreshToken;
+
     const newAccessToken = await AuthServices.getNewAccessToken(refreshToken as string);
 
     setAuthCookie(res, newAccessToken)
