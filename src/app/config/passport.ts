@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import passport from "passport";
 import {
   Strategy as GoogleStrategy,
@@ -7,6 +8,7 @@ import {
 import { envVars } from "./env";
 import { User } from "../modules/user/user.model";
 import { ERole } from "../modules/user/user.interface";
+
 
 passport.use(
   new GoogleStrategy(
@@ -47,11 +49,28 @@ passport.use(
         }
 
         return done(null, user);
-
       } catch (error) {
         console.log("google strategy error", error);
         return done(error);
       }
     }
   )
+);
+
+passport.serializeUser(
+  (user: any, done: (error: any, id?: unknown) => void) => {
+    done(null, user._id);
+  }
+);
+
+passport.deserializeUser(
+  async(id: any, done: any) => {
+    try {
+      const user = await User.findById(id);
+      done(null, user)
+    } catch (error) {
+      console.log(error)
+      done(error)
+    }
+  }
 );
