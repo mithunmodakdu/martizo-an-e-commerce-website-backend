@@ -7,6 +7,7 @@ import AppError from "../errorHelpers/AppError";
 export const globalErrorHandler = (error: any, req: Request, res: Response, next: NextFunction) => {
   let statusCode = 500;
   let message = "Something went wrong";
+  let errorSources : any = [];
     
   if(error.code === 11000){
     // console.log("Duplicate error:::", error)
@@ -18,7 +19,18 @@ export const globalErrorHandler = (error: any, req: Request, res: Response, next
     message = `${duplicate[1]} already exists.`
   }else if(error.name === "CastError"){
     statusCode = 400;
-    message = "Invalid MongoDB ObjectID. Please provide a valid ObjectID.";
+    message = error.message;
+  }else if(error.name === "ValidationError"){
+    statusCode = 400;
+
+    const errors = Object.values(error.errors);
+
+    errors.forEach((errorItem : any) => errorSources.push(
+      {
+        path: errorItem.path,
+        message: errorItem.message
+      }
+    ))
   }
   else if(error instanceof AppError){
     statusCode = error.statusCode;
@@ -32,6 +44,7 @@ export const globalErrorHandler = (error: any, req: Request, res: Response, next
     success: false,
     message,
     error,
+    errorSources,
     stack: envVars.NODE_ENV === "development"? error.stack : null
   })
 
