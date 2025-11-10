@@ -7,24 +7,38 @@ import AppError from "../errorHelpers/AppError";
 export const globalErrorHandler = (error: any, req: Request, res: Response, next: NextFunction) => {
   let statusCode = 500;
   let message = "Something went wrong";
-  let errorSources : any = [];
-    
-  if(error.code === 11000){
+  const errorSources : any = [];
+
+  if(error.name === "ZodError"){
+    statusCode = 400;
+    message = "Zod Error"
+    error.issues.forEach((issue: any) => errorSources.push(
+        {
+          path: issue.path[issue.path.length - 1],
+          message: issue.message
+        }
+      )
+    )
+
+    error = error.issues;
+  }
+  else if(error.code === 11000){
     // console.log("Duplicate error:::", error)
     statusCode = 400;
-    console.log(error.message)
+    // console.log(error.message)
     const duplicate = error.message.match(/"([^"]*)"/);
     // console.log(duplicate)
     // console.log(duplicate[1])
     message = `${duplicate[1]} already exists.`
+
   }else if(error.name === "CastError"){
     statusCode = 400;
     message = error.message;
+
   }else if(error.name === "ValidationError"){
     statusCode = 400;
-
+    message = "ValidationError";
     const errors = Object.values(error.errors);
-
     errors.forEach((errorItem : any) => errorSources.push(
       {
         path: errorItem.path,
@@ -40,12 +54,12 @@ export const globalErrorHandler = (error: any, req: Request, res: Response, next
     message = error.message;
   }
 
-  res.status(statusCode).json({
+  res.status(statusCode).send({
     success: false,
     message,
-    error,
     errorSources,
-    stack: envVars.NODE_ENV === "development"? error.stack : null
+    error   
+    // stack: envVars.NODE_ENV === "development"? error.stack : null
   })
 
 
