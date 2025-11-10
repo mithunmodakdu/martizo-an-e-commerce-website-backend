@@ -15,7 +15,7 @@ router.post(
 router.patch(
   "/:id",
   checkAuth(...Object.values(ERole)),
-  // validateRequest(updateUserZodSchema),
+  validateRequest(updateUserZodSchema),
   UserControllers.updateUser
 );
 router.get(
