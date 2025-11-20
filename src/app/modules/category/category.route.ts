@@ -1,8 +1,17 @@
 import { Router } from "express";
 import { CategoryControllers } from "./category.controller";
+import { checkAuth } from "../../middlewares/checkAuth";
+import { ERole } from "../user/user.interface";
+import { validateRequest } from "../../middlewares/validateRequest";
+import { createCategoryZodSchema } from "./category.validation";
 
-const router =  Router();
+const router = Router();
 
-router.post("/create", CategoryControllers.createCategory);
+router.post(
+  "/create",
+  checkAuth(ERole.SUPER_ADMIN),
+  validateRequest(createCategoryZodSchema),
+  CategoryControllers.createCategory
+);
 
 export const CategoryRoutes = router;

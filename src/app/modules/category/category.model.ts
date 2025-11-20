@@ -3,7 +3,7 @@ import { ICategory } from "./category.interface";
 
 export const categorySchema = new Schema<ICategory>(
   {
-    name: {type: String, required: true},
+    name: {type: String, required: true, unique: true},
     slug: {type: String, required: true, unique: true},
     parent: {type: Schema.Types.ObjectId, ref: "Category", default: null},
     icon: String
