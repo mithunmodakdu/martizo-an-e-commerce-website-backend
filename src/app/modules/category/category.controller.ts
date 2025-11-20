@@ -1,13 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
-import { categoryServices } from "./category.service";
+import { CategoryServices } from "./category.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
 
 const createCategory = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
-    const category = await categoryServices.createCategory(payload);
+    const category = await CategoryServices.createCategory(payload);
 
     sendResponse(res, {
       success: true,
