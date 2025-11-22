@@ -3,7 +3,7 @@ import { CategoryControllers } from "./category.controller";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { ERole } from "../user/user.interface";
 import { validateRequest } from "../../middlewares/validateRequest";
-import { createCategoryZodSchema } from "./category.validation";
+import { createCategoryZodSchema, updateCategoryZodSchema } from "./category.validation";
 
 const router = Router();
 
@@ -12,6 +12,13 @@ router.post(
   checkAuth(ERole.SUPER_ADMIN),
   validateRequest(createCategoryZodSchema),
   CategoryControllers.createCategory
+);
+
+router.patch(
+  "/:id",
+  checkAuth(ERole.SUPER_ADMIN),
+  validateRequest(updateCategoryZodSchema),
+  CategoryControllers.updateCategory
 );
 
 export const CategoryRoutes = router;

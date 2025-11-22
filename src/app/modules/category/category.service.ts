@@ -13,21 +13,29 @@ const createCategory = async (payload: Partial<ICategory>) => {
     );
   }
 
-  const baseSlug = payload.name?.toLocaleLowerCase().split(" ").join("-");
-  let slug = `${baseSlug}-category`;
-
-  let counter = 1;
-
-  while (await Category.exists({ slug })) {
-    slug = `${slug}-${counter++}`;
-  }
-
-  payload.slug = slug;
-
   const category = await Category.create(payload);
   return category;
 };
 
+const updateCategory = async(id: string, payload: Partial<ICategory>) =>{
+  const existedCategory = await Category.findById(id);
+  
+  if(!existedCategory){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "This category does not exist.")
+  }
+
+  const duplicateCategory = await Category.findOne({name: payload.name, _id: {$ne: id}});
+
+  if(duplicateCategory){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "Category with same name already exists");
+  }
+
+  const updatedCategory = await Category.findByIdAndUpdate(id, payload, {new: true, runValidators: true});
+
+  return updatedCategory;
+}
+
 export const CategoryServices = {
   createCategory,
+  updateCategory
 };
