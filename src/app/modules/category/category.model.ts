@@ -30,4 +30,26 @@ categorySchema.pre("save", async function (next) {
   next();
 });
 
+categorySchema.pre("findOneAndUpdate", async function(next){
+  const category = this.getUpdate() as Partial<ICategory>;
+
+  if(category.name){
+    const baseSlug = category.name.toLocaleLowerCase().split(" ").join();
+    let slug = `${baseSlug}-category`;
+
+    let counter = 1;
+
+    while(await Category.exists({slug})){
+      slug = `${slug}-${counter++}`
+    }
+
+    category.slug = slug;
+  }
+
+  this.setUpdate(category);
+
+  next()
+
+})
+
 export const Category = model("Category", categorySchema);
