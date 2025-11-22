@@ -14,4 +14,10 @@ router.post(
   CategoryControllers.createCategory
 );
 
+router.patch(
+  "/:id",
+  checkAuth(ERole.SUPER_ADMIN),
+  CategoryControllers.updateCategory
+);
+
 export const CategoryRoutes = router;
