@@ -25,7 +25,6 @@ const updateCategory = async(id: string, payload: Partial<ICategory>) =>{
   }
 
   const duplicateCategory = await Category.findOne({name: payload.name, _id: {$ne: id}});
-  // console.log(duplicateCategory)
 
   if(duplicateCategory){
     throw new AppError(httpStatusCodes.BAD_REQUEST, "Category with same name already exists");
