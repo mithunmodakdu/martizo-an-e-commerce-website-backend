@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose";
 import { IOffer } from "./offer.interface";
 
-const OfferSchema = new Schema<IOffer>(
+export const OfferSchema = new Schema<IOffer>(
   {
     offerType: {
       type: String,
