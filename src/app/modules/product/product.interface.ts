@@ -43,5 +43,6 @@ export interface IProduct {
 
   // others
   sku?: string;
+  status: "ACTIVE" | "INACTIVE"; 
 
 }

@@ -17,7 +17,16 @@ const ProductSchema = new Schema<IProduct>(
     // price
     price: {type: Number, required: true},
     salePrice: Number,
-    discountPercentage: Number,
+    discountPercentage: {
+      type: Number,
+      default: function(){
+        if(!this.salePrice){
+          return 0;
+        }
+
+        return Math.round(((this.price - this.salePrice)/this.price)*100);
+      }
+    },
 
     // stock + variants
     stock: {type: Number, required: true},
@@ -38,11 +47,12 @@ const ProductSchema = new Schema<IProduct>(
     offers: {type: [Schema.Types.ObjectId], ref: "Offer", default: []},
 
     // rating system
-    rating: Number,
-    ratingCount: Number,
+    rating: { type: Number, default: 0},
+    ratingCount: { type: Number, default: 0},
 
     // others
-    sku: String
+    sku: {type: String, required: true, unique: true},
+    status: {type: String, enum: ["ACTIVE", "INACTIVE"], default: "ACTIVE"}
 
   },
   {
