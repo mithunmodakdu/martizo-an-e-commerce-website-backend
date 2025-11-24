@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import { Schema } from "mongoose";
 import { IVariant } from "./variant.interface";
 
 export const VariantSchema = new Schema<IVariant>(
@@ -6,11 +6,12 @@ export const VariantSchema = new Schema<IVariant>(
     name: {type: String, required: true},
     value: {type: String, required: true},
     additionalPrice: {type: Number},
-    stock: {type: Number}
+    stock: {type: Number},
+    images: [String],
+    sku: String
   },
   {
-    timestamps: true
+    _id: false
   }
 );
 
-export const Variant = model("Variant", VariantSchema);

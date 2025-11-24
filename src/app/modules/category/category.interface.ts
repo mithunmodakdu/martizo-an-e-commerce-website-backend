@@ -1,8 +1,9 @@
+import { Types } from "mongoose";
 
 export interface ICategory {
   _id?: string;
   name: string;
   slug: string;
-  parent?: string | null;
+  parent?: Types.ObjectId | null;
   icon?: string;
 }
