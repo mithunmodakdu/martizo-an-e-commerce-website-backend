@@ -8,7 +8,7 @@ export const OfferSchema = new Schema<IOffer>(
       enum: ["TODAYS_OFFER", "CLEARANCE", "VOUCHER", "BUNDLE", "FLASH_SALE"],
       required: true,
     },
-    discountPercentage: {type: Number},
+    discountPercentage: {type: Number, required: true},
     startDate: {type: Date},
     endDate: { type: Date},
     voucherCode: {type: String}
