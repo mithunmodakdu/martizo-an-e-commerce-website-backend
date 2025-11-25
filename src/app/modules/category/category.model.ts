@@ -15,7 +15,7 @@ export const categorySchema = new Schema<ICategory>(
 
 categorySchema.pre("save", async function (next) {
   if (this.isModified("name")) {
-    const baseSlug = this.name?.toLocaleLowerCase().split(" ").join("-");
+    const baseSlug = this.name?.toLowerCase().split(" ").join("-");
     let slug = `${baseSlug}-category`;
 
     let counter = 1;

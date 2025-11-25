@@ -1,17 +1,17 @@
 import { Router } from "express";
-import { BrandControllers } from "./brand.controller";
+import { OfferControllers } from "./offer.controller";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { ERole } from "../user/user.interface";
 import { validateRequest } from "../../middlewares/validateRequest";
-import { createBrandZodSchema } from "./brand.validation";
+import { createOfferZodSchema } from "./offer.validation";
 
 const router = Router();
 
 router.post(
   "/create",
   checkAuth(ERole.SUPER_ADMIN),
-  validateRequest(createBrandZodSchema),
-  BrandControllers.createBrand
+  validateRequest(createOfferZodSchema),
+  OfferControllers.createOffer
 );
 
-export const BrandRoutes = router;
+export const OfferRoutes = router;
