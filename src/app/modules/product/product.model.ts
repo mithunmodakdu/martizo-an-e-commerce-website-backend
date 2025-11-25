@@ -6,7 +6,7 @@ const ProductSchema = new Schema<IProduct>(
   {
     // main details
     title: {type: String, required: true},
-    slug: {type: String, required: true, unique: true},
+    slug: {type: String, unique: true},
     description: {type: String},
 
     // categorization
@@ -59,6 +59,23 @@ const ProductSchema = new Schema<IProduct>(
     timestamps: true
   }
 );
+
+ProductSchema.pre("save", async function(next){
+  if(this.isModified("title")){
+    const baseSlug = this.title.toLowerCase().split(" ").join("-");
+    let slug = `${baseSlug}-product`;
+
+    let counter = 1;
+
+    while(await Product.exists({slug})){
+      slug = `${slug}-${counter++}`;
+    }
+
+    this.slug = slug;
+  }
+  
+  next();
+})
 
 export const Product = model("Product", ProductSchema);
 

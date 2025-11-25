@@ -5,7 +5,7 @@ export const createOfferZodSchema = z.object({
     ["TODAYS_OFFER", "CLEARANCE", "VOUCHER", "BUNDLE", "FLASH_SALE"],
     {
       error:
-        "Invalid offer type. Allowed values: TODAYS_OFFER, CLEARANCE, VOUCHER, BUNDLE, FLASH_SALE",
+        "Invalid offer type. Allowed values: TODAYS_OFFER, CLEARANCE, VOUCHER, BUNDLE, FLASH_SALE"
     }
   ),
   discountPercentage: z

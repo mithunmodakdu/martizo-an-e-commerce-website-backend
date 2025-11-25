@@ -16,7 +16,7 @@ const BrandSchema = new Schema<IBrand>(
 
 BrandSchema.pre("save", async function(next){
   if(this.isModified("name")){
-    const baseSlug = this.name.toLocaleLowerCase().split(" ").join("-");
+    const baseSlug = this.name.toLowerCase().split(" ").join("-");
     let slug = `${baseSlug}-brand`;
 
     let counter = 1;
