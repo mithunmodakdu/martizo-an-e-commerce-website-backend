@@ -15,6 +15,20 @@ const createProduct = async(payload: Partial<IProduct>) =>{
   return product;
 }
 
+const getAllProducts = async(query : Record<string, string>) => {
+  const filter = query;
+  console.log(filter)
+  const products = await Product.find(filter);
+
+  const totalProducts = await Product.countDocuments();
+
+  return {
+    meta: {total: totalProducts},
+    data: products
+  };
+}
+
 export const ProductServices = {
-  createProduct
+  createProduct,
+  getAllProducts
 }
