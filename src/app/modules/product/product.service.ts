@@ -1,4 +1,5 @@
 import AppError from "../../errorHelpers/AppError";
+import { productSearchableFields } from "./product.constants";
 import { IProduct } from "./product.interface";
 import { Product } from "./product.model";
 import httpStatusCodes from "http-status-codes";
@@ -15,6 +16,30 @@ const createProduct = async(payload: Partial<IProduct>) =>{
   return product;
 }
 
+const getAllProducts = async(query : Record<string, string>) => {
+  const filter = query;
+  const searchTerm = query.searchTerm || "";
+
+  delete filter["searchTerm"]
+
+  const searchQuery = {
+    $or: productSearchableFields.map((field) => ({
+      [field] : {$regex: searchTerm, $options: "i"}
+    }))
+    
+  }
+
+  const products = await Product.find(filter).find(searchQuery);
+
+  const totalProducts = await Product.countDocuments();
+
+  return {
+    meta: {total: totalProducts},
+    data: products
+  };
+}
+
 export const ProductServices = {
-  createProduct
+  createProduct,
+  getAllProducts
 }

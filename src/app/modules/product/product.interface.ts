@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { IVariant } from "../variant/variant.interface";
+import { IVariant } from "./variant/variant.interface";
 
 export interface IProduct {
   _id: string;
