@@ -16,4 +16,6 @@ router.post(
 
 router.get("/", ProductControllers.getAllProducts);
 
+router.get("/:slug", ProductControllers.getSingleProduct);
+
 export const ProductRoutes = router;

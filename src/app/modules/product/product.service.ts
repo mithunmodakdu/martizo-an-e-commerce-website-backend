@@ -90,7 +90,16 @@ const getAllProducts = async (query: Record<string, string>) => {
   };
 };
 
+const getSingleProduct = async(slug: string) => {
+  const product = await Product.findOne({slug});
+
+  return {
+    data: product
+  }
+}
+
 export const ProductServices = {
   createProduct,
   getAllProducts,
+  getSingleProduct
 };
