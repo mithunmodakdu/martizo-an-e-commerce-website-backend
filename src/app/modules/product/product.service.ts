@@ -1,4 +1,5 @@
 import AppError from "../../errorHelpers/AppError";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 import { excludeFields, productSearchableFields } from "./product.constants";
 import { IProduct } from "./product.interface";
 import { Product } from "./product.model";
@@ -19,45 +20,64 @@ const createProduct = async (payload: Partial<IProduct>) => {
   return product;
 };
 
+
+// const getAllProducts = async (query: Record<string, string>) => {
+//   const filter = query;
+//   const searchTerm = query.searchTerm || "";
+//   const sort = query.sort || "-createdAt";
+//   const fields = query.fields?.split(",").join(" ") || "";
+//   const page = Number(query.page) || 1;
+//   const limit = Number(query.limit) || 5;
+//   const skip = (page - 1) * limit;
+
+//   for (const field of excludeFields) {
+//     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+//     delete filter[field];
+//   }
+
+//   const searchQuery = {
+//     $or: productSearchableFields.map((field) => ({
+//       [field]: { $regex: searchTerm, $options: "i" },
+//     })),
+//   };
+
+//   // const products = await Product.find(filter)
+//   //   .find(searchQuery)
+//   //   .sort(sort)
+//   //   .select(fields)
+//   //   .limit(limit)
+//   //   .skip(skip);
+
+//   const productsByFilter = Product.find(filter);
+//   const productsBySearch = productsByFilter.find(searchQuery);
+//   const products = await productsBySearch.sort(sort).select(fields).skip(skip).limit(limit);
+
+//   const totalProducts = await Product.countDocuments();
+//   const totalPage = Math.ceil(totalProducts / limit);
+
+//   const meta = {
+//     page: page,
+//     limit: limit,
+//     total: totalProducts,
+//     totalPage: totalPage,
+//   };
+
+//   return {
+//     meta: meta,
+//     data: products,
+//   };
+// };
+
 const getAllProducts = async (query: Record<string, string>) => {
-  const filter = query;
-  const searchTerm = query.searchTerm || "";
-  const sort = query.sort || "-createdAt";
-  const fields = query.fields?.split(",").join(" ") || "";
-  const page = Number(query.page) || 1;
-  const limit = Number(query.limit) || 5;
-  const skip = (page - 1) * limit;
+  const queryBuilder = new QueryBuilder(Product.find(), query);
 
-  for (const field of excludeFields) {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete filter[field];
-  }
-
-  const searchQuery = {
-    $or: productSearchableFields.map((field) => ({
-      [field]: { $regex: searchTerm, $options: "i" },
-    })),
-  };
-
-  // const products = await Product.find(filter)
-  //   .find(searchQuery)
-  //   .sort(sort)
-  //   .select(fields)
-  //   .limit(limit)
-  //   .skip(skip);
-
-  const productsByFilter = Product.find(filter);
-  const productsBySearch = productsByFilter.find(searchQuery);
-  const products = await productsBySearch.sort(sort).select(fields).skip(skip).limit(limit);
+  const products = await queryBuilder.filter().search(productSearchableFields).modelQuery;
 
   const totalProducts = await Product.countDocuments();
-  const totalPage = Math.ceil(totalProducts / limit);
 
   const meta = {
-    page: page,
-    limit: limit,
-    total: totalProducts,
-    totalPage: totalPage,
+    total: totalProducts
+
   };
 
   return {
