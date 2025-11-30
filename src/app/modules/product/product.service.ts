@@ -71,7 +71,7 @@ const createProduct = async (payload: Partial<IProduct>) => {
 const getAllProducts = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Product.find(), query);
 
-  const products = await queryBuilder.filter().search(productSearchableFields).modelQuery;
+  const products = await queryBuilder.filter().search(productSearchableFields).sort().fields().paginate().build();
 
   const totalProducts = await Product.countDocuments();
 
