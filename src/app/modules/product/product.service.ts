@@ -20,9 +20,10 @@ const getAllProducts = async(query : Record<string, string>) => {
   const filter = query;
   const searchTerm = query.searchTerm || "";
   const sort = query.sort || "-createdAt";
-  const fields = query.fields.split(",").join(" ") || "";
-   console.log(fields)
-
+  const fields = query.fields?.split(",").join(" ") || "";
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 5;
+  const skip = (page - 1) * limit;
 
   for(const field of excludeFields){
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
@@ -36,7 +37,7 @@ const getAllProducts = async(query : Record<string, string>) => {
     
   }
 
-  const products = await Product.find(searchQuery).find(filter).sort(sort).select(fields);
+  const products = await Product.find(searchQuery).find(filter).sort(sort).select(fields).limit(limit).skip(skip);
 
   const totalProducts = await Product.countDocuments();
 
