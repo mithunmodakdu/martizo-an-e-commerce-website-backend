@@ -1,5 +1,5 @@
 import AppError from "../../errorHelpers/AppError";
-import { productSearchableFields } from "./product.constants";
+import { excludeFields, productSearchableFields } from "./product.constants";
 import { IProduct } from "./product.interface";
 import { Product } from "./product.model";
 import httpStatusCodes from "http-status-codes";
@@ -19,8 +19,15 @@ const createProduct = async(payload: Partial<IProduct>) =>{
 const getAllProducts = async(query : Record<string, string>) => {
   const filter = query;
   const searchTerm = query.searchTerm || "";
+  const sort = query.sort || "-createdAt";
+  const fields = query.fields.split(",").join(" ") || "";
+   console.log(fields)
 
-  delete filter["searchTerm"]
+
+  for(const field of excludeFields){
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete filter[field]
+  }
 
   const searchQuery = {
     $or: productSearchableFields.map((field) => ({
@@ -29,7 +36,7 @@ const getAllProducts = async(query : Record<string, string>) => {
     
   }
 
-  const products = await Product.find(filter).find(searchQuery);
+  const products = await Product.find(searchQuery).find(filter).sort(sort).select(fields);
 
   const totalProducts = await Product.countDocuments();
 
