@@ -60,4 +60,18 @@ export class QueryBuilder<T> {
   build(){
     return this.modelQuery;
   }
+
+  async getMeta(){
+    const page = Number(this.query.page);
+    const limit = Number(this.query.limit);
+    const totalDocuments = await this.modelQuery.model.countDocuments();
+    const totalPage = Math.ceil(totalDocuments/limit);
+
+    return {
+      page,
+      limit,
+      total: totalDocuments,
+      totalPage
+    }
+  }
 }

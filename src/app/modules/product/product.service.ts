@@ -20,7 +20,6 @@ const createProduct = async (payload: Partial<IProduct>) => {
   return product;
 };
 
-
 // const getAllProducts = async (query: Record<string, string>) => {
 //   const filter = query;
 //   const searchTerm = query.searchTerm || "";
@@ -71,18 +70,23 @@ const createProduct = async (payload: Partial<IProduct>) => {
 const getAllProducts = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Product.find(), query);
 
-  const products = await queryBuilder.filter().search(productSearchableFields).sort().fields().paginate().build();
+  const products = await queryBuilder
+    .filter()
+    .search(productSearchableFields)
+    .sort()
+    .fields()
+    .paginate();
 
-  const totalProducts = await Product.countDocuments();
-
-  const meta = {
-    total: totalProducts
-
-  };
+  const [data, meta] = await Promise.all(
+    [
+      products.build(),
+      queryBuilder.getMeta()
+    ]
+  );
 
   return {
     meta: meta,
-    data: products,
+    data: data,
   };
 };
 
