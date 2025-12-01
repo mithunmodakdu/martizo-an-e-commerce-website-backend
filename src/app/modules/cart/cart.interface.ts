@@ -1,9 +1,14 @@
 import { Types } from "mongoose";
+import { IVariant } from "../product/variant/variant.interface";
 
 export interface ICartItem {
   productId: Types.ObjectId;
-  quantity: number;
+  name: string;
   price: number;
+  quantity: number;
+  variant? : IVariant;
+  image?: string;
+  
 }
 
 export interface ICart {
