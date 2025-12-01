@@ -61,4 +61,10 @@ export const CartSchema = new Schema<ICart>(
   }
 );
 
+CartSchema.pre("save", function(next){
+  this.totalItems = this.items.reduce((total, item) => total + item.quantity, 0);
+  this.totalPrice = this.items.reduce((total, item) => total + item.quantity * item.price, 0);
+  next();
+});
+
 export const Cart = model("Cart", CartSchema); 
