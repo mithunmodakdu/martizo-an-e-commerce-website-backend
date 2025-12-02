@@ -1,9 +1,13 @@
 import { Types } from "mongoose";
+import { IVariant } from "../product/variant/variant.interface";
 
 export interface IOrderItem {
   productId: Types.ObjectId;
+  name: string;
   quantity: number;
   price: number;
+  variant?: IVariant;
+  image?: string;
 }
 
 export interface IShippingAddress {
@@ -18,9 +22,11 @@ export interface IShippingAddress {
 export enum EOrderStatus {
   PENDING = "PENDING",
   PAID = "PAID",
+  PROCESSING = "PROCESSING",
   SHIPPED = "SHIPPED",
   DELIVERED = "DELIVERED",
-  CANCELLED = "CANCELLED"
+  CANCELLED = "CANCELLED",
+  REFUNDED = "REFUNDED"
 }
 
 export interface IOrder {
@@ -28,8 +34,18 @@ export interface IOrder {
   shippingAddress: IShippingAddress;
 
   items: IOrderItem[];
-  totalAmount: number;
+  itemsPrice : number;
+  taxPrice: number;
+  shippingPrice: number;
+  totalPrice: number;
   
-  paymentId: Types.ObjectId;
+  paymentId?: Types.ObjectId;
   status: EOrderStatus
+
+  paidAt?: Date | null;
+  shippedAt?: Date | null;
+  deliveredAt?: Date | null;
+  cancelledAt?: Date | null;
+  refundedAt?: Date | null;
+
 }
