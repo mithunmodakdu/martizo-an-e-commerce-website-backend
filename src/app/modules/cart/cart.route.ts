@@ -20,5 +20,10 @@ router.patch(
   checkAuth(...Object.values(ERole)),
   CartControllers.updateCartItem
 );
+router.delete(
+  "/remove/:productId",
+  checkAuth(...Object.values(ERole)),
+  CartControllers.removeCartItem
+);
 
 export const CartRoutes = router;

@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import AppError from "../../errorHelpers/AppError";
 import { ICartItem } from "./cart.interface";
 import { Cart } from "./cart.model";
@@ -54,8 +55,23 @@ const updateCartItem = async(userId: string, payload: Partial<ICartItem>) => {
   return cart;
 }
 
+const removeCartItem = async(userId: string, productId: string) => {
+  const cart = await Cart.findOne({userId});
+
+  if(!cart){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "Cart Not Found");
+  }
+
+  cart.items = cart.items.filter((item) => item.productId != productId);
+
+  await cart.save();
+
+  return cart;
+}
+
 export const CartServices = {
   addToCart,
   getUserCart,
-  updateCartItem
+  updateCartItem,
+  removeCartItem
 };
