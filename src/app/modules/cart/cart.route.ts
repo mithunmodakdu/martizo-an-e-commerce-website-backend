@@ -21,6 +21,11 @@ router.patch(
   CartControllers.updateCartItem
 );
 router.delete(
+  "/clear",
+  checkAuth(...Object.values(ERole)),
+  CartControllers.clearCart
+);
+router.delete(
   "/remove/:productId",
   checkAuth(...Object.values(ERole)),
   CartControllers.removeCartItem
