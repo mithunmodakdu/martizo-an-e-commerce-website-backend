@@ -6,17 +6,17 @@ export interface IOrderItem {
   name: string;
   quantity: number;
   price: number;
-  variant?: IVariant;
-  image?: string;
+  variant?: IVariant | null;
+  image?: string | null;
 }
 
 export interface IShippingAddress {
   name: string;
   phone: string;
   address: string;
-  city: string;
-  postalCode: string;
-  country: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
 }
 
 export enum EOrderStatus {
