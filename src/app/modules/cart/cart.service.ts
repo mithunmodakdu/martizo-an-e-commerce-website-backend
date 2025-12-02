@@ -26,6 +26,12 @@ const addToCart = async (userId: string, payload: Partial<ICartItem>) => {
   return cart;
 };
 
+const getUserCart = async(userId: string) => {
+  const cart = await Cart.findOne({userId});
+  return cart;
+}
+
 export const CartServices = {
   addToCart,
+  getUserCart
 };
