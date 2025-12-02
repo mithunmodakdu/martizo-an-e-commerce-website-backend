@@ -15,5 +15,10 @@ router.get(
   checkAuth(...Object.values(ERole)),
   CartControllers.getUserCart
 );
+router.patch(
+  "/update",
+  checkAuth(...Object.values(ERole)),
+  CartControllers.updateCartItem
+);
 
 export const CartRoutes = router;

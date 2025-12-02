@@ -1,5 +1,7 @@
+import AppError from "../../errorHelpers/AppError";
 import { ICartItem } from "./cart.interface";
 import { Cart } from "./cart.model";
+import httpStatusCodes from "http-status-codes";
 
 const addToCart = async (userId: string, payload: Partial<ICartItem>) => {
   const { productId, name, quantity, price } = payload;
@@ -31,7 +33,29 @@ const getUserCart = async(userId: string) => {
   return cart;
 }
 
+const updateCartItem = async(userId: string, payload: Partial<ICartItem>) => {
+  const {productId, quantity} = payload;
+  const cart = await Cart.findOne({userId});
+
+  if(!cart){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "Cart Not Found");
+  }
+
+  const item = cart.items.find((item) => item.productId == productId);
+
+  if(!item){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "This product item in not found in the cart")
+  }
+
+  item.quantity = quantity as number;
+
+  await cart.save();
+
+  return cart;
+}
+
 export const CartServices = {
   addToCart,
-  getUserCart
+  getUserCart,
+  updateCartItem
 };
