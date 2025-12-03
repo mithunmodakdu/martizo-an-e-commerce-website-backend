@@ -7,11 +7,11 @@ export const CartItemSchema = new Schema<ICartItem>(
     productId: {
       type: Schema.Types.ObjectId,
       ref: "Product",
-      required: true
+      required: true,
     },
     name: {
       type: String,
-      required: true
+      required: true,
     },
     price: {
       type: Number,
@@ -20,18 +20,17 @@ export const CartItemSchema = new Schema<ICartItem>(
     quantity: {
       type: Number,
       required: true,
-      min: 1
+      min: 1,
     },
     variant: {
-      type: VariantSchema
+      type: VariantSchema,
     },
     image: {
-      type: String
-    }
-
+      type: String,
+    },
   },
   {
-    _id: false
+    _id: false,
   }
 );
 
@@ -41,30 +40,44 @@ export const CartSchema = new Schema<ICart>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true
+      unique: true,
     },
     items: {
       type: [CartItemSchema],
-      default: []
+      default: [],
     },
     totalItems: {
       type: Number,
-      default: 0
+      default: 0,
     },
-    totalPrice: {
-      type: Number,
-      default: 0
-    }
+    itemsPrice: { type: Number, default: 0 },
+    taxPrice: { type: Number, default: 0 },
+    shippingPrice: { type: Number, default: 0 },
+    totalPrice: { type: Number, default: 0 },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
-CartSchema.pre("save", function(next){
-  this.totalItems = this.items.reduce((total, item) => total + item.quantity, 0);
-  this.totalPrice = this.items.reduce((total, item) => total + item.quantity * item.price, 0);
+CartSchema.pre("save", function (next) {
+  this.totalItems = this.items.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
+  this.itemsPrice = this.items.reduce(
+    (total, item) => total + item.quantity * item.price,
+    0
+  );
+
+  this.taxPrice = parseFloat((this.itemsPrice * 0.15).toFixed(2));
+
+  this.shippingPrice = this.itemsPrice > 10000 ? 0 : 150;
+
+  this.totalPrice = this.itemsPrice + this.taxPrice + this.shippingPrice;
+
   next();
 });
 
-export const Cart = model("Cart", CartSchema); 
+export const Cart = model("Cart", CartSchema);
