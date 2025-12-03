@@ -15,5 +15,8 @@ export interface ICart {
   userId: Types.ObjectId;
   items: ICartItem[];
   totalItems: number;
+  itemsPrice: number;
+  taxPrice: number;
+  shippingPrice: number;
   totalPrice: number;
 }
