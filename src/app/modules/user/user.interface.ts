@@ -1,4 +1,4 @@
-import { ObjectId, Types } from "mongoose";
+import { Types } from "mongoose";
 
 export enum ERole {
   SUPER_ADMIN = "SUPER_ADMIN",
