@@ -16,7 +16,5 @@ export interface ICart {
   items: ICartItem[];
   totalItems: number;
   itemsPrice: number;
-  taxPrice: number;
-  shippingPrice: number;
-  totalPrice: number;
+  
 }

@@ -14,7 +14,7 @@ const addToCart = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatusCodes.CREATED,
-      message: "Cart created successfully",
+      message: "Product added to Cart successfully",
       data: result
     })
   }

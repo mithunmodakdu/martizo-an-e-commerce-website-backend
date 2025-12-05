@@ -6,8 +6,9 @@ import httpStatusCodes from "http-status-codes";
 
 const createOrder = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
+    const userId = req.user?.userId;
     const payload = req.body;
-    const result = await OrderServices.createOrder(payload);
+    const result = await OrderServices.createOrder(userId, payload);
 
     sendResponse(res, {
       success: true,
