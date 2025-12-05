@@ -51,9 +51,6 @@ export const CartSchema = new Schema<ICart>(
       default: 0,
     },
     itemsPrice: { type: Number, default: 0 },
-    taxPrice: { type: Number, default: 0 },
-    shippingPrice: { type: Number, default: 0 },
-    totalPrice: { type: Number, default: 0 },
   },
   {
     timestamps: true,
@@ -70,12 +67,6 @@ CartSchema.pre("save", function (next) {
     (total, item) => total + item.quantity * item.price,
     0
   );
-
-  this.taxPrice = parseFloat((this.itemsPrice * 0.15).toFixed(2));
-
-  this.shippingPrice = this.itemsPrice > 10000 ? 0 : 150;
-
-  this.totalPrice = this.itemsPrice + this.taxPrice + this.shippingPrice;
 
   next();
 });

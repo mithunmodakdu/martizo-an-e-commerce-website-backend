@@ -3,11 +3,13 @@ import { catchAsync } from "../../utils/catchAsync";
 import { OrderServices } from "./order.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
+import { JwtPayload } from "jsonwebtoken";
 
 const createOrder = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
+    const userId = (req.user as JwtPayload).userId;
     const payload = req.body;
-    const result = await OrderServices.createOrder(payload);
+    const result = await OrderServices.createOrder(userId, payload);
 
     sendResponse(res, {
       success: true,

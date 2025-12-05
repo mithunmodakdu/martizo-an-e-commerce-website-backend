@@ -14,9 +14,18 @@ export interface IShippingAddress {
   name: string;
   phone: string;
   address: string;
-  city?: string;
+  city: string;
   postalCode?: string;
   country?: string;
+}
+
+export enum EPaymentMethod {
+  COD = "COD",                  // Cash on Delivery
+  SSL_COMMERZ = "SSL_COMMERZ",  
+  STRIPE = "STRIPE",            
+  PAYPAL = "PAYPAL",            
+  BKASH = "BKASH",              
+  NAGAD = "NAGAD"               
 }
 
 export enum EOrderStatus {
@@ -39,6 +48,7 @@ export interface IOrder {
   shippingPrice: number;
   totalPrice: number;
   
+  paymentMethod: EPaymentMethod;
   paymentId?: Types.ObjectId;
   status: EOrderStatus
 

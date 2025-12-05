@@ -4,17 +4,18 @@ import { CartServices } from "./cart.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
 import { ICartItem } from "./cart.interface";
+import { JwtPayload } from "jsonwebtoken";
 
 const addToCart = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user?.userId;
+    const userId = (req.user as JwtPayload).userId;
     const payload = req.body;
     const result = await CartServices.addToCart(userId as string, payload as Partial<ICartItem>)
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatusCodes.CREATED,
-      message: "Cart created successfully",
+      message: "Product added to Cart successfully",
       data: result
     })
   }
@@ -22,7 +23,7 @@ const addToCart = catchAsync(
 
 const getUserCart = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user?.userId;
+    const userId = (req.user as JwtPayload).userId;
     const result = await CartServices.getUserCart(userId);
     
     sendResponse(res, {
@@ -36,7 +37,7 @@ const getUserCart = catchAsync(
 
 const updateCartItem = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user?.userId;
+    const userId = (req.user as JwtPayload).userId;
     const payload = req.body;
     const result = await CartServices.updateCartItem(userId, payload);
 
@@ -51,7 +52,7 @@ const updateCartItem = catchAsync(
 
 const removeCartItem = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user?.userId;
+    const userId = (req.user as JwtPayload).userId;
     const {productId} = req.params;
     const result = await CartServices.removeCartItem(userId, productId);
 
@@ -66,7 +67,7 @@ const removeCartItem = catchAsync(
 
 const clearCart = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
-    const userId = req.user?.userId;
+    const userId = (req.user as JwtPayload).userId;
     const result = await CartServices.clearCart(userId);
 
     sendResponse(res, {

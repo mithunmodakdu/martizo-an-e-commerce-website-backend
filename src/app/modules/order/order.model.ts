@@ -1,6 +1,7 @@
 import { model, Schema } from "mongoose";
 import {
   EOrderStatus,
+  EPaymentMethod,
   IOrder,
   IOrderItem,
   IShippingAddress,
@@ -45,6 +46,7 @@ export const OrderSchema = new Schema<IOrder>(
     shippingPrice: { type: Number, required: true, default: 0.0 },
     totalPrice: { type: Number, required: true, default: 0.0 },
 
+    paymentMethod: {type: String, enum: Object.values(EPaymentMethod)},
     paymentId: { type: Schema.Types.ObjectId, ref: "Payment" },
     status: {
       type: String,
@@ -62,5 +64,6 @@ export const OrderSchema = new Schema<IOrder>(
     timestamps: true,
   }
 );
+
 
 export const Order = model<IOrder>("Order", OrderSchema);
