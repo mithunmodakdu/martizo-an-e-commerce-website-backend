@@ -15,7 +15,7 @@ const PaymentSchema = new Schema(
     },
     paymentGatewayData: { type: Schema.Types.Mixed },
     invoiceUrl: { type: String },
-    status: { type: String, enum: Object.values(EPaymentStatus) },
+    status: { type: String, enum: Object.values(EPaymentStatus), default: EPaymentStatus.UNPAID },
   },
   {
     timestamps: true,
