@@ -82,11 +82,10 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
       { new: true, runValidators: true, session }
     )
       .populate("userId", "name email")
-      .populate("paymentId");
-
+      .populate("paymentId", "transactionId");
 
     cart.items = [];
-    await cart.save({session});
+    await cart.save({ session });
 
     await session.commitTransaction();
     session.endSession();
