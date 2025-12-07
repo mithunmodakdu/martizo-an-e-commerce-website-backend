@@ -13,7 +13,7 @@ const sslPaymentInit = async (payload: ISSLCommerz) => {
       currency: "BDT",
       tran_id: payload.tran_id,
 
-      success_url: envVars.SSL.SSL_SUCCESS_BACKEND_URL,
+      success_url: `${envVars.SSL.SSL_SUCCESS_BACKEND_URL}?transactionId=${payload.tran_id}&amount=${payload.total_amount}&status=success`,
       fail_url: envVars.SSL.SSL_FAIL_BACKEND_URL,
       cancel_url: envVars.SSL.SSL_CANCEL_BACKEND_URL,
 
@@ -31,13 +31,8 @@ const sslPaymentInit = async (payload: ISSLCommerz) => {
       cus_state: "N/A",
       cus_postcode: payload.cus_postcode,
       cus_country: payload.cus_country,
-      cus_phone: payload.cus_phone,
-
-  
-      
+      cus_phone: payload.cus_phone
     };
-
-    console.log(data);
 
     const response = await axios({
       method: "POST",

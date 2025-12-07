@@ -121,15 +121,15 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
     };
 
     const sslPayment = await SSLCommerzServices.sslPaymentInit(sslPayload);
-    console.log(sslPayment)
 
     await session.commitTransaction();
     session.endSession();
 
     return {
       order: updatedOrder,
-      payment: sslPayment
+      paymentGateWayUrl: sslPayment.GatewayPageURL
     };
+
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
