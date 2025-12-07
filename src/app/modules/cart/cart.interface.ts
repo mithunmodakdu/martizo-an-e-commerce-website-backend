@@ -4,6 +4,7 @@ import { IVariant } from "../product/variant/variant.interface";
 export interface ICartItem {
   productId: Types.ObjectId;
   name: string;
+  categoryName: string;
   price: number;
   quantity: number;
   variant? : IVariant;

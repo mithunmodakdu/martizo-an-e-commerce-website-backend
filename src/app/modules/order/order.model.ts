@@ -12,6 +12,7 @@ export const OrderItemSchema = new Schema<IOrderItem>(
   {
     productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     name: { type: String, required: true },
+    categoryName: { type: String, required: true },
     quantity: { type: Number, required: true },
     price: { type: Number, required: true },
     variant: { type: VariantSchema, default: null },
