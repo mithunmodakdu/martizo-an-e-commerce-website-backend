@@ -13,6 +13,10 @@ export const CartItemSchema = new Schema<ICartItem>(
       type: String,
       required: true,
     },
+    categoryName: {
+      type: String,
+      required: true,
+    },
     price: {
       type: Number,
       required: true,

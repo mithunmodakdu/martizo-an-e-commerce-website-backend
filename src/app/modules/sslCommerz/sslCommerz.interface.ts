@@ -1,5 +1,5 @@
 export interface ISSLCommerz {
-  total_amount: string;
+  total_amount: number;
   tran_id: string;
   product_name: string;
   product_category: string;

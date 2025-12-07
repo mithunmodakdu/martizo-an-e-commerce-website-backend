@@ -6,6 +6,8 @@ import { Order } from "./order.model";
 import { User } from "../user/user.model";
 import { Payment } from "../payment/payment.model";
 import { EPaymentStatus } from "../payment/payment.interface";
+import { IUser } from "../user/user.interface";
+import { SSLCommerzServices } from "../sslCommerz/sslCommerz.service";
 
 const createTransactionId = () => {
   return `tran_id_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
@@ -39,6 +41,7 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
     const orderItems = cart.items.map((item) => ({
       productId: item.productId,
       name: item.name,
+      categoryName: item.categoryName,
       quantity: item.quantity,
       price: item.price,
       variant: item.variant,
@@ -62,6 +65,7 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
 
     const order = await Order.create([orderData], { session });
 
+    //create payment
     const payment = await Payment.create(
       [
         {
@@ -76,21 +80,56 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
       { session }
     );
 
+    // update Order
     const updatedOrder = await Order.findByIdAndUpdate(
       order[0]._id,
       { paymentId: payment[0]._id },
       { new: true, runValidators: true, session }
     )
-      .populate("userId", "name email")
+      .populate("userId", "name email address")
       .populate("paymentId", "transactionId");
 
+  
+    //make cart empty
     cart.items = [];
     await cart.save({ session });
+
+    // SSL Payment related
+    const { name, email } =
+      updatedOrder?.userId as Partial<IUser>;
+
+    let productName = "";
+    updatedOrder?.items.map((item) => (productName += item.name + ", "));
+
+    let productCategory = "";
+    updatedOrder?.items.map(
+      (item) => (productCategory += item.categoryName + ", ")
+    );
+
+    const sslPayload = {
+      total_amount: updatedOrder?.totalPrice as number,
+      tran_id: payment[0]?.transactionId as string,
+      product_name: productName as string,
+      product_category: productCategory as string,
+      cus_name: name as string,
+      cus_email: email as string,
+      cus_add1: shippingAddress?.address as string,
+      cus_city: shippingAddress?.city as string,
+      cus_postcode: shippingAddress?.postalCode as string,
+      cus_country: shippingAddress?.country as string,
+      cus_phone: shippingAddress?.phone as string,
+    };
+
+    const sslPayment = await SSLCommerzServices.sslPaymentInit(sslPayload);
+    console.log(sslPayment)
 
     await session.commitTransaction();
     session.endSession();
 
-    return updatedOrder;
+    return {
+      order: updatedOrder,
+      payment: sslPayment
+    };
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
