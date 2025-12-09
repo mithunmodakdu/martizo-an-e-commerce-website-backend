@@ -35,7 +35,24 @@ const failPayment = catchAsync(
   }
 );
 
+const cancelPayment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+    const result = await PaymentServices.cancelPayment(
+      query as Record<string, string>
+    );
+
+    if (!result?.success) {
+      res.redirect(
+        `${envVars.SSL.SSL_CANCEL_FRONTEND_URL}?transactionId=${query.transactionId}&amount=${query.amount}&status=${query.status}&message=${result.message}`
+      );
+    }
+
+  }
+);
+
 export const PaymentControllers = {
   successPayment,
-  failPayment
+  failPayment,
+  cancelPayment
 };
