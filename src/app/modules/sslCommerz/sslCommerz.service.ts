@@ -14,8 +14,8 @@ const sslPaymentInit = async (payload: ISSLCommerz) => {
       tran_id: payload.tran_id,
 
       success_url: `${envVars.SSL.SSL_SUCCESS_BACKEND_URL}?transactionId=${payload.tran_id}&amount=${payload.total_amount}&status=success`,
-      fail_url: envVars.SSL.SSL_FAIL_BACKEND_URL,
-      cancel_url: envVars.SSL.SSL_CANCEL_BACKEND_URL,
+      fail_url: `${envVars.SSL.SSL_FAIL_BACKEND_URL}?transactionId=${payload.tran_id}&amount=${payload.total_amount}&status=failed`,
+      cancel_url: `${envVars.SSL.SSL_CANCEL_BACKEND_URL}?transactionId=${payload.tran_id}&amount=${payload.total_amount}&status=cancelled`,
 
       emi_option: 0,
 
@@ -31,7 +31,7 @@ const sslPaymentInit = async (payload: ISSLCommerz) => {
       cus_state: "N/A",
       cus_postcode: payload.cus_postcode,
       cus_country: payload.cus_country,
-      cus_phone: payload.cus_phone
+      cus_phone: payload.cus_phone,
     };
 
     const response = await axios({
@@ -45,8 +45,8 @@ const sslPaymentInit = async (payload: ISSLCommerz) => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    console.log(error)
-    throw new AppError(httpStatusCodes.BAD_REQUEST, error.message)
+    console.log(error);
+    throw new AppError(httpStatusCodes.BAD_REQUEST, error.message);
     // throw error;
   }
 };

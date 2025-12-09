@@ -19,6 +19,23 @@ const successPayment = catchAsync(
   }
 );
 
+const failPayment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+    const result = await PaymentServices.failPayment(
+      query as Record<string, string>
+    );
+
+    if (!result?.success) {
+      res.redirect(
+        `${envVars.SSL.SSL_FAIL_FRONTEND_URL}?transactionId=${query.transactionId}&amount=${query.amount}&status=${query.status}&message=${result.message}`
+      );
+    }
+
+  }
+);
+
 export const PaymentControllers = {
   successPayment,
+  failPayment
 };

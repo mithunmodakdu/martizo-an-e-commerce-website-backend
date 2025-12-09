@@ -5,4 +5,6 @@ const router = Router();
 
 router.post("/success", PaymentControllers.successPayment);
 
+router.post("/fail", PaymentControllers.failPayment);
+
 export const PaymentRoutes = router;
