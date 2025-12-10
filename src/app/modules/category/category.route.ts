@@ -4,12 +4,14 @@ import { checkAuth } from "../../middlewares/checkAuth";
 import { ERole } from "../user/user.interface";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { createCategoryZodSchema, updateCategoryZodSchema } from "./category.validation";
+import { multerUpload } from "../../config/multer.config";
 
 const router = Router();
 
 router.post(
   "/create",
   checkAuth(ERole.SUPER_ADMIN),
+  multerUpload.single("file"),
   validateRequest(createCategoryZodSchema),
   CategoryControllers.createCategory
 );

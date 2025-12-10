@@ -3,10 +3,15 @@ import { catchAsync } from "../../utils/catchAsync";
 import { CategoryServices } from "./category.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
+import { ICategory } from "./category.interface";
 
 const createCategory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const payload = req.body;
+    const payload : ICategory = {
+      ...req.body,
+      icon: req.file?.path
+    };
+
     const category = await CategoryServices.createCategory(payload);
 
     sendResponse(res, {
