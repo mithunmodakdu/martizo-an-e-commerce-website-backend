@@ -4,10 +4,16 @@ import { ProductServices } from "./product.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
 import { record } from "zod";
+import { IProduct } from "./product.interface";
 
 const createProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) =>{
-    const product = await ProductServices.createProduct(req.body);
+    const payload : IProduct = {
+      ...req.body,
+      images: (req.files as Express.Multer.File[]).map(file => file.path)
+    }
+
+    const product = await ProductServices.createProduct(payload);
 
     sendResponse(res, {
       success: true,
