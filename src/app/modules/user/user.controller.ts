@@ -53,8 +53,22 @@ const getAllUsers = catchAsync(
   }
 );
 
+const getMe = catchAsync(
+  async(req: Request, res: Response, next: NextFunction) => {
+    const {userId} = req.user as JwtPayload;
+    const result = await UserServices.getMe(userId);
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "Your profile retrieved successfully",
+      data: result
+    })
+  }
+);
+
 export const UserControllers = {
   createUser,
   updateUser,
   getAllUsers,
+  getMe
 };

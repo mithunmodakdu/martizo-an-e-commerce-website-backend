@@ -119,8 +119,14 @@ const getAllUsers = async (query: Record<string, string>) => {
   };
 };
 
+const getMe = async(userId: string) => {
+  const existedUser = await User.findById(userId).select("-password");
+  return existedUser;
+}
+
 export const UserServices = {
   createUser,
   updateUser,
   getAllUsers,
+  getMe
 };
