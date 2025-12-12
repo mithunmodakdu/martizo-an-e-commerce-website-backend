@@ -9,12 +9,14 @@ const router = Router();
 router.post("/login", AuthControllers.credentialsLogin);
 router.post("/new-token-with-refresh-token", AuthControllers.getNewAccessToken);
 router.post("/logout", AuthControllers.logout);
-router.post("/reset-password", checkAuth(...Object.values(ERole)), AuthControllers.resetPassword);
+router.patch("/reset-password", checkAuth(...Object.values(ERole)), AuthControllers.resetPassword);
 
 router.get("/google", async(req: Request, res: Response, next: NextFunction) => {
   const redirect = req.query.redirect || "/";
   passport.authenticate("google", {scope: ["profile", "email"], state: redirect as string})(req, res, next)
 });
 router.get("/google/callback", passport.authenticate("google", {failureRedirect: "/login"}), AuthControllers.googleCallback);
+
+router.patch("/set-password", checkAuth(...Object.values(ERole)), AuthControllers.setPassword);
 
 export const AuthRoutes = router; 

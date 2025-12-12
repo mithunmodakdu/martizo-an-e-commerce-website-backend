@@ -101,11 +101,12 @@ const resetPassword = catchAsync(
     sendResponse(res, {
       statusCode: httpStatusCodes.OK,
       success: true,
-      message: "Password changed successfully.",
+      message: "You have reset your password successfully.",
       data: null,
     });
   }
 );
+
 
 const googleCallback = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -128,10 +129,28 @@ const googleCallback = catchAsync(
   }
 );
 
+const setPassword = catchAsync(
+  async(req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.user as JwtPayload;
+    const { password } = req.body;
+
+    await AuthServices.setPassword(userId, password);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "You have set your password successfully.",
+      data: null
+    })
+  }
+);
+
 export const AuthControllers = {
   credentialsLogin,
   getNewAccessToken,
   logout,
   resetPassword,
   googleCallback,
+  setPassword
+  
 };
