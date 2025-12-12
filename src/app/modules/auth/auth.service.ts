@@ -6,32 +6,8 @@ import bcryptjs from "bcryptjs";
 import { createNewAccessTokenWithRefreshToken} from "../../utils/createUserTokens";
 import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../../config/env";
+import { IAuthProvider } from "../user/user.interface";
 
-// const credentialsLogin = async(payload : Partial<IUser>) => {
-//   const {email, password} = payload;
-
-//   const isUserExist = await User.findOne({email});
-
-//   if(!isUserExist){
-//     throw new AppError(httpStatusCodes.BAD_REQUEST, "Email does not exist.")
-//   }
-
-//   const isPasswordMatched = await bcryptjs.compare(password as string, isUserExist.password as string);
-
-//   if(!isPasswordMatched){
-//     throw new AppError(httpStatusCodes.BAD_REQUEST, "Password is incorrect.")
-//   }
-
-//   const userTokens = createUserTokens(isUserExist);
-
-//   const {password: pass, ...rest} = isUserExist.toObject();
-
-//   return {
-//     accessToken: userTokens.accessToken,
-//     refreshToken: userTokens.refreshToken,
-//     user: rest
-//   }
-// }
 
 const getNewAccessToken = async(refreshToken: string) =>{
   const newAccessToken = await createNewAccessTokenWithRefreshToken(refreshToken);
@@ -61,8 +37,39 @@ const resetPassword = async (oldPassword: string, newPassword: string, decodedTo
 
 }
 
+const setPassword = async(userId: string, plainPassword: string) => {
+  const existedUser = await User.findById(userId);
+
+  if(!existedUser){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "User NOT Found")
+  }
+
+  if(existedUser.password && existedUser.auths.some(providerObject => providerObject.provider === "google")){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "You already have a password. You can reset your password from your profile password reset option.")
+  }
+
+  const hashedPassword = await bcryptjs.hash(plainPassword, Number(envVars.BCRYPT_SALT_ROUND));
+
+  const credentialsProvider: IAuthProvider = {
+    provider: "credentials",
+    providerId: existedUser.email
+  }
+
+  const auths : IAuthProvider[] = [
+    ...existedUser.auths,
+    credentialsProvider
+  ]
+
+  existedUser.password = hashedPassword;
+  existedUser.auths = auths;
+  await existedUser.save();
+
+  
+}
+
 export const AuthServices = {
   // credentialsLogin,
   getNewAccessToken,
-  resetPassword
+  resetPassword,
+  setPassword
 }

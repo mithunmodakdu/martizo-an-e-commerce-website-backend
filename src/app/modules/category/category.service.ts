@@ -1,3 +1,4 @@
+import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import { ICategory } from "./category.interface";
 import { Category } from "./category.model";
@@ -28,6 +29,10 @@ const updateCategory = async(id: string, payload: Partial<ICategory>) =>{
 
   if(duplicateCategory){
     throw new AppError(httpStatusCodes.BAD_REQUEST, "Category with same name already exists");
+  }
+
+  if(payload.icon && existedCategory.icon){
+    await deleteImageFromCloudinary(existedCategory.icon);
   }
 
   const updatedCategory = await Category.findByIdAndUpdate(id, payload, {new: true, runValidators: true});

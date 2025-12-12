@@ -55,8 +55,29 @@ const getSingleProduct = catchAsync(
   }
 );
 
+const updateProduct = catchAsync(
+  async(req: Request, res: Response, next: NextFunction) => {
+    const productId = req.params.productId;
+    
+    const payload = {
+      ...req.body,
+      images: (req.files as Express.Multer.File[]).map(file => file.path)
+    };
+
+    const updatedProduct = await ProductServices.updateProduct(productId, payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "Product updated successfully.",
+      data: updatedProduct
+    })
+  }
+);
+
 export const ProductControllers = {
   createProduct,
   getAllProducts,
-  getSingleProduct
+  getSingleProduct,
+  updateProduct
 }

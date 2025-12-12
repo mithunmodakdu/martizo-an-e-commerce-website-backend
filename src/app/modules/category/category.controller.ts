@@ -26,7 +26,11 @@ const createCategory = catchAsync(
 const updateCategory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    const payload = req.body;
+    const payload = {
+      ...req.body,
+      icon: req.file?.path
+    };
+    
     const updatedCategory = await CategoryServices.updateCategory(id, payload);
 
     sendResponse(res, {

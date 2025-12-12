@@ -24,8 +24,9 @@ export interface IProduct {
   variants: IVariant[];
 
   // media
-  thumbnail: string;
+  thumbnail?: string;
   images: string[];
+  deleteImages?: string[];
 
   // labels for Shop menu sections
   isNewArrival?: boolean;

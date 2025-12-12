@@ -19,6 +19,8 @@ router.get(
   UserControllers.getAllUsers
 );
 
+router.get("/me", checkAuth(...Object.values(ERole)), UserControllers.getMe);
+
 router.patch(
   "/:id",
   checkAuth(...Object.values(ERole)),
