@@ -1,3 +1,4 @@
+import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { productSearchableFields } from "./product.constants";
@@ -96,9 +97,54 @@ const getSingleProduct = async (slug: string) => {
   };
 };
 
+const updateProduct = async (productId: string, payload: Partial<IProduct>) => {
+  const existedProduct = await Product.findById(productId);
+
+  if (!existedProduct) {
+    throw new AppError(
+      httpStatusCodes.BAD_REQUEST,
+      "This product does not exist."
+    );
+  }
+
+  if (
+    payload.images &&
+    payload.images.length > 0 &&
+    existedProduct.images &&
+    existedProduct.images.length > 0
+  ) {
+    payload.images = [...payload.images, ...existedProduct.images];
+  }
+
+  if (
+    payload.deleteImages &&
+    payload.deleteImages.length > 0 &&
+    existedProduct.images &&
+    existedProduct.images.length > 0
+  ) {
+    const restExistedProductImages = existedProduct.images.filter(
+      (imageUrl) => !payload.deleteImages?.includes(imageUrl)
+    );
+
+    const onlyNewPayloadImages = (payload.images || [])
+      .filter((imageUrl) => !payload.deleteImages?.includes(imageUrl))
+      .filter((imageUrl) => !restExistedProductImages.includes(imageUrl));
+
+    payload.images = [...restExistedProductImages, ...onlyNewPayloadImages];
+  }
+
+  const updatedProduct = await Product.findByIdAndUpdate(productId, payload, {new: true});
+
+  if(payload.deleteImages && payload.deleteImages.length > 0 && existedProduct.images && existedProduct.images.length > 0){
+    await Promise.all(payload.deleteImages.map(url => deleteImageFromCloudinary(url)));
+  }
+
+  return updatedProduct;
+};
+
 export const ProductServices = {
   createProduct,
   getAllProducts,
   getSingleProduct,
+  updateProduct,
 };
-
