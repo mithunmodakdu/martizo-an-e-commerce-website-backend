@@ -1,6 +1,6 @@
 import AppError from "../../errorHelpers/AppError";
 import { QueryBuilder } from "../../utils/QueryBuilder";
-import { excludeFields, productSearchableFields } from "./product.constants";
+import { productSearchableFields } from "./product.constants";
 import { IProduct } from "./product.interface";
 import { Product } from "./product.model";
 import httpStatusCodes from "http-status-codes";
@@ -77,12 +77,10 @@ const getAllProducts = async (query: Record<string, string>) => {
     .fields()
     .paginate();
 
-  const [data, meta] = await Promise.all(
-    [
-      products.build(),
-      queryBuilder.getMeta()
-    ]
-  );
+  const [data, meta] = await Promise.all([
+    products.build(),
+    queryBuilder.getMeta(),
+  ]);
 
   return {
     meta: meta,
@@ -90,16 +88,17 @@ const getAllProducts = async (query: Record<string, string>) => {
   };
 };
 
-const getSingleProduct = async(slug: string) => {
-  const product = await Product.findOne({slug});
+const getSingleProduct = async (slug: string) => {
+  const product = await Product.findOne({ slug });
 
   return {
-    data: product
-  }
-}
+    data: product,
+  };
+};
 
 export const ProductServices = {
   createProduct,
   getAllProducts,
-  getSingleProduct
+  getSingleProduct,
 };
+

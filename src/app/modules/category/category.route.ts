@@ -19,6 +19,7 @@ router.post(
 router.patch(
   "/:id",
   checkAuth(ERole.SUPER_ADMIN),
+  multerUpload.single("file"),
   validateRequest(updateCategoryZodSchema),
   CategoryControllers.updateCategory
 );
