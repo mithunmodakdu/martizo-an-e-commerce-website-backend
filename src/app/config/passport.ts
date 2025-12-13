@@ -7,7 +7,7 @@ import {
 } from "passport-google-oauth20";
 import { envVars } from "./env";
 import { User } from "../modules/user/user.model";
-import { ERole } from "../modules/user/user.interface";
+import { EIsActive, ERole } from "../modules/user/user.interface";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcryptjs from "bcryptjs";
 
@@ -23,6 +23,14 @@ passport.use(
 
         if(!existedUser){
           return done(null, false, {message: "User does not exist."});
+        }
+
+        if(existedUser.isActive === EIsActive.INACTIVE || existedUser.isActive === EIsActive.BLOCKED){
+          return done(`User is ${existedUser.isActive}`)
+        }
+
+        if(existedUser.isDeleted){
+          return done("User is deleted");
         }
 
         const isGoogleAuthenticated = existedUser.auths.some(authObject => authObject.provider === "google");
