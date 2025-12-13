@@ -7,7 +7,7 @@ import {
 } from "passport-google-oauth20";
 import { envVars } from "./env";
 import { User } from "../modules/user/user.model";
-import { ERole } from "../modules/user/user.interface";
+import { EIsActive, ERole } from "../modules/user/user.interface";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcryptjs from "bcryptjs";
 
@@ -23,6 +23,18 @@ passport.use(
 
         if(!existedUser){
           return done(null, false, {message: "User does not exist."});
+        }
+
+        if(!existedUser.isVerified){
+          return done("User is not verified");
+        }
+
+        if(existedUser.isActive === EIsActive.INACTIVE || existedUser.isActive === EIsActive.BLOCKED){
+          return done(`User is ${existedUser.isActive}`)
+        }
+
+        if(existedUser.isDeleted){
+          return done("User is deleted");
         }
 
         const isGoogleAuthenticated = existedUser.auths.some(authObject => authObject.provider === "google");
@@ -69,10 +81,22 @@ passport.use(
           return done(null, false, { message: "No email Found." });
         }
 
-        let user = await User.findOne({ email });
+        let existedUser = await User.findOne({ email });
 
-        if (!user) {
-          user = await User.create({
+        if(existedUser && existedUser.isVerified){
+          return done(null, false, {message: "User is not verified"});
+        }
+
+        if(existedUser && (existedUser.isActive === EIsActive.INACTIVE || existedUser.isActive === EIsActive.BLOCKED)){
+          return done(null, false, {message: `User is ${existedUser.isActive}`})
+        }
+
+        if(existedUser && existedUser.isDeleted){
+          return done(null, false, {message: "User is deleted."})
+        }
+
+        if (!existedUser) {
+          existedUser = await User.create({
             email,
             name: profile.displayName,
             avatar: profile.photos?.[0].value,
@@ -87,7 +111,7 @@ passport.use(
           });
         }
 
-        return done(null, user);
+        return done(null, existedUser);
       } catch (error) {
         console.log("google strategy error", error);
         return done(error);
