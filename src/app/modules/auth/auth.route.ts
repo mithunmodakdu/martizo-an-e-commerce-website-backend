@@ -19,5 +19,7 @@ router.get("/google", async(req: Request, res: Response, next: NextFunction) => 
 router.get("/google/callback", passport.authenticate("google", {failureRedirect: `${envVars.FRONTEND_URL}/login?error=There is some issue with your Account. Please contact with our support team.`}), AuthControllers.googleCallback);
 
 router.patch("/set-password", checkAuth(...Object.values(ERole)), AuthControllers.setPassword);
+router.post("/forgot-password", AuthControllers.forgotPassword);
+router.patch("/forgot-password-reset", checkAuth(...Object.values(ERole)), AuthControllers.forgotPasswordReset);
 
 export const AuthRoutes = router; 

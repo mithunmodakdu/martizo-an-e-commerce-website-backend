@@ -26,7 +26,7 @@ export const checkAuth = (...authRoles : string[]) => async(req: Request, res: R
       throw new AppError(httpStatusCodes.BAD_REQUEST, "User does not exist")
     }
 
-    if(existedUser.isVerified){
+    if(!existedUser.isVerified){
       throw new AppError(httpStatusCodes.BAD_REQUEST, "User is not verified.")
     }
 
