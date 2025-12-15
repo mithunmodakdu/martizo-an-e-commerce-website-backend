@@ -8,6 +8,7 @@ import { ProductRoutes } from "../modules/product/product.route";
 import { CartRoutes } from "../modules/cart/cart.route";
 import { OrderRoutes } from "../modules/order/order.route";
 import { PaymentRoutes } from "../modules/payment/payment.route";
+import { OTPRoutes } from "../modules/otp/otp.route";
 
 export const router = Router();
 
@@ -47,6 +48,10 @@ const moduleRoutes = [
   {
     path: "/payments",
     route: PaymentRoutes
+  },
+  {
+    path: "/otp",
+    route: OTPRoutes
   }
 ];
 
