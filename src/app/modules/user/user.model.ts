@@ -25,6 +25,7 @@ const userSchema = new Schema<IUser>(
     auths: [authProviderSchema],
     phone: { type: String },
     address: { type: String },
+    city: { type: String },
     avatar: { type: String },
     isActive: {
       type: String,

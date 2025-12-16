@@ -110,10 +110,10 @@ export const generateInvoicePDF = async (
         .text(invoiceData.shippingInfo.city)
         .text(`Phone: ${invoiceData.shippingInfo.phone}`);
 
-      drawLine(doc, 200);
+      drawLine(doc, 230);
 
       // TABLE HEADER
-      const tableTop = 210;
+      const tableTop = 240;
       doc.font("Helvetica-Bold");
       tableRow(doc, tableTop, "Item", "Price", "Qty", "Total");
       drawLine(doc, tableTop + 15);
@@ -183,28 +183,3 @@ export const generateInvoicePDF = async (
 };
 
 
-// {
-//   invoiceNo: "DH-1023",
-//   date: "16 Dec 2025",
-//   customerInfo: {
-//     name: "Mithun Kumer Modak",
-//     email: "mithun@email.com",
-//     address: "Dhaka, Bangladesh",
-//     city: "Dhaka",
-//     phone: "01919834450"
-//   },
-//   shippingInfo: {
-//     name: "Mithun Kumer Modak",
-//     address: "Mirpur, Dhaka",
-//     city: "Dhaka",
-//     phone: "01919834450"
-//   },
-//   items: [
-//     { name: "Samsung Galaxy A34", price: 45000, quantity: 1 },
-//     { name: "Cotton Blanket", price: 2500, quantity: 2 },
-//   ],
-//   subtotal: 50000,
-//   shippingCost: 100,
-//   tax: 500,
-//   total: 50600,
-// }
