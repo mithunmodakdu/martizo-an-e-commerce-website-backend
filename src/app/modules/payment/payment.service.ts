@@ -33,7 +33,7 @@ const successPayment = async (query: Record<string, string>) => {
     }
 
     const invoiceData: IInvoiceData = {
-      invoiceNo: "DH-1023",
+      invoiceNo: updatedOrder.invoiceNo,
       date:  new Date(updatedOrder.createdAt as Date).toLocaleDateString("en-GB"),
       customerInfo: {
         name: (updatedOrder.userId as unknown as IUser).name,

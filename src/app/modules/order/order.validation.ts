@@ -25,6 +25,7 @@ export const ShippingAddressZodSchema = z.object({
   city: z.string({ error: "City must be a string" }),
   postalCode: z.string({ error: "Postal code must be a string" }).optional(),
   country: z.string({ error: "Country must be a string" }).optional(),
+  
 });
 
 export const CreateOrderZodSchema = z.object({
@@ -42,4 +43,5 @@ export const CreateOrderZodSchema = z.object({
   deliveredAt: z.string().optional(),
   cancelledAt: z.string().optional(),
   refundedAt: z.string().optional(),
+  invoiceNo: z.string({ error: "invoiceNo must be a string" }).optional(),
 });
