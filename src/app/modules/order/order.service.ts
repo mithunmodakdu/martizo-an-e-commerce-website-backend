@@ -8,6 +8,7 @@ import { Payment } from "../payment/payment.model";
 import { EPaymentStatus } from "../payment/payment.interface";
 import { IUser } from "../user/user.interface";
 import { SSLCommerzServices } from "../sslCommerz/sslCommerz.service";
+import { generateInvoiceNo } from "./invoiceCounter.model";
 
 const createTransactionId = () => {
   return `tran_id_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
@@ -52,6 +53,8 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
       payload.shippingAddress?.city?.toLowerCase() === "dhaka" ? 60 : 120;
     const totalPrice = cart.itemsPrice + taxPrice + shippingPrice;
 
+    const invoiceNo = await generateInvoiceNo();
+
     const orderData = {
       userId,
       shippingAddress,
@@ -61,6 +64,7 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
       taxPrice,
       shippingPrice,
       totalPrice,
+      invoiceNo
     };
 
     const order = await Order.create([orderData], { session });

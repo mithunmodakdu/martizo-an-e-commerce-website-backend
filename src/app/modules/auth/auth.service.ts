@@ -10,6 +10,7 @@ import { envVars } from "../../config/env";
 import { EIsActive, IAuthProvider } from "../user/user.interface";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../../utils/sendEmail";
+import { generateInvoicePDF } from "../../utils/invoice";
 
 const getNewAccessToken = async (refreshToken: string) => {
   const newAccessToken = await createNewAccessTokenWithRefreshToken(
@@ -128,24 +129,27 @@ const forgotPassword = async (email: string) => {
     templateName: "forgotPassword",
     templateData: {
       name: existedUser.name,
-      forgotPasswordResetUILink
+      forgotPasswordResetUILink,
     }
-  })
+    
+  });
 };
 
 const forgotPasswordReset = async (
   payload: Record<string, any>,
   decodedToken: JwtPayload
 ) => {
-
-  if(!payload.userId === decodedToken.userId){
-    throw new AppError(httpStatusCodes.BAD_REQUEST, "You can not reset your password.")
+  if (!payload.userId === decodedToken.userId) {
+    throw new AppError(
+      httpStatusCodes.BAD_REQUEST,
+      "You can not reset your password."
+    );
   }
 
   const existedUser = await User.findById(decodedToken.userId);
 
-  if(!existedUser){
-    throw new AppError(httpStatusCodes.BAD_REQUEST, "User does not exist.")
+  if (!existedUser) {
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "User does not exist.");
   }
 
   const hashedPassword = await bcryptjs.hash(
@@ -164,5 +168,5 @@ export const AuthServices = {
   resetPassword,
   setPassword,
   forgotPassword,
-  forgotPasswordReset
+  forgotPasswordReset,
 };

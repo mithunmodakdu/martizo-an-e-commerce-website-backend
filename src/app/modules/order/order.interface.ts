@@ -60,4 +60,7 @@ export interface IOrder {
   cancelledAt?: Date | null;
   refundedAt?: Date | null;
 
+  createdAt?: Date;
+  invoiceNo: string;
+
 }

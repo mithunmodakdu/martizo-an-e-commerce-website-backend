@@ -60,6 +60,8 @@ export const OrderSchema = new Schema<IOrder>(
     deliveredAt: { type: Date },
     cancelledAt: { type: Date },
     refundedAt: { type: Date },
+
+    invoiceNo: {type: String}
   },
   {
     timestamps: true,

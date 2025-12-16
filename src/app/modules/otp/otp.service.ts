@@ -13,6 +13,17 @@ const generateOTP = (length = 6) => {
 }
 
 const sendOTP = async(name: string, email: string) => {
+
+  const existedUser = await User.findOne({email});
+
+  if(!existedUser){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "User NOT Found.");
+  }
+
+  if(existedUser.isVerified){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "User is already verified.");
+  }
+
   const otp = Number(generateOTP());
 
   const redisKey = `otp:${email}`;
@@ -36,6 +47,17 @@ const sendOTP = async(name: string, email: string) => {
 }
 
 const verifyOTP = async(email: string, otp: string) => {
+
+  const existedUser = await User.findOne({email});
+
+  if(!existedUser){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "User NOT Found.");
+  }
+
+  if(existedUser.isVerified){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "User is already verified.");
+  }
+
   const redisKey = `otp:${email}`;
 
   const savedOtp = await redisClient.get(redisKey);

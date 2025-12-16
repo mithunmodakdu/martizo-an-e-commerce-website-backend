@@ -1,9 +1,13 @@
-import { EOrderStatus } from "../order/order.interface";
+import AppError from "../../errorHelpers/AppError";
+import { generateInvoicePDF, IInvoiceData } from "../../utils/invoice";
+import { sendEmail } from "../../utils/sendEmail";
+import { EOrderStatus, IOrder } from "../order/order.interface";
 import { Order } from "../order/order.model";
 import { SSLCommerzServices } from "../sslCommerz/sslCommerz.service";
 import { IUser } from "../user/user.interface";
 import { EPaymentStatus } from "./payment.interface";
 import { Payment } from "./payment.model";
+import httpStatusCodes from "http-status-codes";
 
 const successPayment = async (query: Record<string, string>) => {
   const session = await Order.startSession();
@@ -16,13 +20,58 @@ const successPayment = async (query: Record<string, string>) => {
       { new: true, runValidators: true, session }
     );
 
-    await Order.findByIdAndUpdate(
+    const updatedOrder = await Order.findByIdAndUpdate(
       updatedPayment?.orderId,
       {
         status: EOrderStatus.PAID,
       },
       { new: true, runValidators: true, session }
-    );
+    ).populate("userId", "name email address city phone");
+
+    if(!updatedOrder){
+      throw new AppError(httpStatusCodes.NOT_FOUND, "Updated Order is NOT  Found")
+    }
+
+    const invoiceData: IInvoiceData = {
+      invoiceNo: updatedOrder.invoiceNo,
+      date:  new Date(updatedOrder.createdAt as Date).toLocaleDateString("en-GB"),
+      customerInfo: {
+        name: (updatedOrder.userId as unknown as IUser).name,
+        email: (updatedOrder.userId as unknown as IUser).email,
+        address: (updatedOrder.userId as unknown as IUser).address as string,
+        city: (updatedOrder.userId as unknown as IUser).city as string,
+        phone: (updatedOrder.userId as unknown as IUser).phone as string
+      },
+      shippingInfo: {
+        name: updatedOrder.shippingAddress.name,
+        address: updatedOrder.shippingAddress.address,
+        city: updatedOrder.shippingAddress.city,
+        phone: updatedOrder.shippingAddress.phone,
+      },
+      items: updatedOrder.items,
+      subtotal: updatedOrder.itemsPrice,
+      shippingCost: updatedOrder.shippingPrice,
+      tax: updatedOrder.taxPrice,
+      total: updatedOrder.totalPrice
+    };
+
+    const pdfBuffer = await generateInvoicePDF(invoiceData);
+
+    await sendEmail({
+      to: (updatedOrder.userId as unknown as IUser).email,
+      subject: "Invoice of Your Purchase",
+      templateName: "invoice",
+      templateData: invoiceData,
+      attachments: [
+        {
+          filename: "invoice.pdf",
+          content: pdfBuffer,
+          contentType: "application/pdf"
+        }
+      ]
+    })
+
+
 
     await session.commitTransaction();
     session.endSession();
