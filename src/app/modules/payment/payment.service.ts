@@ -1,3 +1,4 @@
+import { uploadBufferToCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import { generateInvoicePDF, IInvoiceData } from "../../utils/invoice";
 import { sendEmail } from "../../utils/sendEmail";
@@ -56,6 +57,15 @@ const successPayment = async (query: Record<string, string>) => {
     };
 
     const pdfBuffer = await generateInvoicePDF(invoiceData);
+
+    const pdfCloudinaryResult = await uploadBufferToCloudinary(pdfBuffer, "invoice");
+    // console.log(pdfCloudinaryResult)
+
+    if(!pdfCloudinaryResult){
+      throw new AppError(401, "Error in uploading pdf in cloudinary")
+    }
+
+    await Payment.findByIdAndUpdate(updatedPayment?._id, {invoiceUrl: pdfCloudinaryResult.secure_url}, {runValidators: true, session})
 
     await sendEmail({
       to: (updatedOrder.userId as unknown as IUser).email,
