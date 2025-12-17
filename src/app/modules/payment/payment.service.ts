@@ -97,6 +97,20 @@ const successPayment = async (query: Record<string, string>) => {
   }
 };
 
+const getInvoiceDownloadUrl = async(paymentId: string) => {
+  const payment = await Payment.findById(paymentId).select("invoiceUrl");
+
+  if(!payment){
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Payment NOT Found");
+  }
+
+  if(!payment.invoiceUrl){
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Payment Invoice URL NOT Found");
+  }
+
+  return payment.invoiceUrl;
+}
+
 const failPayment = async (query: Record<string, string>) => {
   const session = await Order.startSession();
   session.startTransaction();
@@ -196,8 +210,10 @@ const initPayment = async (orderId: string) => {
   };
 };
 
+
 export const PaymentServices = {
   successPayment,
+  getInvoiceDownloadUrl,
   failPayment,
   cancelPayment,
   initPayment,
