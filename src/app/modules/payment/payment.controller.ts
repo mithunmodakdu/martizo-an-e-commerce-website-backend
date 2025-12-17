@@ -20,6 +20,21 @@ const successPayment = catchAsync(
   }
 );
 
+const getInvoiceDownloadUrl = catchAsync(
+  async(req: Request, res: Response, next: NextFunction) => {
+    const paymentId = req.params.paymentId;
+
+    const result = await PaymentServices.getInvoiceDownloadUrl(paymentId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "Invoice download url retrieved successfully.",
+      data: result
+    });
+  }
+);
+
 const failPayment = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
@@ -66,6 +81,7 @@ const initPayment = catchAsync(
 
 export const PaymentControllers = {
   successPayment,
+  getInvoiceDownloadUrl,
   failPayment,
   cancelPayment,
   initPayment

@@ -1,3 +1,4 @@
+import { uploadBufferToCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import { generateInvoicePDF, IInvoiceData } from "../../utils/invoice";
 import { sendEmail } from "../../utils/sendEmail";
@@ -57,6 +58,15 @@ const successPayment = async (query: Record<string, string>) => {
 
     const pdfBuffer = await generateInvoicePDF(invoiceData);
 
+    const pdfCloudinaryResult = await uploadBufferToCloudinary(pdfBuffer, "invoice");
+    // console.log(pdfCloudinaryResult)
+
+    if(!pdfCloudinaryResult){
+      throw new AppError(401, "Error in uploading pdf in cloudinary")
+    }
+
+    await Payment.findByIdAndUpdate(updatedPayment?._id, {invoiceUrl: pdfCloudinaryResult.secure_url}, {runValidators: true, session})
+
     await sendEmail({
       to: (updatedOrder.userId as unknown as IUser).email,
       subject: "Invoice of Your Purchase",
@@ -86,6 +96,20 @@ const successPayment = async (query: Record<string, string>) => {
     throw error;
   }
 };
+
+const getInvoiceDownloadUrl = async(paymentId: string) => {
+  const payment = await Payment.findById(paymentId).select("invoiceUrl");
+
+  if(!payment){
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Payment NOT Found");
+  }
+
+  if(!payment.invoiceUrl){
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Payment Invoice URL NOT Found");
+  }
+
+  return payment.invoiceUrl;
+}
 
 const failPayment = async (query: Record<string, string>) => {
   const session = await Order.startSession();
@@ -186,8 +210,10 @@ const initPayment = async (orderId: string) => {
   };
 };
 
+
 export const PaymentServices = {
   successPayment,
+  getInvoiceDownloadUrl,
   failPayment,
   cancelPayment,
   initPayment,
