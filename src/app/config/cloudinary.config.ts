@@ -2,7 +2,7 @@
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import { envVars } from "./env";
 import AppError from "../errorHelpers/AppError";
-import stream from "stream";
+// import stream from "stream";
 
 cloudinary.config({
   cloud_name: envVars.CLOUDINARY.CLOUDINARY_CLOUD_NAME,
@@ -15,10 +15,10 @@ export const uploadBufferToCloudinary = async(buffer: Buffer, filename: string) 
     return new Promise((resolve, reject) => {
       const public_id = `pdf/${filename}-${Date.now()}`;
 
-      const bufferStream = new stream.PassThrough();
-      bufferStream.end(buffer);
+      // const bufferStream = new stream.PassThrough();
+      // bufferStream.end(buffer);
 
-      cloudinary.uploader.upload_stream(
+      const uploadStream = cloudinary.uploader.upload_stream(
         {
           resource_type: "auto",
           public_id: public_id,
@@ -31,10 +31,12 @@ export const uploadBufferToCloudinary = async(buffer: Buffer, filename: string) 
 
           resolve(result);
         }
-      ).end(buffer);
+      );
+
+      uploadStream.end(buffer);
 
     })
-    
+
   } catch (error: any) {
     console.log(error)
     throw new AppError(401, `error in buffer uploading: ${error.message}` )
