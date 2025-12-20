@@ -60,11 +60,23 @@ const getProductsStats = async() => {
         foreignField: "_id",
         as: "category"
       }
+    },
+
+    {
+      $unwind: "$category"
+    },
+
+    {
+      $group: {
+        _id: "$category.name",
+        count: {$sum: 1}
+      }
     }
+  
   ]);
 
   const [totalProducts, totalProductsByCategory] = await Promise.all([totalProductsPromise, totalProductsByCategoryPromise]);
-  
+
   return {totalProducts, totalProductsByCategory}
 }
 
