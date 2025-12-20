@@ -1,3 +1,4 @@
+import { Product } from "../product/product.model";
 import { EIsActive } from "../user/user.interface";
 import { User } from "../user/user.model";
 
@@ -49,7 +50,22 @@ const getUsersStats = async() => {
 }
 
 const getProductsStats = async() => {
-  return {}
+  const totalProductsPromise = Product.countDocuments(); 
+
+  const totalProductsByCategoryPromise = Product.aggregate([
+    {
+      $lookup : {
+        from: "categories",
+        localField: "category",
+        foreignField: "_id",
+        as: "category"
+      }
+    }
+  ]);
+
+  const [totalProducts, totalProductsByCategory] = await Promise.all([totalProductsPromise, totalProductsByCategoryPromise]);
+  
+  return {totalProducts, totalProductsByCategory}
 }
 
 const getOrdersStats = async() => {

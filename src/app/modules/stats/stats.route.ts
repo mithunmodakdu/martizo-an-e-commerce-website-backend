@@ -6,7 +6,7 @@ import { ERole } from "../user/user.interface";
 const router = Router();
 
 router.get("/users", checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),  StatsControllers.getUsersStats);
-router.get("/products", StatsControllers.getProductsStats);
+router.get("/products", checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN), StatsControllers.getProductsStats);
 router.get("/orders", StatsControllers.getOrdersStats);
 router.get("/payments", StatsControllers.getPaymentsStats);
 
