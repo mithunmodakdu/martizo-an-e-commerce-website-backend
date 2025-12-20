@@ -75,9 +75,57 @@ const getProductsStats = async() => {
   
   ]);
 
-  const [totalProducts, totalProductsByCategory] = await Promise.all([totalProductsPromise, totalProductsByCategoryPromise]);
+  const totalProductsByBrandNamePromise = Product.aggregate([
+    {
+      $lookup: {
+        from: "brands",
+        localField: "brand",
+        foreignField: "_id",
+        as: "brand"
+      }
+    },
 
-  return {totalProducts, totalProductsByCategory}
+    {
+      $unwind: "$brand"
+    },
+
+    {
+      $group: {
+        _id: "$brand.name",
+        count: {$sum: 1}
+      }
+    }
+  ]);
+
+  const averageProductsPricePromise = Product.aggregate([
+    {
+      $group : {
+        _id: null,
+        averageProductsPrice: {$avg: "$price"}
+      }
+    }
+  ]);
+
+  const [totalProducts, 
+    totalProductsByCategory,
+    totalProductsByBrandName,
+    averageProductsPrice
+     
+  ] = await Promise.all([
+    totalProductsPromise, 
+    totalProductsByCategoryPromise,
+    totalProductsByBrandNamePromise,
+    averageProductsPricePromise,
+    
+  ]);
+
+  return {
+    totalProducts, 
+    totalProductsByCategory,
+    totalProductsByBrandName,
+    averageProductsPrice
+    
+  }
 }
 
 const getOrdersStats = async() => {
