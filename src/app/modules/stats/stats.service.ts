@@ -1,3 +1,4 @@
+import { Product } from "../product/product.model";
 import { EIsActive } from "../user/user.interface";
 import { User } from "../user/user.model";
 
@@ -49,7 +50,82 @@ const getUsersStats = async() => {
 }
 
 const getProductsStats = async() => {
-  return {}
+  const totalProductsPromise = Product.countDocuments(); 
+
+  const totalProductsByCategoryPromise = Product.aggregate([
+    {
+      $lookup : {
+        from: "categories",
+        localField: "category",
+        foreignField: "_id",
+        as: "category"
+      }
+    },
+
+    {
+      $unwind: "$category"
+    },
+
+    {
+      $group: {
+        _id: "$category.name",
+        count: {$sum: 1}
+      }
+    }
+  
+  ]);
+
+  const totalProductsByBrandNamePromise = Product.aggregate([
+    {
+      $lookup: {
+        from: "brands",
+        localField: "brand",
+        foreignField: "_id",
+        as: "brand"
+      }
+    },
+
+    {
+      $unwind: "$brand"
+    },
+
+    {
+      $group: {
+        _id: "$brand.name",
+        count: {$sum: 1}
+      }
+    }
+  ]);
+
+  const averageProductsPricePromise = Product.aggregate([
+    {
+      $group : {
+        _id: null,
+        averageProductsPrice: {$avg: "$price"}
+      }
+    }
+  ]);
+
+  const [totalProducts, 
+    totalProductsByCategory,
+    totalProductsByBrandName,
+    averageProductsPrice
+     
+  ] = await Promise.all([
+    totalProductsPromise, 
+    totalProductsByCategoryPromise,
+    totalProductsByBrandNamePromise,
+    averageProductsPricePromise,
+    
+  ]);
+
+  return {
+    totalProducts, 
+    totalProductsByCategory,
+    totalProductsByBrandName,
+    averageProductsPrice
+    
+  }
 }
 
 const getOrdersStats = async() => {
