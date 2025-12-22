@@ -199,7 +199,29 @@ const getProductsStats = async () => {
 };
 
 const getOrdersStats = async () => {
-  return {};
+  const totalOrdersPromise = Order.countDocuments();
+
+  const totalOrdersByStatusPromise = Order.aggregate([
+    {
+      $group: {
+        _id: "$status",
+        count: {$sum: 1}
+      }
+    }
+  ]);
+
+  const [
+    totalOrders,
+    totalOrdersByStatus
+   ] = await Promise.all([
+    totalOrdersPromise,
+    totalOrdersByStatusPromise
+  ]);
+
+  return {
+    totalOrders,
+    totalOrdersByStatus
+  };
 };
 
 const getPaymentsStats = async () => {

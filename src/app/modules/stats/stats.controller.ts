@@ -21,7 +21,7 @@ const getProductsStats = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatusCodes.OK,
-      message: "Users Stats retrieved successfully.",
+      message: "Products Stats retrieved successfully.",
       data: stats 
     })
 }) 
@@ -32,7 +32,7 @@ const getOrdersStats = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatusCodes.OK,
-      message: "Users Stats retrieved successfully.",
+      message: "Orders Stats retrieved successfully.",
       data: stats 
     })
 }) 
@@ -43,7 +43,7 @@ const getPaymentsStats = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatusCodes.OK,
-      message: "Users Stats retrieved successfully.",
+      message: "Payments Stats retrieved successfully.",
       data: stats 
     })
 }) 
