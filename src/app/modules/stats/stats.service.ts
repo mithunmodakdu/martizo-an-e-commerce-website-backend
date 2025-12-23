@@ -359,17 +359,28 @@ const getPaymentsStats = async () => {
     }
   ]);
 
+  const paymentGatewayDataPromise = Payment.aggregate([
+    {
+      $group: {
+        _id: {$ifNull: ["$paymentGatewayData.status", "UNKNOWN"]},
+        count: {$sum: 1}
+      }
+    }
+  ]);
+
   const [
     totalPayments,
     totalPaymentsByStatus,
     totalRevenue,
-    avgPaymentAmount
+    avgPaymentAmount,
+    paymentGatewayData
 
   ] = await Promise.all([
     totalPaymentsPromise,
     totalPaymentsByStatusPromise,
     totalRevenuePromise,
-    avgPaymentAmountPromise
+    avgPaymentAmountPromise,
+    paymentGatewayDataPromise
 
   ]);
 
@@ -377,7 +388,8 @@ const getPaymentsStats = async () => {
     totalPayments,
     totalPaymentsByStatus,
     totalRevenue,
-    avgPaymentAmount
+    avgPaymentAmount,
+    paymentGatewayData
   };
 };
 
