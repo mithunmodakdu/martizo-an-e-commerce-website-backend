@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Order } from "../order/order.model";
 import { Product } from "../product/product.model";
 import { EIsActive } from "../user/user.interface";
@@ -263,22 +264,59 @@ const getOrdersStats = async () => {
 
   ]);
 
+  const avgItemsPricePromise = Order.aggregate([
+    {
+      $group: {
+        _id: null,
+        avgItemsPrice: {
+          $avg: "$itemsPrice"
+        }
+      }
+    }
+  ]);
+
+  const ordersInLastSevenDaysPromise = Order.countDocuments(
+    {
+      createdAt: {$gte: sevenDaysAgo}
+    }
+  );
+
+  const ordersInLastThirtyDaysPromise = Order.countDocuments(
+    {
+      createdAt: {$gte: thirtyDaysAgo}
+    }
+  );
+
+  const totalDistinctUserInOrdersPromise = Order.distinct("userId").then((user: any) => user.length);
+
   const [
     totalOrders,
     totalOrdersByStatus,
     orderPerProduct,
+    avgItemsPrice,
+    ordersInLastSevenDays,
+    ordersInLastThirtyDays,
+    totalDistinctUserInOrders
 
    ] = await Promise.all([
     totalOrdersPromise,
     totalOrdersByStatusPromise,
     orderPerProductPromise,
+    avgItemsPricePromise,
+    ordersInLastSevenDaysPromise,
+    ordersInLastThirtyDaysPromise,
+    totalDistinctUserInOrdersPromise
 
   ]);
 
   return {
     totalOrders,
     totalOrdersByStatus,
-    orderPerProduct
+    orderPerProduct,
+    avgItemsPrice,
+    ordersInLastSevenDays,
+    ordersInLastThirtyDays,
+    totalDistinctUserInOrders
 
   };
 };
