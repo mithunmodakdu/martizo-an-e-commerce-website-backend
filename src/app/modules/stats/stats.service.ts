@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { EPaymentMethod } from "../order/order.interface";
 import { Order } from "../order/order.model";
+import { EPaymentStatus } from "../payment/payment.interface";
 import { Payment } from "../payment/payment.model";
 import { Product } from "../product/product.model";
 import { EIsActive } from "../user/user.interface";
@@ -334,19 +336,48 @@ const getPaymentsStats = async () => {
     }
   ]);
 
+  const totalRevenuePromise = Payment.aggregate([
+    {
+      $match: {status: EPaymentStatus.PAID}
+    },
+
+    {
+      $group: {
+        _id: null,
+        totalRevenue: {$sum: "$amount"}
+      }
+    }
+
+  ]);
+
+  const avgPaymentAmountPromise = Payment.aggregate([
+    {
+      $group: {
+        _id: null,
+        avgPaymentAmount: {$avg: "$amount"}
+      }
+    }
+  ]);
+
   const [
     totalPayments,
-    totalPaymentsByStatus
+    totalPaymentsByStatus,
+    totalRevenue,
+    avgPaymentAmount
 
   ] = await Promise.all([
     totalPaymentsPromise,
-    totalPaymentsByStatusPromise
+    totalPaymentsByStatusPromise,
+    totalRevenuePromise,
+    avgPaymentAmountPromise
 
   ]);
 
   return {
     totalPayments,
-    totalPaymentsByStatus
+    totalPaymentsByStatus,
+    totalRevenue,
+    avgPaymentAmount
   };
 };
 
