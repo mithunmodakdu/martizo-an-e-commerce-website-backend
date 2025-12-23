@@ -210,17 +210,76 @@ const getOrdersStats = async () => {
     }
   ]);
 
+  const orderPerProductPromise = Order.aggregate([
+    {
+      $unwind: "$items"
+    },
+
+    {
+      $group: {
+        _id: "$items.productId",
+        orderCount: {$sum: 1}
+      }
+    },
+
+    {
+      $sort: {orderCount: -1}
+    },
+
+    {
+      $limit: 10
+    },
+
+    {
+      $lookup: {
+        from: "products",
+        let: {productId: "$_id"},
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ["$_id", "$$productId"]
+              }
+            }
+          }
+        ],
+        as: "product"
+      }
+    },
+
+    {
+      $unwind: "$product"
+    },
+
+    {
+      $project: {
+        _id: 0,
+        orderCount: 1,
+        "product.title": 1,
+        "product.slug": 1
+      }
+    }
+
+
+  ]);
+
   const [
     totalOrders,
-    totalOrdersByStatus
+    totalOrdersByStatus,
+    orderPerProduct,
+
    ] = await Promise.all([
     totalOrdersPromise,
-    totalOrdersByStatusPromise
+    totalOrdersByStatusPromise,
+    orderPerProductPromise,
+
   ]);
 
   return {
     totalOrders,
-    totalOrdersByStatus
+    totalOrdersByStatus,
+    orderPerProduct
+
   };
 };
 
