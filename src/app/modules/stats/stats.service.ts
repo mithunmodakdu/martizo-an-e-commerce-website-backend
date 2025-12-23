@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Order } from "../order/order.model";
+import { Payment } from "../payment/payment.model";
 import { Product } from "../product/product.model";
 import { EIsActive } from "../user/user.interface";
 import { User } from "../user/user.model";
@@ -322,7 +323,31 @@ const getOrdersStats = async () => {
 };
 
 const getPaymentsStats = async () => {
-  return {};
+  const totalPaymentsPromise = Payment.countDocuments();
+
+  const totalPaymentsByStatusPromise = Payment.aggregate([
+    {
+      $group: {
+        _id: "$status",
+        count: {$sum: 1}
+      }
+    }
+  ]);
+
+  const [
+    totalPayments,
+    totalPaymentsByStatus
+
+  ] = await Promise.all([
+    totalPaymentsPromise,
+    totalPaymentsByStatusPromise
+
+  ]);
+
+  return {
+    totalPayments,
+    totalPaymentsByStatus
+  };
 };
 
 export const StatsServices = {
