@@ -8,6 +8,12 @@ import { multerUpload } from "../../config/multer.config";
 
 const router = Router();
 
+router.get(
+  "/",
+  checkAuth(ERole.SUPER_ADMIN),
+  CategoryControllers.getAllCategories
+)
+
 router.post(
   "/create",
   checkAuth(ERole.SUPER_ADMIN),

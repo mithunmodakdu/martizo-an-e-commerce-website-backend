@@ -18,6 +18,11 @@ const createCategory = async (payload: Partial<ICategory>) => {
   return category;
 };
 
+const getAllCategories = async() => {
+  const allCategories = await Category.find();
+  return allCategories;
+}
+
 const updateCategory = async(id: string, payload: Partial<ICategory>) =>{
   const existedCategory = await Category.findById(id);
   
@@ -42,5 +47,6 @@ const updateCategory = async(id: string, payload: Partial<ICategory>) =>{
 
 export const CategoryServices = {
   createCategory,
+  getAllCategories,
   updateCategory
 };
