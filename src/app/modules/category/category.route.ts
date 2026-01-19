@@ -14,6 +14,12 @@ router.get(
   CategoryControllers.getAllCategories
 )
 
+router.get(
+  "/:id",
+  checkAuth(ERole.SUPER_ADMIN),
+  CategoryControllers.getCategoryById
+)
+
 router.post(
   "/create",
   checkAuth(ERole.SUPER_ADMIN),
