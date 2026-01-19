@@ -5,6 +5,33 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
 import { ICategory } from "./category.interface";
 
+const getAllCategories = catchAsync(
+  async(req: Request, res: Response, next: NextFunction) => {
+    const allCategories = await CategoryServices.getAllCategories();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "All categories retrieved successfully.",
+      data: allCategories
+    })
+  }
+);
+
+const getCategoryById = catchAsync(
+  async(req: Request, res: Response, next: NextFunction) => {
+    const categoryId = req.params.id;
+    const category = await CategoryServices.getCategoryById(categoryId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "Category retrieved successfully.",
+      data: category
+    })
+  }
+);
+
 const createCategory = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const payload : ICategory = {
@@ -20,19 +47,6 @@ const createCategory = catchAsync(
       message: "Category created successfully.",
       data: category,
     });
-  }
-);
-
-const getAllCategories = catchAsync(
-  async(req: Request, res: Response, next: NextFunction) => {
-    const allCategories = await CategoryServices.getAllCategories();
-
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatusCodes.OK,
-      message: "All categories retrieved successfully.",
-      data: allCategories
-    })
   }
 );
 
@@ -56,7 +70,8 @@ const updateCategory = catchAsync(
 );
 
 export const CategoryControllers = {
-  createCategory,
   getAllCategories,
+  getCategoryById,
+  createCategory,
   updateCategory
 };

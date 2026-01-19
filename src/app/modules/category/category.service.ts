@@ -4,6 +4,16 @@ import { ICategory } from "./category.interface";
 import { Category } from "./category.model";
 import httpStatusCodes from "http-status-codes";
 
+const getAllCategories = async() => {
+  const allCategories = await Category.find();
+  return allCategories;
+}
+
+const getCategoryById = async(categoryId: string) => {
+  const category = await Category.findById(categoryId);
+  return category;
+}
+
 const createCategory = async (payload: Partial<ICategory>) => {
   const existedCategory = await Category.findOne({ name: payload.name });
 
@@ -17,11 +27,6 @@ const createCategory = async (payload: Partial<ICategory>) => {
   const category = await Category.create(payload);
   return category;
 };
-
-const getAllCategories = async() => {
-  const allCategories = await Category.find();
-  return allCategories;
-}
 
 const updateCategory = async(id: string, payload: Partial<ICategory>) =>{
   const existedCategory = await Category.findById(id);
@@ -46,7 +51,8 @@ const updateCategory = async(id: string, payload: Partial<ICategory>) =>{
 }
 
 export const CategoryServices = {
-  createCategory,
   getAllCategories,
+  getCategoryById,
+  createCategory,
   updateCategory
 };
