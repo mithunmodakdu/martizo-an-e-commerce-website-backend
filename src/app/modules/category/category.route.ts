@@ -10,7 +10,6 @@ const router = Router();
 
 router.get(
   "/",
-  checkAuth(ERole.SUPER_ADMIN),
   CategoryControllers.getAllCategories
 )
 
@@ -18,6 +17,12 @@ router.get(
   "/:id",
   checkAuth(ERole.SUPER_ADMIN),
   CategoryControllers.getCategoryById
+)
+
+router.delete(
+  "/:id",
+  checkAuth(ERole.SUPER_ADMIN),
+  CategoryControllers.deleteCategory
 )
 
 router.post(

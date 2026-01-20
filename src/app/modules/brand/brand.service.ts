@@ -3,6 +3,10 @@ import { IBrand } from "./brand.interface";
 import { Brand } from "./brand.model";
 import httpStatusCodes from "http-status-codes";
 
+const getAllBrands = async() => {
+  const allBrands = await Brand.find();
+  return allBrands;
+}
 const createBrand = async(payload: Partial<IBrand>) => {
   const existedBrand = await Brand.findOne({name: payload.name});
 
@@ -16,5 +20,6 @@ const createBrand = async(payload: Partial<IBrand>) => {
 }
 
 export const BrandServices = {
+  getAllBrands,
   createBrand
 }
