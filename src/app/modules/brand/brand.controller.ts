@@ -3,6 +3,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { BrandServices } from "./brand.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
+import { IBrand } from "./brand.interface";
 
 const getAllBrands = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
@@ -18,7 +19,11 @@ const getAllBrands = catchAsync(
 
 const createBrand = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
-    const brand = await BrandServices.createBrand(req.body);
+    const payload: IBrand = {
+      ...req.body,
+      brandLogo: req.file?.path
+    }
+    const brand = await BrandServices.createBrand(payload);
 
     sendResponse(res, {
       success: true,

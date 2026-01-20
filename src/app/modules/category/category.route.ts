@@ -10,7 +10,6 @@ const router = Router();
 
 router.get(
   "/",
-  checkAuth(ERole.SUPER_ADMIN),
   CategoryControllers.getAllCategories
 )
 
