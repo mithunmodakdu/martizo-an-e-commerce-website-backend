@@ -14,6 +14,18 @@ const getCategoryById = async(categoryId: string) => {
   return category;
 }
 
+const deleteCategory = async(categoryId: string) => {
+  const category = await Category.findById(categoryId);
+
+  if(!category){
+    throw new AppError(httpStatusCodes.NOT_FOUND, "This category is not found")
+  }
+
+  await Category.findByIdAndDelete(categoryId);
+
+  return null;
+}
+
 const createCategory = async (payload: Partial<ICategory>) => {
   const existedCategory = await Category.findOne({ name: payload.name });
 
@@ -53,6 +65,7 @@ const updateCategory = async(id: string, payload: Partial<ICategory>) =>{
 export const CategoryServices = {
   getAllCategories,
   getCategoryById,
+  deleteCategory,
   createCategory,
   updateCategory
 };

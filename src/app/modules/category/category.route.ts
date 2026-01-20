@@ -20,6 +20,12 @@ router.get(
   CategoryControllers.getCategoryById
 )
 
+router.delete(
+  "/:id",
+  checkAuth(ERole.SUPER_ADMIN),
+  CategoryControllers.deleteCategory
+)
+
 router.post(
   "/create",
   checkAuth(ERole.SUPER_ADMIN),
