@@ -7,6 +7,11 @@ import { createBrandZodSchema } from "./brand.validation";
 
 const router = Router();
 
+router.get(
+  "/",
+  BrandControllers.getAllBrands
+)
+
 router.post(
   "/create",
   checkAuth(ERole.SUPER_ADMIN),
