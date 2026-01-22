@@ -17,6 +17,40 @@ const getAllBrands = catchAsync(
   }
 )
 
+const deleteBrand = catchAsync(
+  async(req: Request, res: Response) => {
+    const brandId = req.params.id;
+
+    await BrandServices.deleteBrand(brandId);
+
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: "This brand deleted successfully.",
+      data: null
+    })
+  }
+);
+
+const updateBrand = catchAsync(
+  async(req: Request, res: Response) => {
+    const id = req.params.id;
+    const payload = {
+      ...req.body,
+      brandLogo: req.file?.path
+    }
+
+    const updatedBrand = await BrandServices.updateBrand(id, payload);
+
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: "This brand updated successfully.",
+      data: updatedBrand
+    })
+  }
+);
+
 const createBrand = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
     const payload: IBrand = {
@@ -34,7 +68,11 @@ const createBrand = catchAsync(
   }
 );
 
+
 export const BrandControllers = {
   getAllBrands,
-  createBrand
+  deleteBrand,
+  updateBrand,
+  createBrand,
+  
 }
