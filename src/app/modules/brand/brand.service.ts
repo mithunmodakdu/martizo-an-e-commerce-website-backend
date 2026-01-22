@@ -1,3 +1,4 @@
+import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import { IBrand } from "./brand.interface";
 import { Brand } from "./brand.model";
@@ -19,7 +20,29 @@ const createBrand = async(payload: Partial<IBrand>) => {
   return brand;
 }
 
+const updateBrand = async(id: string, payload: Partial<IBrand>) => {
+  const existedBrand = await Brand.findById(id);
+  if(!existedBrand){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "This brand is not found")
+  }
+
+  const duplicateBrand = await Brand.findOne({name: payload.name, _id: {$ne: id}});
+  if(duplicateBrand){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "The brand with same name already exists");
+  }
+
+  if(payload.brandLogo && existedBrand.brandLogo){
+    await deleteImageFromCloudinary(existedBrand.brandLogo);
+  }
+
+  const updatedBrand = await Brand.findByIdAndUpdate(id, payload, {new: true, runValidators: true});
+
+  return updatedBrand;
+}
+
+
 export const BrandServices = {
   getAllBrands,
-  createBrand
+  createBrand,
+  updateBrand
 }

@@ -30,4 +30,25 @@ BrandSchema.pre("save", async function(next){
   next();
 });
 
+
+BrandSchema.pre("findOneAndUpdate", async function(next){
+  const brand = this.getUpdate() as Partial<IBrand>;
+
+  if(brand.name){
+    const baseSlug = brand.name.toLowerCase().split(" ").join("-");
+    let slug = `${baseSlug}-brand`;
+
+    let counter = 1;
+    while(await Brand.exists({slug})){
+      slug = `${slug}-${counter++}`
+    }
+
+    brand.slug = slug;
+  }
+
+  this.setUpdate(brand);
+
+  next();
+})
+
 export const Brand = model<IBrand>("Brand", BrandSchema);
