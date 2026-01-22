@@ -8,16 +8,16 @@ const getAllBrands = async() => {
   const allBrands = await Brand.find();
   return allBrands;
 }
-const createBrand = async(payload: Partial<IBrand>) => {
-  const existedBrand = await Brand.findOne({name: payload.name});
 
-  if(existedBrand){
-    throw new AppError(httpStatusCodes.BAD_REQUEST, "This brand name already exists.")
+const deleteBrand = async(id: string) => {
+  const existedBrand = await Brand.findById(id);
+
+  if(!existedBrand){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "This brand is not found.")
   }
 
-  const brand = await Brand.create(payload);
-
-  return brand;
+  await Brand.findByIdAndDelete(id);
+  return null;
 }
 
 const updateBrand = async(id: string, payload: Partial<IBrand>) => {
@@ -40,9 +40,25 @@ const updateBrand = async(id: string, payload: Partial<IBrand>) => {
   return updatedBrand;
 }
 
+const createBrand = async(payload: Partial<IBrand>) => {
+  const existedBrand = await Brand.findOne({name: payload.name});
+
+  if(existedBrand){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "This brand name already exists.")
+  }
+
+  const brand = await Brand.create(payload);
+
+  return brand;
+}
+
+
+
 
 export const BrandServices = {
   getAllBrands,
-  createBrand,
-  updateBrand
+  deleteBrand,
+  updateBrand,
+  createBrand
+  
 }
