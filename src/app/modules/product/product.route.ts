@@ -11,7 +11,12 @@ const router = Router();
 router.post(
   "/create",
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
-  multerUpload.array("files"),
+
+  multerUpload.fields([
+    {name: "file", maxCount: 1},
+    {name: "files", maxCount: 6}
+  ]),
+  
   validateRequest(ProductCreationZodSchema),
   ProductControllers.createProduct
 );
