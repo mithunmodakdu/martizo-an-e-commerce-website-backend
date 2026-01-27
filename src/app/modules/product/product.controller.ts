@@ -7,6 +7,8 @@ import { IProduct } from "./product.interface";
 
 const createProduct = catchAsync(
   async (req: Request, res: Response, next: NextFunction) =>{
+    // console.log(req.body)
+    // console.log(req.files)
 
     const files = req.files as {
       file?: Express.Multer.File[];
@@ -18,6 +20,8 @@ const createProduct = catchAsync(
       thumbnail: files.file?.[0].path,
       images: files.files?.map(file => file.path)
     }
+
+    // console.log(payload)
 
     const product = await ProductServices.createProduct(payload);
 
