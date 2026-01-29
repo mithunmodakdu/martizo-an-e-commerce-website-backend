@@ -76,7 +76,12 @@ const getAllProducts = async (query: Record<string, string>) => {
     .search(productSearchableFields)
     .sort()
     .fields()
-    .paginate();
+    .paginate()
+    .populate([
+      { path: "category", select: "name slug" },
+      { path: "brand", select: "name" },
+    ]);
+    
 
   const [data, meta] = await Promise.all([
     products.build(),
