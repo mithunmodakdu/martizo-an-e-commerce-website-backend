@@ -1,4 +1,4 @@
-import z from "zod";
+import * as z from "zod";
 import { EIsActive, ERole } from "./user.interface";
 
 export const createUserZodSchema = z.object({

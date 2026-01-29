@@ -1,4 +1,4 @@
-import z from "zod";
+import * as z from "zod";
 import { VariantCreationZodSchema } from "./variant/variant.validation";
 
 export const ProductCreationZodSchema = z.object({
@@ -79,7 +79,7 @@ export const ProductCreationZodSchema = z.object({
     .optional(),
 
   // sku
-  sku: z.string({ error: "SKU must be string" }).min(1, "SKU cannot be empty").optional(),
+  sku: z.string({ error: "SKU must be string" }).optional(),
 
   // status
   status: z
@@ -173,7 +173,7 @@ export const ProductUpdateZodSchema = z.object({
     .optional(),
 
   // sku
-  sku: z.string({ error: "SKU must be string" }),
+  sku: z.string({ error: "SKU must be string" }).optional(),
 
   // status
   status: z

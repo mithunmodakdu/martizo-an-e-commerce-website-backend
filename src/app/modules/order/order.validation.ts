@@ -1,5 +1,4 @@
-import z from "zod";
-import { VariantCreationZodSchema } from "../product/variant/variant.validation";
+import * as z from "zod";
 import { EOrderStatus, EPaymentMethod } from "./order.interface";
 
 export const ShippingAddressZodSchema = z.object({

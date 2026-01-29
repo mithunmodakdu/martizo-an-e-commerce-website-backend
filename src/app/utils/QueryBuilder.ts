@@ -1,19 +1,19 @@
-import { Query } from "mongoose";
+import { PopulateOptions, Query } from "mongoose";
 import { excludeFields } from "../constants";
 
 export class QueryBuilder<T> {
   public modelQuery: Query<T[], T>;
   public readonly query: Record<string, string>;
 
-  constructor(modelQuery: Query<T[], T>, query: Record<string, string> ){
+  constructor(modelQuery: Query<T[], T>, query: Record<string, string>) {
     this.modelQuery = modelQuery;
-    this.query = query
+    this.query = query;
   }
 
   filter(): this {
-    const filter = {...this.query};
+    const filter = { ...this.query };
 
-    for(const field of excludeFields){
+    for (const field of excludeFields) {
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete filter[field];
     }
@@ -28,16 +28,16 @@ export class QueryBuilder<T> {
 
     const searchQuery = {
       $or: searchableFields.map((field) => ({
-        [field] : {$regex: searchTerm, $options: "i"}
-      }))
-    }
+        [field]: { $regex: searchTerm, $options: "i" },
+      })),
+    };
 
     this.modelQuery = this.modelQuery.find(searchQuery);
 
     return this;
   }
 
-  sort() : this {
+  sort(): this {
     const sort = this.query.sort || "-createdAt";
     this.modelQuery = this.modelQuery.sort(sort);
     return this;
@@ -49,7 +49,7 @@ export class QueryBuilder<T> {
     return this;
   }
 
-  paginate():this {
+  paginate(): this {
     const page = Number(this.query.page);
     const limit = Number(this.query.limit);
     const skip = (page - 1) * limit;
@@ -57,21 +57,27 @@ export class QueryBuilder<T> {
     return this;
   }
 
-  build(){
+
+  populate(path:  PopulateOptions | (string | PopulateOptions)[]): this{
+    this.modelQuery = this.modelQuery.populate(path);
+    return this;
+  }
+
+  build() {
     return this.modelQuery;
   }
 
-  async getMeta(){
+  async getMeta() {
     const page = Number(this.query.page);
     const limit = Number(this.query.limit);
     const totalDocuments = await this.modelQuery.model.countDocuments();
-    const totalPage = Math.ceil(totalDocuments/limit);
+    const totalPage = Math.ceil(totalDocuments / limit);
 
     return {
       page,
       limit,
       total: totalDocuments,
-      totalPage
-    }
+      totalPage,
+    };
   }
 }

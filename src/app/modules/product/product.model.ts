@@ -51,7 +51,7 @@ const ProductSchema = new Schema<IProduct>(
     ratingCount: { type: Number, default: 0},
 
     // others
-    sku: {type: String, unique: true},
+    sku: {type: String},
     status: {type: String, enum: ["ACTIVE", "INACTIVE"], default: "ACTIVE"}
 
   },
