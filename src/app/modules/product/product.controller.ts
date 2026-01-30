@@ -3,36 +3,6 @@ import { catchAsync } from "../../utils/catchAsync";
 import { ProductServices } from "./product.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
-import { IProduct } from "./product.interface";
-
-const createProduct = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) =>{
-    // console.log(req.body)
-    // console.log(req.files)
-
-    const files = req.files as {
-      file?: Express.Multer.File[];
-      files?: Express.Multer.File[];
-    }
-
-    const payload : IProduct = {
-      ...req.body,
-      thumbnail: files.file?.[0].path,
-      images: files.files?.map(file => file.path)
-    }
-
-    // console.log(payload)
-
-    const product = await ProductServices.createProduct(payload);
-
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatusCodes.CREATED,
-      message: "Product created successfully.",
-      data: product
-    })
-  }
-);
 
 const getAllProducts = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
@@ -65,6 +35,50 @@ const getSingleProduct = catchAsync(
   }
 );
 
+const deleteProduct = catchAsync(
+  async(req: Request, res: Response) => {
+    const productId = req.params.id;
+
+    await ProductServices.deleteProduct(productId as string);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "This product deleted successfully.",
+      data: null
+    })
+  }
+);
+
+const createProduct = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) =>{
+    // console.log(req.body)
+    // console.log(req.files)
+
+    const files = req.files as {
+      file?: Express.Multer.File[];
+      files?: Express.Multer.File[];
+    }
+
+    const payload : IProduct = {
+      ...req.body,
+      thumbnail: files.file?.[0].path,
+      images: files.files?.map(file => file.path)
+    }
+
+    // console.log(payload)
+
+    const product = await ProductServices.createProduct(payload);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.CREATED,
+      message: "Product created successfully.",
+      data: product
+    })
+  }
+);
+
 const updateProduct = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
     const productId = req.params.productId;
@@ -86,8 +100,9 @@ const updateProduct = catchAsync(
 );
 
 export const ProductControllers = {
-  createProduct,
   getAllProducts,
   getSingleProduct,
+  deleteProduct,
+  createProduct,
   updateProduct
 }
