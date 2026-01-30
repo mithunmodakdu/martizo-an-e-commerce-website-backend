@@ -6,20 +6,6 @@ import { IProduct } from "./product.interface";
 import { Product } from "./product.model";
 import httpStatusCodes from "http-status-codes";
 
-const createProduct = async (payload: Partial<IProduct>) => {
-  const existedProduct = await Product.findOne({ title: payload.title });
-
-  if (existedProduct) {
-    throw new AppError(
-      httpStatusCodes.BAD_REQUEST,
-      "This product already exists"
-    );
-  }
-
-  const product = await Product.create(payload);
-
-  return product;
-};
 
 // const getAllProducts = async (query: Record<string, string>) => {
 //   const filter = query;
@@ -102,6 +88,33 @@ const getSingleProduct = async (slug: string) => {
   };
 };
 
+const createProduct = async (payload: Partial<IProduct>) => {
+  const existedProduct = await Product.findOne({ title: payload.title });
+
+  if (existedProduct) {
+    throw new AppError(
+      httpStatusCodes.BAD_REQUEST,
+      "This product already exists"
+    );
+  }
+
+  const product = await Product.create(payload);
+
+  return product;
+};
+
+const deleteProduct = async(productId: string) => {
+  const existedProduct = await Product.findById(productId);
+
+  if(!existedProduct){
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "This product is not found.");
+  }
+
+  await Product.findByIdAndDelete(productId);
+
+  return null;
+}
+
 const updateProduct = async (productId: string, payload: Partial<IProduct>) => {
   const existedProduct = await Product.findById(productId);
 
@@ -148,8 +161,9 @@ const updateProduct = async (productId: string, payload: Partial<IProduct>) => {
 };
 
 export const ProductServices = {
-  createProduct,
   getAllProducts,
   getSingleProduct,
+  deleteProduct,
+  createProduct,
   updateProduct,
 };

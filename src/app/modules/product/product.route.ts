@@ -8,6 +8,12 @@ import { multerUpload } from "../../config/multer.config";
 
 const router = Router();
 
+router.get("/", ProductControllers.getAllProducts);
+
+router.get("/:slug", ProductControllers.getSingleProduct);
+
+router.delete("/:id", checkAuth(ERole.SUPER_ADMIN, ERole.SUPER_ADMIN), ProductControllers.deleteProduct);
+
 router.post(
   "/create",
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
@@ -20,10 +26,6 @@ router.post(
   validateRequest(ProductCreationZodSchema),
   ProductControllers.createProduct
 );
-
-router.get("/", ProductControllers.getAllProducts);
-
-router.get("/:slug", ProductControllers.getSingleProduct);
 
 router.patch(
   "/update/:productId",
