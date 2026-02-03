@@ -141,6 +141,7 @@ export const ProductUpdateZodSchema = z.object({
     .string({ error: "Thumbnail image URL must be string" })
     .min(1, "Thumbnail cannot be empty")
     .optional(),
+  deleteThumbnail: z.string().optional(),
 
   images: z.array(z.string()).optional(),
   deleteImages: z.array(z.string()).optional(),

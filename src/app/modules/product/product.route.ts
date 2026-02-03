@@ -14,6 +14,17 @@ router.get("/:slug", ProductControllers.getSingleProduct);
 
 router.delete("/:id", checkAuth(ERole.SUPER_ADMIN, ERole.SUPER_ADMIN), ProductControllers.deleteProduct);
 
+router.patch(
+  "/update/:slug",
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
+  multerUpload.fields([
+    {name: "file", maxCount: 1},
+    {name: "files", maxCount: 6}
+  ]),
+  validateRequest(ProductUpdateZodSchema),
+  ProductControllers.updateProduct
+);
+
 router.post(
   "/create",
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
@@ -25,14 +36,6 @@ router.post(
   
   validateRequest(ProductCreationZodSchema),
   ProductControllers.createProduct
-);
-
-router.patch(
-  "/update/:productId",
-  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
-  multerUpload.array("files"),
-  validateRequest(ProductUpdateZodSchema),
-  ProductControllers.updateProduct
 );
 
 export const ProductRoutes = router;

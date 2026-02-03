@@ -25,6 +25,7 @@ export interface IProduct {
 
   // media
   thumbnail?: string;
+  deleteThumbnail?: string;
   images: string[];
   deleteImages?: string[];
 

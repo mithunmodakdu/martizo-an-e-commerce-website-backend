@@ -81,14 +81,20 @@ const createProduct = catchAsync(
 
 const updateProduct = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
-    const productId = req.params.productId;
+    const productSlug = req.params.slug as string;
+    
+    // console.log(productSlug)
+    // console.log(req.files?.file?.[0].path)
+    // console.log(req.files?.files)
     
     const payload = {
       ...req.body,
-      images: (req.files as Express.Multer.File[]).map(file => file.path)
+      thumbnail: req.files?.file?.[0].path,
+      images: (req.files?.files as Express.Multer.File[]).map(file => file.path)
     };
+    // console.log(payload)
 
-    const updatedProduct = await ProductServices.updateProduct(productId, payload);
+    const updatedProduct = await ProductServices.updateProduct(productSlug, payload);
 
     sendResponse(res, {
       success: true,
