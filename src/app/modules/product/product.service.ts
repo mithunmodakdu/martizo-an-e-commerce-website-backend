@@ -115,8 +115,8 @@ const deleteProduct = async(productId: string) => {
   return null;
 }
 
-const updateProduct = async (productId: string, payload: Partial<IProduct>) => {
-  const existedProduct = await Product.findById(productId);
+const updateProduct = async (productSlug: string, payload: Partial<IProduct>) => {
+  const existedProduct = await Product.findOne({slug: productSlug});
 
   if (!existedProduct) {
     throw new AppError(
@@ -125,36 +125,69 @@ const updateProduct = async (productId: string, payload: Partial<IProduct>) => {
     );
   }
 
-  if (
-    payload.images &&
-    payload.images.length > 0 &&
-    existedProduct.images &&
-    existedProduct.images.length > 0
-  ) {
-    payload.images = [...payload.images, ...existedProduct.images];
+  // if (
+  //   payload.images &&
+  //   payload.images.length > 0 &&
+  //   existedProduct.images &&
+  //   existedProduct.images.length > 0
+  // ) {
+  //   payload.images = [...payload.images, ...existedProduct.images];
+  // }
+
+  // if (
+  //   payload.deleteImages &&
+  //   payload.deleteImages.length > 0 &&
+  //   existedProduct.images &&
+  //   existedProduct.images.length > 0
+  // ) {
+  //   const restExistedProductImages = existedProduct.images.filter(
+  //     (imageUrl) => !payload.deleteImages?.includes(imageUrl)
+  //   );
+
+  //   const onlyNewPayloadImages = (payload.images || [])
+  //     .filter((imageUrl) => !payload.deleteImages?.includes(imageUrl))
+  //     .filter((imageUrl) => !restExistedProductImages.includes(imageUrl));
+
+  //   payload.images = [...restExistedProductImages, ...onlyNewPayloadImages];
+  // }
+
+  
+  const existedImages = existedProduct.images || [];
+  const newImages = payload.images || [];
+  const deleteImages = payload.deleteImages || [];
+
+  // 1. Keep only existing images that are NOT deleted
+  const remainingExistedImages = existedImages.filter((img) => !deleteImages.includes(img));
+
+  // 2. Keep only new images that are NOT deleted
+  const validNewImages = newImages.filter((img) => !deleteImages.includes(img));
+
+  // 3. Merge both
+  payload.images = [...remainingExistedImages, ...validNewImages];
+
+  // For zero duplicates
+  payload.images = [...new Set(payload.images)];
+
+  const existedThumbnail = existedProduct.thumbnail;
+  const newThumbnail = payload.thumbnail;
+  const deleteThumbnail = payload.deleteThumbnail;
+
+  if(deleteThumbnail){
+    payload.thumbnail = undefined;
+  }else if(newThumbnail){
+    payload.thumbnail = newThumbnail;
+  }else{
+    payload.thumbnail = existedThumbnail;
   }
 
-  if (
-    payload.deleteImages &&
-    payload.deleteImages.length > 0 &&
-    existedProduct.images &&
-    existedProduct.images.length > 0
-  ) {
-    const restExistedProductImages = existedProduct.images.filter(
-      (imageUrl) => !payload.deleteImages?.includes(imageUrl)
-    );
-
-    const onlyNewPayloadImages = (payload.images || [])
-      .filter((imageUrl) => !payload.deleteImages?.includes(imageUrl))
-      .filter((imageUrl) => !restExistedProductImages.includes(imageUrl));
-
-    payload.images = [...restExistedProductImages, ...onlyNewPayloadImages];
-  }
-
-  const updatedProduct = await Product.findByIdAndUpdate(productId, payload, {new: true});
+  const updatedProduct = await Product.findOneAndUpdate({slug: productSlug}, payload, {new: true})
 
   if(payload.deleteImages && payload.deleteImages.length > 0 && existedProduct.images && existedProduct.images.length > 0){
     await Promise.all(payload.deleteImages.map(url => deleteImageFromCloudinary(url)));
+  }
+
+  if(deleteThumbnail && existedThumbnail){
+    await deleteImageFromCloudinary(deleteThumbnail);
   }
 
   return updatedProduct;
