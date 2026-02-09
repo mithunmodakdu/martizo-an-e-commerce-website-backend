@@ -90,7 +90,7 @@ const updateProduct = catchAsync(
     const payload = {
       ...req.body,
       thumbnail: req.files?.file?.[0].path,
-      images: (req.files?.files as Express.Multer.File[]).map(file => file.path)
+      images: (req.files?.files as Express.Multer.File[])?.map(file => file.path)
     };
     // console.log(payload)
 

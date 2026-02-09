@@ -64,8 +64,8 @@ const getAllProducts = async (query: Record<string, string>) => {
     .fields()
     .paginate()
     .populate([
-      { path: "category", select: "name slug" },
-      { path: "brand", select: "name" },
+      { path: "category", select: "_id, name slug" },
+      { path: "brand", select: "_id, name" },
     ]);
     
 
@@ -171,14 +171,15 @@ const updateProduct = async (productSlug: string, payload: Partial<IProduct>) =>
   const existedThumbnail = existedProduct.thumbnail;
   const newThumbnail = payload.thumbnail;
   const deleteThumbnail = payload.deleteThumbnail;
-
+ 
   if(deleteThumbnail){
     payload.thumbnail = undefined;
-  }else if(newThumbnail){
-    payload.thumbnail = newThumbnail;
-  }else{
-    payload.thumbnail = existedThumbnail;
   }
+
+  if(deleteThumbnail && newThumbnail){
+    payload.thumbnail = newThumbnail;
+  }
+  // console.log(payload)
 
   const updatedProduct = await Product.findOneAndUpdate({slug: productSlug}, payload, {new: true})
 
@@ -189,6 +190,8 @@ const updateProduct = async (productSlug: string, payload: Partial<IProduct>) =>
   if(deleteThumbnail && existedThumbnail){
     await deleteImageFromCloudinary(deleteThumbnail);
   }
+
+  // console.log(updatedProduct)
 
   return updatedProduct;
 };

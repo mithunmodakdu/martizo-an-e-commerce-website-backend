@@ -9,6 +9,12 @@ export const ProductCreationZodSchema = z.object({
   description: z
     .string({ error: "Product description must be string" })
     .optional(),
+  features: z.array(z.object(
+    {
+      name: z.string().min(1, {error: "Feature name is required"}),
+      value: z.string().min(1, {error: "Feature value is required"})
+    }
+  )).optional(),
 
   // categorization
   category: z
@@ -23,8 +29,7 @@ export const ProductCreationZodSchema = z.object({
     .positive("Price must be a positive number"),
 
   salePrice: z
-    .number({ error: "Sale Price must be a number" })
-    .positive("Sale price must be a positive number")
+    .z.union([z.number().min(0), z.undefined()])
     .optional(),
 
   discountPercentage: z
@@ -47,7 +52,7 @@ export const ProductCreationZodSchema = z.object({
   // media
   thumbnail: z
     .string({ error: "Thumbnail image URL must be string" })
-    .min(1, "Thumbnail cannot be empty").optional(),
+    .optional(),
 
   images: z.array(z.string()).optional(),
 
@@ -98,11 +103,16 @@ export const ProductUpdateZodSchema = z.object({
   description: z
     .string({ error: "Product description must be string" })
     .optional(),
+  features: z.array(z.object(
+    {
+      name: z.string().min(1, {error: "Feature name is required"}),
+      value: z.string().min(1, {error: "Feature value is required"})
+    }
+  )).optional(),
 
   // categorization
   category: z
-    .string({ error: "Category ID is required" })
-    .min(1, { error: "Category ID cannot be empty" })
+    .string()
     .optional(),
   subCategory: z.string().optional(),
   brand: z.string().optional(),
@@ -114,8 +124,7 @@ export const ProductUpdateZodSchema = z.object({
     .optional(),
 
   salePrice: z
-    .number({ error: "Sale Price must be a number" })
-    .positive("Sale price must be a positive number")
+    .z.union([z.number().min(0), z.undefined()])
     .optional(),
 
   discountPercentage: z
@@ -139,7 +148,6 @@ export const ProductUpdateZodSchema = z.object({
   // media
   thumbnail: z
     .string({ error: "Thumbnail image URL must be string" })
-    .min(1, "Thumbnail cannot be empty")
     .optional(),
   deleteThumbnail: z.string().optional(),
 
