@@ -8,6 +8,7 @@ export interface IProduct {
   title: string;
   slug: string;
   description: string;
+  features?: {name: string, value: string}[], 
 
   // categorization
   category: Types.ObjectId;
