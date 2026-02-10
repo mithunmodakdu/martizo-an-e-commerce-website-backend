@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import { QueryBuilder } from "../../utils/QueryBuilder";
@@ -181,7 +182,19 @@ const updateProduct = async (productSlug: string, payload: Partial<IProduct>) =>
   }
   // console.log(payload)
 
-  const updatedProduct = await Product.findOneAndUpdate({slug: productSlug}, payload, {new: true})
+  const updatePayload: any = {
+    $set: {}
+  }
+
+  for (const key in payload){
+    updatePayload.$set[key] = payload[key];
+  }
+
+  if(!("salePrice" in payload)){
+    updatePayload.$unset = {salePrice: 1}
+  }
+
+  const updatedProduct = await Product.findOneAndUpdate({slug: productSlug}, updatePayload, {new: true})
 
   if(payload.deleteImages && payload.deleteImages.length > 0 && existedProduct.images && existedProduct.images.length > 0){
     await Promise.all(payload.deleteImages.map(url => deleteImageFromCloudinary(url)));
@@ -191,7 +204,7 @@ const updateProduct = async (productSlug: string, payload: Partial<IProduct>) =>
     await deleteImageFromCloudinary(deleteThumbnail);
   }
 
-  // console.log(updatedProduct)
+  console.log(updatedProduct)
 
   return updatedProduct;
 };

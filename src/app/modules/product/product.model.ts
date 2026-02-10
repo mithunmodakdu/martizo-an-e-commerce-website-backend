@@ -8,6 +8,7 @@ const ProductSchema = new Schema<IProduct>(
     title: {type: String, required: true},
     slug: {type: String, unique: true},
     description: {type: String},
+    features: {type: [{name: String, value: String}]},
 
     // categorization
     category: {type: Schema.Types.ObjectId, ref: "Category", required: true},
