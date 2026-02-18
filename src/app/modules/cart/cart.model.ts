@@ -2,6 +2,19 @@ import { model, Schema } from "mongoose";
 import { ICart, ICartItem } from "./cart.interface";
 import { VariantSchema } from "../product/variant/variant.model";
 
+export const PriceSchema = new Schema(
+  {
+    regular: { type: Number, required: true },
+    sale: { type: Number },
+    currency: { type: String, required: true },
+  },
+  {
+    _id: false,
+  },
+);
+
+
+
 export const CartItemSchema = new Schema<ICartItem>(
   {
     productId: {
@@ -17,10 +30,7 @@ export const CartItemSchema = new Schema<ICartItem>(
       type: String,
       required: true,
     },
-    price: {
-      type: Number,
-      required: true,
-    },
+    price: PriceSchema,
     quantity: {
       type: Number,
       required: true,
@@ -30,12 +40,13 @@ export const CartItemSchema = new Schema<ICartItem>(
       type: VariantSchema,
     },
     image: {
-      type: String,
+      src: String,
+      alt: String
     },
   },
   {
     _id: false,
-  }
+  },
 );
 
 export const CartSchema = new Schema<ICart>(
@@ -58,18 +69,18 @@ export const CartSchema = new Schema<ICart>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 CartSchema.pre("save", function (next) {
   this.totalItems = this.items.reduce(
     (total, item) => total + item.quantity,
-    0
+    0,
   );
 
   this.itemsPrice = this.items.reduce(
-    (total, item) => total + item.quantity * item.price,
-    0
+    (total, item) => total + item.quantity * item.price.regular,
+    0,
   );
 
   next();

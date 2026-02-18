@@ -204,7 +204,7 @@ const updateProduct = async (productSlug: string, payload: Partial<IProduct>) =>
     await deleteImageFromCloudinary(deleteThumbnail);
   }
 
-  console.log(updatedProduct)
+  // console.log(updatedProduct)
 
   return updatedProduct;
 };
