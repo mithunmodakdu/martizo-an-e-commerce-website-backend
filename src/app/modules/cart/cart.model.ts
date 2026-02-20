@@ -26,7 +26,7 @@ export const CartItemSchema = new Schema<ICartItem>(
       type: String,
       required: true,
     },
-    categoryName: {
+    category: {
       type: String,
       required: true,
     },
@@ -36,13 +36,14 @@ export const CartItemSchema = new Schema<ICartItem>(
       required: true,
       min: 1,
     },
-    variant: {
-      type: VariantSchema,
-    },
-    image: {
+     image: {
       src: String,
       alt: String
     },
+    variant: {
+      type: VariantSchema,
+    }
+   
   },
   {
     _id: false,
@@ -79,7 +80,7 @@ CartSchema.pre("save", function (next) {
   );
 
   this.itemsPrice = this.items.reduce(
-    (total, item) => total + item.quantity * item.price.regular,
+    (total, item) => total + item.quantity * (item.price.sale?? item.price.regular),
     0,
   );
 

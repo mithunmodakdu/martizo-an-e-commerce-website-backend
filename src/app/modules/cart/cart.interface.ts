@@ -10,11 +10,12 @@ export interface IProductPrice {
 export interface ICartItem {
   productId: Types.ObjectId;
   name: string;
-  categoryName: string;
+  category: string;
   price: IProductPrice;
   quantity: number;
-  variant? : IVariant;
   image?: {src: string, alt: string};
+  variant? : IVariant;
+  
   
 }
 
