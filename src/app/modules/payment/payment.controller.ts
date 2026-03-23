@@ -5,9 +5,27 @@ import { envVars } from "../../config/env";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
 
+const getPaymentByTransactionId = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const transactionId = req.params.transactionId;
+
+    const result = await PaymentServices.getPaymentByTransactionId(
+      transactionId as string,
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "Payment retrieved successfully.",
+      data: result,
+    });
+  },
+);
+
 const successPayment = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
+      
     const result = await PaymentServices.successPayment(
       query as Record<string, string>
     );
@@ -80,6 +98,7 @@ const initPayment = catchAsync(
 );
 
 export const PaymentControllers = {
+  getPaymentByTransactionId,
   successPayment,
   getInvoiceDownloadUrl,
   failPayment,

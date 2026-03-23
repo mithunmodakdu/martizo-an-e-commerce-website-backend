@@ -10,6 +10,13 @@ import { EPaymentStatus } from "./payment.interface";
 import { Payment } from "./payment.model";
 import httpStatusCodes from "http-status-codes";
 
+const getPaymentByTransactionId = async(transactionId: string) => {
+  // console.log(transactionId)
+  const payment = await Payment.findOne({transactionId: transactionId});
+  console.log(payment)
+  return payment;
+}
+
 const successPayment = async (query: Record<string, string>) => {
   const session = await Order.startSession();
   session.startTransaction();
@@ -57,6 +64,11 @@ const successPayment = async (query: Record<string, string>) => {
     };
 
     const pdfBuffer = await generateInvoicePDF(invoiceData);
+    // console.log(pdfBuffer)
+
+    if(!pdfBuffer){
+      throw new AppError(401, "Error in generating invoice pdf");
+    }
 
     const pdfCloudinaryResult = await uploadBufferToCloudinary(pdfBuffer, "invoice");
     // console.log(pdfCloudinaryResult)
@@ -81,15 +93,14 @@ const successPayment = async (query: Record<string, string>) => {
       ]
     })
 
-
-
     await session.commitTransaction();
     session.endSession();
 
     return {
       success: true,
-      message: "Payment completed successfully",
+      message: "Thank you for your Payment. Your payment completed successfully",
     };
+
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -135,7 +146,7 @@ const failPayment = async (query: Record<string, string>) => {
 
     return {
       success: false,
-      message: "Payment failed.",
+      message: "It's unfortunate! Your Payment failed.",
     };
   } catch (error) {
     await session.abortTransaction();
@@ -168,7 +179,7 @@ const cancelPayment = async (query: Record<string, string>) => {
 
     return {
       success: false,
-      message: "Payment cancelled.",
+      message: "You cancelled your Payment.",
     };
   } catch (error) {
     await session.abortTransaction();
@@ -212,6 +223,7 @@ const initPayment = async (orderId: string) => {
 
 
 export const PaymentServices = {
+  getPaymentByTransactionId,
   successPayment,
   getInvoiceDownloadUrl,
   failPayment,

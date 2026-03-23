@@ -15,7 +15,7 @@ export const checkAuth = (...authRoles : string[]) => async(req: Request, res: R
     const accessToken = req.headers.authorization || req.cookies.accessToken;
     
     if(!accessToken){
-      throw new AppError(httpStatusCodes.UNAUTHORIZED, "No access token received.")
+      throw new AppError(httpStatusCodes.UNAUTHORIZED, "You are not logged in. Please log in.")
     }
 
     const verifiedToken = verifyToken(accessToken as string, envVars.JWT_SECRET) as JwtPayload;
@@ -23,19 +23,19 @@ export const checkAuth = (...authRoles : string[]) => async(req: Request, res: R
     const existedUser = await User.findOne({email: verifiedToken.email})
 
     if(!existedUser){
-      throw new AppError(httpStatusCodes.BAD_REQUEST, "User does not exist")
+      throw new AppError(httpStatusCodes.BAD_REQUEST, "You are not signed up. Please create your account.")
     }
 
     if(!existedUser.isVerified){
-      throw new AppError(httpStatusCodes.BAD_REQUEST, "User is not verified.")
+      throw new AppError(httpStatusCodes.BAD_REQUEST, "You are not verified.")
     }
 
     if(existedUser.isActive === EIsActive.INACTIVE || existedUser.isActive === EIsActive.BLOCKED){
-      throw new AppError(httpStatusCodes.BAD_REQUEST, `User is ${existedUser.isActive}`)
+      throw new AppError(httpStatusCodes.BAD_REQUEST, `You are ${existedUser.isActive}. Please contact with our support team.`)
     }
 
     if(existedUser.isDeleted){
-      throw new AppError(httpStatusCodes.BAD_REQUEST, "User is deleted.")
+      throw new AppError(httpStatusCodes.BAD_REQUEST, "You account is deleted. Please contact with our support team.")
     }
     
     if(!authRoles.includes(verifiedToken.role)){
