@@ -13,7 +13,7 @@ import { generateInvoiceNo } from "./invoiceCounter.model";
 const createTransactionId = () => {
   return `tran_id_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 };
-// console.log(createTransactionId())
+
 
 const createOrder = async (userId: string, payload: Partial<IOrder>) => {
   const session = await Order.startSession();
@@ -42,16 +42,20 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
     const orderItems = cart.items.map((item) => ({
       productId: item.productId,
       name: item.name,
-      categoryName: item.categoryName,
+      categoryName: item.category,
       quantity: item.quantity,
-      price: item.price,
+      price: {
+         regular: item.price.regular,
+         sale: item.price.sale,
+         currency: item.price.currency
+      },
       variant: item.variant,
     }));
 
-    const taxPrice = cart.itemsPrice * 0.15;
+    const taxPrice = Number((cart.itemsPrice * 0.075).toFixed(2));
     const shippingPrice =
       payload.shippingAddress?.city?.toLowerCase() === "dhaka" ? 60 : 120;
-    const totalPrice = cart.itemsPrice + taxPrice + shippingPrice;
+    const totalPrice = Number((cart.itemsPrice + taxPrice + shippingPrice).toFixed(2));
 
     const invoiceNo = await generateInvoiceNo();
 
@@ -66,9 +70,11 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
       totalPrice,
       invoiceNo
     };
+   
 
     const order = await Order.create([orderData], { session });
 
+     
     //create payment
     const payment = await Payment.create(
       [
@@ -92,7 +98,7 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
     )
       .populate("userId", "name email address")
       .populate("paymentId", "transactionId");
-
+    
   
     //make cart empty
     cart.items = [];
@@ -123,6 +129,7 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
       cus_country: shippingAddress?.country as string,
       cus_phone: shippingAddress?.phone as string,
     };
+   
 
     const sslPayment = await SSLCommerzServices.sslPaymentInit(sslPayload);
 
@@ -141,6 +148,9 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
   }
 };
 
+
+
 export const OrderServices = {
   createOrder,
+  
 };

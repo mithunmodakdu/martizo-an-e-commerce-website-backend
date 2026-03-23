@@ -6,7 +6,7 @@ import httpStatusCodes from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 
 const createOrder = catchAsync(
-  async(req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const userId = (req.user as JwtPayload).userId;
     const payload = req.body;
     const result = await OrderServices.createOrder(userId, payload);
@@ -15,11 +15,11 @@ const createOrder = catchAsync(
       success: true,
       statusCode: httpStatusCodes.CREATED,
       message: "You have ordered successfully.",
-      data: result
-    })
-  }
+      data: result,
+    });
+  },
 );
 
 export const OrderControllers = {
-  createOrder
-}
+  createOrder,
+};

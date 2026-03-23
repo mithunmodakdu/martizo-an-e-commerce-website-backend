@@ -3,6 +3,7 @@ import PDFDocument from "pdfkit";
 import AppError from "../errorHelpers/AppError";
 import httpStatusCodes from "http-status-codes";
 import { IShippingAddress } from "../modules/order/order.interface";
+import { IProductPrice } from "../modules/cart/cart.interface";
 
 export interface ICustomerInfo {
   name: string;
@@ -14,7 +15,7 @@ export interface ICustomerInfo {
 
 export interface IInvoiceItem {
   name: string;
-  price: number;
+  price: IProductPrice;
   quantity: number;
 }
 
@@ -126,9 +127,9 @@ export const generateInvoicePDF = async (
           doc,
           position,
           item.name,
-          formatCurrency(item.price),
+          formatCurrency(item.price.sale? item.price.sale : item.price.regular),
           item.quantity,
-          formatCurrency(item.price * item.quantity)
+          formatCurrency((item.price.sale? item.price.sale : item.price.regular) * item.quantity)
         );
         position += 20;
       });

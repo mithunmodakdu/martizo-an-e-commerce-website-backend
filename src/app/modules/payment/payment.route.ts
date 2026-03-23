@@ -5,6 +5,7 @@ import { ERole } from "../user/user.interface";
 
 const router = Router();
 
+router.get("/:transactionId", checkAuth(...Object.values(ERole)), PaymentControllers.getPaymentByTransactionId);
 router.post("/success", PaymentControllers.successPayment);
 router.post("/fail", PaymentControllers.failPayment);
 router.post("/cancel", PaymentControllers.cancelPayment);

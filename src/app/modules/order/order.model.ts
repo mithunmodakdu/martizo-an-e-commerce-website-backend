@@ -7,6 +7,7 @@ import {
   IShippingAddress,
 } from "./order.interface";
 import { VariantSchema } from "../product/variant/variant.model";
+import { PriceSchema } from "../cart/cart.model";
 
 export const OrderItemSchema = new Schema<IOrderItem>(
   {
@@ -14,7 +15,7 @@ export const OrderItemSchema = new Schema<IOrderItem>(
     name: { type: String, required: true },
     categoryName: { type: String, required: true },
     quantity: { type: Number, required: true },
-    price: { type: Number, required: true },
+    price: PriceSchema,
     variant: { type: VariantSchema, default: null },
   },
   {
@@ -42,10 +43,10 @@ export const OrderSchema = new Schema<IOrder>(
     shippingAddress: ShippingAddressSchema,
 
     items: [OrderItemSchema],
-    itemsPrice: { type: Number, required: true, default: 0.0 },
-    taxPrice: { type: Number, required: true, default: 0.0 },
-    shippingPrice: { type: Number, required: true, default: 0.0 },
-    totalPrice: { type: Number, required: true, default: 0.0 },
+    itemsPrice: { type: Number, required: true},
+    taxPrice: { type: Number, required: true},
+    shippingPrice: { type: Number, required: true},
+    totalPrice: { type: Number, required: true},
 
     paymentMethod: {type: String, enum: Object.values(EPaymentMethod)},
     paymentId: { type: Schema.Types.ObjectId, ref: "Payment" },
