@@ -9,6 +9,7 @@ import { EPaymentStatus } from "../payment/payment.interface";
 import { IUser } from "../user/user.interface";
 import { SSLCommerzServices } from "../sslCommerz/sslCommerz.service";
 import { generateInvoiceNo } from "./invoiceCounter.model";
+import { generateOrderNo } from "./orderCounter.model";
 
 const createTransactionId = () => {
   return `tran_id_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
@@ -58,8 +59,10 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
     const totalPrice = Number((cart.itemsPrice + taxPrice + shippingPrice).toFixed(2));
 
     const invoiceNo = await generateInvoiceNo();
+    const orderNo = await generateOrderNo();
 
     const orderData = {
+      orderNo,
       userId,
       shippingAddress,
       paymentMethod,

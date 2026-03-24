@@ -8,6 +8,7 @@ import {
 } from "./order.interface";
 import { VariantSchema } from "../product/variant/variant.model";
 import { PriceSchema } from "../cart/cart.model";
+import { string } from "zod";
 
 export const OrderItemSchema = new Schema<IOrderItem>(
   {
@@ -39,6 +40,7 @@ export const ShippingAddressSchema = new Schema<IShippingAddress>(
 
 export const OrderSchema = new Schema<IOrder>(
   {
+    orderNo: {type: String, required: true},
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     shippingAddress: ShippingAddressSchema,
 
