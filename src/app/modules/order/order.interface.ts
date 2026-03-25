@@ -42,6 +42,7 @@ export enum EOrderStatus {
 }
 
 export interface IOrder {
+  orderNo: string;
   userId: Types.ObjectId;
   shippingAddress: IShippingAddress;
 
