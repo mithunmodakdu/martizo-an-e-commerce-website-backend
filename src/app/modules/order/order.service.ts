@@ -15,6 +15,26 @@ const createTransactionId = () => {
   return `tran_id_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 };
 
+const getOrderByTransactionId = async(transactionId: string) => {
+  const order = await Order.aggregate([
+    {
+      $lookup: {
+        from: "payments",
+        localField: "paymentId",
+        foreignField: "_id",
+        as: "payment"
+      }
+    },
+    {
+      $unwind: "$payment"
+    },
+    {
+      $match: {"payment.transactionId": transactionId }
+    }
+  ])
+
+  return order[0];
+}
 
 const createOrder = async (userId: string, payload: Partial<IOrder>) => {
   const session = await Order.startSession();
@@ -151,9 +171,8 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
   }
 };
 
-
-
 export const OrderServices = {
+  getOrderByTransactionId,
   createOrder,
   
 };

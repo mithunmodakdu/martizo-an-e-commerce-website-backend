@@ -7,6 +7,8 @@ import { CreateOrderZodSchema } from "./order.validation";
 
 const router = Router();
 
+router.get("/:transactionId", checkAuth(...Object.values(ERole)), OrderControllers.getOrderByTransactionId);
+
 router.post("/create", checkAuth(...Object.values(ERole)), validateRequest(CreateOrderZodSchema), OrderControllers.createOrder);
 
 export const OrderRoutes = router;
