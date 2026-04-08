@@ -71,6 +71,7 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
          currency: item.price.currency
       },
       variant: item.variant,
+      image: item.image
     }));
 
     const taxPrice = Number((cart.itemsPrice * 0.075).toFixed(2));

@@ -21,6 +21,6 @@ export const updateCategoryZodSchema = z.object({
     .string()
     .min(3, { error: "Category slug must be of at least 3 characters" })
     .optional(),
-  parent: z.string().optional(),
+  parent: z.union([z.string(), z.null()]).optional(),
   icon: z.string().optional(),
 });

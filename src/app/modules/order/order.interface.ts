@@ -9,7 +9,7 @@ export interface IOrderItem {
   quantity: number;
   price: IProductPrice;
   variant?: IVariant | null;
-  image?: string | null;
+  image?: {src: string, alt: string};
 }
 
 export interface IShippingAddress {
