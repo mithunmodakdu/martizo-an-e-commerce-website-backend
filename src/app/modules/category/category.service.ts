@@ -42,6 +42,8 @@ const createCategory = async (payload: Partial<ICategory>) => {
 
 const updateCategory = async(id: string, payload: Partial<ICategory>) =>{
   const existedCategory = await Category.findById(id);
+  console.log(existedCategory)
+  console.log(payload)
   
   if(!existedCategory){
     throw new AppError(httpStatusCodes.BAD_REQUEST, "This category does not exist.")

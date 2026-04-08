@@ -1,6 +1,7 @@
 import { PopulateOptions, Query } from "mongoose";
 import { excludeFields } from "../constants";
 
+
 export class QueryBuilder<T> {
   public modelQuery: Query<T[], T>;
   public readonly query: Record<string, string>;

@@ -8,7 +8,7 @@ import {
 } from "./order.interface";
 import { VariantSchema } from "../product/variant/variant.model";
 import { PriceSchema } from "../cart/cart.model";
-import { string } from "zod";
+
 
 export const OrderItemSchema = new Schema<IOrderItem>(
   {
@@ -18,6 +18,7 @@ export const OrderItemSchema = new Schema<IOrderItem>(
     quantity: { type: Number, required: true },
     price: PriceSchema,
     variant: { type: VariantSchema, default: null },
+    image: {src: {type: String}, alt: {type: String}}
   },
   {
     _id: false,

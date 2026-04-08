@@ -73,7 +73,7 @@ const updateCategory = catchAsync(
       icon: req.file?.path
     };
     
-    const updatedCategory = await CategoryServices.updateCategory(id, payload);
+    const updatedCategory = await CategoryServices.updateCategory(id as string, payload);
 
     sendResponse(res, {
       success: true,
