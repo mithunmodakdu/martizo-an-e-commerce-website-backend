@@ -6,7 +6,7 @@ export const CreateBrandZodSchema = z.object({
     .min(2, { error: "Brand name must have at least 2 characters" }),
   slug: z.string().optional(),
   tagline: z.string({error: "Brand tagline must be string."}),
-  totalProducts: z.number().int().min(0),
+  totalProducts: z.number().int(),
   isTopBrand: z.boolean({ error: "isTopBrand must be boolean." }).optional(),
   isMartizoChoice: z
     .boolean({ error: "isMartizoChoice must be boolean." })
@@ -23,7 +23,7 @@ export const UpdateBrandZodSchema = z.object({
     .optional(),
   slug: z.string().optional(),
   tagline: z.string({error: "Brand tagline must be string."}).optional(),
-  totalProducts: z.number().int().min(0).optional(),
+  totalProducts: z.number().int().optional(),
   isTopBrand: z.boolean({ error: "isTopBrand must be boolean." }).optional(),
   isMartizoChoice: z
     .boolean({ error: "isMartizoChoice must be boolean." })

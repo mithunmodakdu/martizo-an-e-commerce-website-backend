@@ -6,10 +6,11 @@ const BrandSchema = new Schema<IBrand>(
     name: { type: String, required: true },
     slug: { type: String, unique: true },
     tagline: {type: String, required: true},
-    brandLogo: {type: String, required: true},
+    totalProducts: {type: Number, required: true},
     isTopBrand: {type: Boolean, default: false},
     isMartizoChoice: {type: Boolean, default: false},
-    isFeatured: {type: Boolean, default: false}
+    isFeatured: {type: Boolean, default: false},
+    brandLogo: {type: String, required: true},
     
   },
   {
