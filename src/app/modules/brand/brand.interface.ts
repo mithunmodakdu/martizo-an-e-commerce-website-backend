@@ -4,8 +4,10 @@ export interface IBrand {
   name: string;
   slug: string;
   tagline: string;
-  brandLogo: string;
+  totalProducts: number;
   isTopBrand?: boolean;
   isMartizoChoice?: boolean;
   isFeatured?: boolean;
+  brandLogo: string;
+  
 }
