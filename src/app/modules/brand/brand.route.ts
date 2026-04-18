@@ -13,6 +13,11 @@ router.get(
   BrandControllers.getAllBrands
 )
 
+router.get(
+  "/:id",
+  BrandControllers.getBrandById
+)
+
 router.delete(
   "/:id",
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
