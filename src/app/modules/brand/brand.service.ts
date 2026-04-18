@@ -9,6 +9,11 @@ const getAllBrands = async() => {
   return allBrands;
 }
 
+const getBrandById = async(brandId: string) =>{
+  const brand = await Brand.findById(brandId);
+  return brand;
+}
+
 const deleteBrand = async(id: string) => {
   const existedBrand = await Brand.findById(id);
 
@@ -57,6 +62,7 @@ const createBrand = async(payload: Partial<IBrand>) => {
 
 export const BrandServices = {
   getAllBrands,
+  getBrandById,
   deleteBrand,
   updateBrand,
   createBrand
