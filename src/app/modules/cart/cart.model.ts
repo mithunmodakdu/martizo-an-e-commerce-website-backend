@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 import { ICart, ICartItem } from "./cart.interface";
-import { VariantSchema } from "../product/variant/variant.model";
+import { VariantSchema } from "../variant/variant.model";
 
 export const PriceSchema = new Schema(
   {

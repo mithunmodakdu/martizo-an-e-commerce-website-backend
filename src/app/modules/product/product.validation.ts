@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { VariantCreationZodSchema } from "./variant/variant.validation";
+import { VariantCreationZodSchema } from "../variant/variant.validation";
 
 export const ProductCreationZodSchema = z.object({
   // main details

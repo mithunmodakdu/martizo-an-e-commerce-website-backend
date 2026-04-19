@@ -6,7 +6,7 @@ import {
   IOrderItem,
   IShippingAddress,
 } from "./order.interface";
-import { VariantSchema } from "../product/variant/variant.model";
+import { VariantSchema } from "../variant/variant.model";
 import { PriceSchema } from "../cart/cart.model";
 
 
