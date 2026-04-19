@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { IVariant } from "../product/variant/variant.interface";
+import { IVariant } from "../variant/variant.interface";
 import { IProductPrice } from "../cart/cart.interface";
 
 export interface IOrderItem {

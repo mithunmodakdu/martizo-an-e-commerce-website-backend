@@ -36,7 +36,7 @@ const deleteBrand = catchAsync(
   async(req: Request, res: Response) => {
     const brandId = req.params.id;
 
-    await BrandServices.deleteBrand(brandId);
+    await BrandServices.deleteBrand(brandId as string);
 
     sendResponse(res, {
       statusCode: httpStatusCodes.OK,
