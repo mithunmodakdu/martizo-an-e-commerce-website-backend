@@ -10,6 +10,7 @@ import { OrderRoutes } from "../modules/order/order.route";
 import { PaymentRoutes } from "../modules/payment/payment.route";
 import { OTPRoutes } from "../modules/otp/otp.route";
 import { StatsRoutes } from "../modules/stats/stats.route";
+import { WishlistRoutes } from "../modules/wishlist/wishlist.route";
 
 export const router = Router();
 
@@ -57,6 +58,10 @@ const moduleRoutes = [
   {
     path: "/stats",
     route: StatsRoutes
+  },
+  {
+    path: "/wishlist",
+    route: WishlistRoutes
   }
 ];
 

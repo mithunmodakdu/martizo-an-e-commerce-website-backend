@@ -7,7 +7,7 @@ import { ICartItem } from "./cart.interface";
 import { JwtPayload } from "jsonwebtoken";
 
 const addToCart = catchAsync(
-  async(req: Request, res: Response, next: NextFunction) => {
+  async(req: Request, res: Response) => {
     const userId = (req.user as JwtPayload).userId;
     const payload = req.body;
     const result = await CartServices.addToCart(userId as string, payload as Partial<ICartItem>)
