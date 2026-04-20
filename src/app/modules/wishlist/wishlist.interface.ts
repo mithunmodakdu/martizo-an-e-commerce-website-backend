@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 
 export interface IWishListItem {
   productId: Types.ObjectId;
-  addedAt: Date 
+  addedAt: string; 
 }
 
 export interface IWishList {
