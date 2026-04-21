@@ -21,6 +21,20 @@ const removeFromWishlist = catchAsync(
   }
 );
 
+const getWishlist = catchAsync(
+  async(req: Request, res: Response) => {
+    const userId = (req.user as JwtPayload).userId;
+    const result = await WishlistServices.getWishlist(userId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "Wishlist retrieved successfully.",
+      data: result
+    })
+  }
+)
+
 const addToWishlist = catchAsync(
   async(req: Request, res: Response) => {
     const userId = (req.user as JwtPayload).userId;
@@ -39,5 +53,6 @@ const addToWishlist = catchAsync(
 
 export const WishlistControllers = {
   removeFromWishlist,
+  getWishlist,
   addToWishlist
 }
