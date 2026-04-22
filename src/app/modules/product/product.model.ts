@@ -1,6 +1,7 @@
 import { model, Schema } from "mongoose";
 import { IProduct } from "./product.interface";
 import { VariantSchema } from "../variant/variant.model";
+import { ProductPriceSchema } from "../shared-interfaces-schemas";
 
 const ProductSchema = new Schema<IProduct>(
   {
@@ -16,26 +17,28 @@ const ProductSchema = new Schema<IProduct>(
     brand: {type: Schema.Types.ObjectId, ref: "Brand"},
 
     // price
-    price: {type: Number, required: true},
-    salePrice: Number,
+    price: ProductPriceSchema,
     discountPercentage: {
       type: Number,
       default: function(){
-        if(!this.salePrice){
+        if(!this.price.sale){
           return 0;
         }
 
-        return Math.round(((this.price - this.salePrice)/this.price)*100);
+        return Math.round(((this.price.regular - this.price.sale)/this.price.regular)*100);
       }
     },
 
     // stock + variants
     stock: {type: Number, required: true},
+    soldFromStock: {type: Number, default: 0},
     variants: {type: [VariantSchema], default: []},
 
     // media
     thumbnail: {type: String, required: true},
+    deleteThumbnail: {type: String},
     images: {type: [String]},
+    deleteImages: {type: [String]},
 
     // labels for Shop menu sections
     isNewArrival: {type: Boolean, default: false},
@@ -43,6 +46,7 @@ const ProductSchema = new Schema<IProduct>(
     isFlashSale: {type: Boolean, default: false},
     isMartizoExclusive: {type: Boolean, default: false},
     isTrending: {type: Boolean, default: false},
+    isFeatured: {type: Boolean, default: false},
 
     // offers
     offers: {type: [Schema.Types.ObjectId], ref: "Offer", default: []},
