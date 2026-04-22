@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { IVariant } from "../variant/variant.interface";
+import { IProductPrice } from "../shared-interfaces-schemas";
 
 export interface IProduct {
   _id: string;
@@ -16,12 +17,12 @@ export interface IProduct {
   brand?: string;
 
   // pricing
-  price: number;
-  salePrice?: number;
+  price: IProductPrice; 
   discountPercentage?: number;
   
   // stock + variants
   stock: number;
+  soldFromStock?: number;
   variants: IVariant[];
 
   // media
@@ -36,6 +37,7 @@ export interface IProduct {
   isFlashSale?: boolean;
   isTrending?: boolean;
   isMartizoExclusive?: boolean;
+  isFeatured?: boolean; 
 
   // offers
   offers?: [Types.ObjectId];

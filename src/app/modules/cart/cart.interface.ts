@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { IVariant } from "../variant/variant.interface";
-import { IProductPrice } from "../shared-interfaces";
+import { IProductPrice } from "../shared-interfaces-schemas";
 
 export interface ICartItem {
   productId: Types.ObjectId;
