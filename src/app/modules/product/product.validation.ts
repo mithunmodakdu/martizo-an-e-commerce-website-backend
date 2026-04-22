@@ -1,5 +1,6 @@
 import * as z from "zod";
 import { VariantCreationZodSchema } from "../variant/variant.validation";
+import { ProductPriceUpdateZodSchema, ProductPriceZodSchema } from "../shared-interfaces-schemas";
 
 export const ProductCreationZodSchema = z.object({
   // main details
@@ -24,13 +25,7 @@ export const ProductCreationZodSchema = z.object({
   brand: z.string().optional(),
 
   // price section
-  price: z
-    .number({ error: "Price must be a number" })
-    .positive("Price must be a positive number"),
-
-  salePrice: z
-    .z.union([z.number().min(0), z.undefined()])
-    .optional(),
+  price: ProductPriceZodSchema,
 
   discountPercentage: z
     .number()
@@ -43,6 +38,11 @@ export const ProductCreationZodSchema = z.object({
     .number({ error: "Stock quantity must be a number" })
     .int("Stock must be an integer")
     .nonnegative("Stock cannot be negative"),
+  soldFromStock: z
+    .number({ error: "Sold From Stock quantity must be a number" })
+    .int("Sold From Stock must be an integer")
+    .nonnegative("Sold From Stock cannot be negative")
+    .optional(),
 
   // variants
   variants: z
@@ -62,6 +62,7 @@ export const ProductCreationZodSchema = z.object({
   isFlashSale: z.boolean().optional(),
   isMartizoExclusive: z.boolean().optional(),
   isTrending: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
 
   // offers
   offers: z
@@ -118,14 +119,7 @@ export const ProductUpdateZodSchema = z.object({
   brand: z.string().optional(),
 
   // price section
-  price: z
-    .number({ error: "Price must be a number" })
-    .positive("Price must be a positive number")
-    .optional(),
-
-  salePrice: z
-    .z.union([z.number().min(0), z.undefined()])
-    .optional(),
+  price: ProductPriceUpdateZodSchema,
 
   discountPercentage: z
     .number()
@@ -138,6 +132,11 @@ export const ProductUpdateZodSchema = z.object({
     .number({ error: "Stock quantity must be a number" })
     .int("Stock must be an integer")
     .nonnegative("Stock cannot be negative")
+    .optional(),
+  soldFromStock: z
+    .number({ error: "Sold From Stock quantity must be a number" })
+    .int("Sold From Stock must be an integer")
+    .nonnegative("Sold From Stock cannot be negative")
     .optional(),
 
   // variants
@@ -160,6 +159,7 @@ export const ProductUpdateZodSchema = z.object({
   isFlashSale: z.boolean().optional(),
   isMartizoExclusive: z.boolean().optional(),
   isTrending: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
 
   // offers
   offers: z
