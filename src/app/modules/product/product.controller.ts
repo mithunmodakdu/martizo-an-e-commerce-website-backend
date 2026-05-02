@@ -5,7 +5,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
 
 const getAllProducts = catchAsync(
-  async(req: Request, res: Response, next: NextFunction) => {
+  async(req: Request, res: Response) => {
     const query = req.query;
 
     const result = await ProductServices.getAllProducts(query as Record<string, string>);
