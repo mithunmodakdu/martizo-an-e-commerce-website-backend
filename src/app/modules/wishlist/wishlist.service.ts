@@ -23,7 +23,15 @@ const removeFromWishlist = async(userId: string, productId: string) => {
 
 const getWishlist = async(userId: string) => {
   const wishlist = await Wishlist.findOne({userId})
-  .populate("items.productId", "_id title price thumbnail rating ratingCount discountPercentage");
+  // .populate("items.productId", "_id title category price thumbnail stock rating ratingCount discountPercentage")
+  .populate({
+    path: "items.productId", 
+    select: "_id title category price thumbnail stock rating ratingCount discountPercentage",
+    populate: {
+      path: "category",
+      select: "_id name"
+    }
+  })
   return wishlist;
 }
 
