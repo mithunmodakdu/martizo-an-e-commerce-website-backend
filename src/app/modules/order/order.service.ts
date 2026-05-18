@@ -172,8 +172,14 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
   }
 };
 
+const getOrders = async() =>{
+  const orders = await Order.find();
+  return orders;
+}
+
 export const OrderServices = {
   getOrderByTransactionId,
   createOrder,
+  getOrders
   
 };
