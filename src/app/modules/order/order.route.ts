@@ -11,4 +11,6 @@ router.get("/:transactionId", checkAuth(...Object.values(ERole)), OrderControlle
 
 router.post("/create", checkAuth(...Object.values(ERole)), validateRequest(CreateOrderZodSchema), OrderControllers.createOrder);
 
+router.get("/", checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN), OrderControllers.getOrders);
+
 export const OrderRoutes = router;

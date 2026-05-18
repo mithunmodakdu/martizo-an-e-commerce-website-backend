@@ -34,7 +34,21 @@ const createOrder = catchAsync(
   },
 );
 
+const getOrders = catchAsync(
+  async(req: Request, res: Response) => {
+    const result = await OrderServices.getOrders();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "Orders data retrieved successfully.",
+      data: result
+    })
+  }
+)
+
 export const OrderControllers = {
   getOrderByTransactionId,
   createOrder,
+  getOrders
 };
