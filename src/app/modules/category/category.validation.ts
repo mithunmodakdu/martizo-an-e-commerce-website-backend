@@ -8,7 +8,7 @@ export const createCategoryZodSchema = z.object({
     .string()
     .min(3, { error: "Category slug must be of at least 3 characters" })
     .optional(),
-  parent: z.string().optional(),
+  parent: z.union([z.string(), z.null()], {error:"Parent Category must be string or null"}).optional(),
   icon: z.string().optional(),
 });
 

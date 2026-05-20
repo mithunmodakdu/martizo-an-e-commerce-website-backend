@@ -173,7 +173,7 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
 };
 
 const getOrders = async() =>{
-  const orders = await Order.find();
+  const orders = await Order.find().populate("userId", "name email");
   return orders;
 }
 
