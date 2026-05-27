@@ -1,7 +1,10 @@
 import { Response } from "express";
 
+
 interface IMeta {
-  total: number;
+  page?: number;
+  limit?: number;
+  total?: number;
 }
 
 interface IResData<T> {
@@ -9,7 +12,7 @@ interface IResData<T> {
   success: boolean;
   message: string;
   meta?: IMeta;
-  data: T;
+  data: T | null | undefined;
 }
 
 export const sendResponse = <T>(res: Response, resData : IResData<T>) => {
@@ -18,6 +21,7 @@ export const sendResponse = <T>(res: Response, resData : IResData<T>) => {
     success: resData.success,
     message: resData.message,
     meta: resData.meta,
-    data: resData.data
+    data: resData.data || null || undefined
   });
 };
+
