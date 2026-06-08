@@ -24,7 +24,6 @@ export const ShippingAddressZodSchema = z.object({
   city: z.string({ error: "City must be a string" }),
   postalCode: z.string({ error: "Postal code must be a string" }).optional(),
   country: z.string({ error: "Country must be a string" }).optional(),
-  
 });
 
 export const CreateOrderZodSchema = z.object({
@@ -43,4 +42,28 @@ export const CreateOrderZodSchema = z.object({
   cancelledAt: z.string().optional(),
   refundedAt: z.string().optional(),
   invoiceNo: z.string({ error: "invoiceNo must be a string" }).optional(),
+});
+
+export const UpdateOrderZodSchema = z.object({
+  shippingAddress: ShippingAddressZodSchema.optional(),
+
+  status: z
+    .enum(Object.values(EOrderStatus) as [string], {
+      error: "Invalid order status",
+    })
+    .optional(),
+
+  carrier: z.string().optional(),
+  trackingNumber: z.string().optional(),
+  lastLocation: z.string().optional(),
+
+  paidAt: z.string().optional(),
+  processedAt: z.string().optional(),
+  shippedAt: z.string().optional(),
+  outForDeliveryAt: z.string().optional(),
+  estimatedDeliveryAt: z.string().optional(),
+  deliveredAt: z.string().optional(),
+
+  cancelledAt: z.string().optional(),
+  refundedAt: z.string().optional(),
 });

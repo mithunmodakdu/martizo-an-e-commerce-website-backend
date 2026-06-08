@@ -35,6 +35,7 @@ export enum EOrderStatus {
   PAID = "PAID",
   PROCESSING = "PROCESSING",
   SHIPPED = "SHIPPED",
+  OUT_FOR_DELIVERY ="OUT_FOR_DELIVERY", 
   DELIVERED = "DELIVERED",
   FAILED = "FAILED",
   CANCELLED = "CANCELLED",
@@ -43,6 +44,7 @@ export enum EOrderStatus {
 
 export interface IOrder {
   orderNo: string;
+  invoiceNo: string;
   userId: Types.ObjectId;
   shippingAddress: IShippingAddress;
 
@@ -54,15 +56,24 @@ export interface IOrder {
   
   paymentMethod: EPaymentMethod;
   paymentId?: Types.ObjectId;
-  status: EOrderStatus
+  
+  status: EOrderStatus;
+ 
+  carrier?: string;             
+  trackingNumber?: string;      
+  lastLocation?: string;  
 
-  paidAt?: Date | null;
-  shippedAt?: Date | null;
-  deliveredAt?: Date | null;
+  paidAt?: Date | null;                
+  processedAt?: Date | null;           
+  shippedAt?: Date | null;              
+  outForDeliveryAt?: Date | null;       
+  deliveredAt?: Date | null;        
+  estimatedDelivery?: Date | null;     
+
   cancelledAt?: Date | null;
   refundedAt?: Date | null;
 
   createdAt?: Date;
-  invoiceNo: string;
-
+  updatedAt?: Date;
+ 
 }
