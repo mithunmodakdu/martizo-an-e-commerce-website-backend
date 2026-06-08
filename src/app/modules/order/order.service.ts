@@ -15,26 +15,44 @@ const createTransactionId = () => {
   return `tran_id_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 };
 
-const getOrderByTransactionId = async(transactionId: string) => {
+const getOrderByTransactionId = async (transactionId: string) => {
+  if (
+    !transactionId ||
+    transactionId === "undefined" ||
+    transactionId === "null"
+  ) {
+    throw new AppError(
+      httpStatusCodes.BAD_REQUEST,
+      "Transaction ID is required.",
+    );
+  }
+
   const order = await Order.aggregate([
     {
       $lookup: {
         from: "payments",
         localField: "paymentId",
         foreignField: "_id",
-        as: "payment"
-      }
+        as: "payment",
+      },
     },
     {
-      $unwind: "$payment"
+      $unwind: "$payment",
     },
     {
-      $match: {"payment.transactionId": transactionId }
-    }
-  ])
+      $match: { "payment.transactionId": transactionId },
+    },
+  ]);
+
+  if (!order.length) {
+    throw new AppError(
+      httpStatusCodes.NOT_FOUND,
+      "Transaction ID not found or incorrect.",
+    );
+  }
 
   return order[0];
-}
+};
 
 const createOrder = async (userId: string, payload: Partial<IOrder>) => {
   const session = await Order.startSession();
@@ -49,7 +67,7 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
       if (!user?.phone || !user.address) {
         throw new AppError(
           httpStatusCodes.BAD_REQUEST,
-          "Please update your profile with phone number and address."
+          "Please update your profile with phone number and address.",
         );
       }
     }
@@ -66,18 +84,20 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
       categoryName: item.category,
       quantity: item.quantity,
       price: {
-         regular: item.price.regular,
-         sale: item.price.sale,
-         currency: item.price.currency
+        regular: item.price.regular,
+        sale: item.price.sale,
+        currency: item.price.currency,
       },
       variant: item.variant,
-      image: item.image
+      image: item.image,
     }));
 
     const taxPrice = Number((cart.itemsPrice * 0.075).toFixed(2));
     const shippingPrice =
       payload.shippingAddress?.city?.toLowerCase() === "dhaka" ? 60 : 120;
-    const totalPrice = Number((cart.itemsPrice + taxPrice + shippingPrice).toFixed(2));
+    const totalPrice = Number(
+      (cart.itemsPrice + taxPrice + shippingPrice).toFixed(2),
+    );
 
     const invoiceNo = await generateInvoiceNo();
     const orderNo = await generateOrderNo();
@@ -92,13 +112,11 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
       taxPrice,
       shippingPrice,
       totalPrice,
-      invoiceNo
+      invoiceNo,
     };
-   
 
     const order = await Order.create([orderData], { session });
 
-     
     //create payment
     const payment = await Payment.create(
       [
@@ -111,33 +129,31 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
           status: EPaymentStatus.UNPAID,
         },
       ],
-      { session }
+      { session },
     );
 
     // update Order
     const updatedOrder = await Order.findByIdAndUpdate(
       order[0]._id,
       { paymentId: payment[0]._id },
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     )
       .populate("userId", "name email address")
       .populate("paymentId", "transactionId");
-    
-  
+
     //make cart empty
     cart.items = [];
     await cart.save({ session });
 
     // SSL Payment related
-    const { name, email } =
-      updatedOrder?.userId as Partial<IUser>;
+    const { name, email } = updatedOrder?.userId as Partial<IUser>;
 
     let productName = "";
     updatedOrder?.items.map((item) => (productName += item.name + ", "));
 
     let productCategory = "";
     updatedOrder?.items.map(
-      (item) => (productCategory += item.categoryName + ", ")
+      (item) => (productCategory += item.categoryName + ", "),
     );
 
     const sslPayload = {
@@ -153,7 +169,6 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
       cus_country: shippingAddress?.country as string,
       cus_phone: shippingAddress?.phone as string,
     };
-   
 
     const sslPayment = await SSLCommerzServices.sslPaymentInit(sslPayload);
 
@@ -162,9 +177,8 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
 
     return {
       order: updatedOrder,
-      paymentGateWayUrl: sslPayment.GatewayPageURL
+      paymentGateWayUrl: sslPayment.GatewayPageURL,
     };
-
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -172,14 +186,13 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
   }
 };
 
-const getOrders = async() =>{
+const getOrders = async () => {
   const orders = await Order.find().populate("userId", "name email");
   return orders;
-}
+};
 
 export const OrderServices = {
   getOrderByTransactionId,
   createOrder,
-  getOrders
-  
+  getOrders,
 };
