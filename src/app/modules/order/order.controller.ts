@@ -4,6 +4,7 @@ import { OrderServices } from "./order.service";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
+import { IOrder } from "./order.interface";
 
 const getOrderByTransactionId = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
@@ -18,6 +19,34 @@ const getOrderByTransactionId = catchAsync(
     })
   }
 );
+
+const getOrders = catchAsync(
+  async(req: Request, res: Response) => {
+    const result = await OrderServices.getOrders();
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "Orders data retrieved successfully.",
+      data: result
+    })
+  }
+)
+
+const updateOrderById = catchAsync(
+  async(req: Request, res: Response) =>{
+    const orderId = req.params.id;
+    const payload = req.body;
+    const result = await OrderServices.updateOrderById(orderId as string, payload as Partial<IOrder>);
+
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: "Order updated successfully.",
+      data: result
+    })
+  }
+)
 
 const createOrder = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -34,21 +63,12 @@ const createOrder = catchAsync(
   },
 );
 
-const getOrders = catchAsync(
-  async(req: Request, res: Response) => {
-    const result = await OrderServices.getOrders();
 
-    sendResponse(res, {
-      success: true,
-      statusCode: httpStatusCodes.OK,
-      message: "Orders data retrieved successfully.",
-      data: result
-    })
-  }
-)
 
 export const OrderControllers = {
   getOrderByTransactionId,
+  getOrders,
+  updateOrderById,
   createOrder,
-  getOrders
+  
 };

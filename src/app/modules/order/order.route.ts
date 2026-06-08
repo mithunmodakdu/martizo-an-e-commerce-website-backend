@@ -8,9 +8,8 @@ import { CreateOrderZodSchema } from "./order.validation";
 const router = Router();
 
 router.get("/:transactionId", checkAuth(...Object.values(ERole)), OrderControllers.getOrderByTransactionId);
-
+router.patch("/update/:id", checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN), OrderControllers.updateOrderById);
 router.post("/create", checkAuth(...Object.values(ERole)), validateRequest(CreateOrderZodSchema), OrderControllers.createOrder);
-
 router.get("/", checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN), OrderControllers.getOrders);
 
 export const OrderRoutes = router;

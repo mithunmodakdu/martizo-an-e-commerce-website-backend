@@ -54,6 +54,16 @@ const getOrderByTransactionId = async (transactionId: string) => {
   return order[0];
 };
 
+const getOrders = async () => {
+  const orders = await Order.find().populate("userId", "name email");
+  return orders;
+};
+
+const updateOrderById = async(orderId: string, payload: Partial<IOrder>) => {
+  console.log(orderId)
+  console.log(payload)
+}
+
 const createOrder = async (userId: string, payload: Partial<IOrder>) => {
   const session = await Order.startSession();
   session.startTransaction();
@@ -186,13 +196,11 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
   }
 };
 
-const getOrders = async () => {
-  const orders = await Order.find().populate("userId", "name email");
-  return orders;
-};
 
 export const OrderServices = {
   getOrderByTransactionId,
-  createOrder,
   getOrders,
+  updateOrderById,
+  createOrder,
+  
 };
