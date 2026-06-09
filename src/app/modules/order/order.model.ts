@@ -9,7 +9,6 @@ import {
 import { VariantSchema } from "../variant/variant.model";
 import { PriceSchema } from "../cart/cart.model";
 
-
 export const OrderItemSchema = new Schema<IOrderItem>(
   {
     productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },
@@ -18,11 +17,11 @@ export const OrderItemSchema = new Schema<IOrderItem>(
     quantity: { type: Number, required: true },
     price: PriceSchema,
     variant: { type: VariantSchema, default: null },
-    image: {src: {type: String}, alt: {type: String}}
+    image: { src: { type: String }, alt: { type: String } },
   },
   {
     _id: false,
-  }
+  },
 );
 
 export const ShippingAddressSchema = new Schema<IShippingAddress>(
@@ -36,41 +35,46 @@ export const ShippingAddressSchema = new Schema<IShippingAddress>(
   },
   {
     _id: false,
-  }
+  },
 );
 
 export const OrderSchema = new Schema<IOrder>(
   {
-    orderNo: {type: String, required: true},
+    orderNo: { type: String, required: true },
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     shippingAddress: ShippingAddressSchema,
 
     items: [OrderItemSchema],
-    itemsPrice: { type: Number, required: true},
-    taxPrice: { type: Number, required: true},
-    shippingPrice: { type: Number, required: true},
-    totalPrice: { type: Number, required: true},
+    itemsPrice: { type: Number, required: true },
+    taxPrice: { type: Number, required: true },
+    shippingPrice: { type: Number, required: true },
+    totalPrice: { type: Number, required: true },
 
-    paymentMethod: {type: String, enum: Object.values(EPaymentMethod)},
+    paymentMethod: { type: String, enum: Object.values(EPaymentMethod) },
     paymentId: { type: Schema.Types.ObjectId, ref: "Payment" },
     status: {
       type: String,
       enum: Object.values(EOrderStatus),
       default: EOrderStatus.PENDING,
     },
+    carrier: { type: String },
+    trackingNumber: { type: String },
+    lastLocation: { type: String },
 
     paidAt: { type: Date },
+    processedAt: { type: Date },
     shippedAt: { type: Date },
+    outForDeliveryAt: { type: Date },
+    estimatedDelivery: { type: Date },
     deliveredAt: { type: Date },
     cancelledAt: { type: Date },
     refundedAt: { type: Date },
 
-    invoiceNo: {type: String}
+    invoiceNo: { type: String },
   },
   {
     timestamps: true,
-  }
+  },
 );
-
 
 export const Order = model<IOrder>("Order", OrderSchema);
