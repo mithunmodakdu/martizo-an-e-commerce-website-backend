@@ -60,8 +60,9 @@ const getOrders = async () => {
 };
 
 const updateOrderById = async(orderId: string, payload: Partial<IOrder>) => {
-  console.log(orderId)
-  console.log(payload)
+  const updatedOrder = await Order.findByIdAndUpdate(orderId, payload, {runValidators: true, new: true}).populate("userId", "name email address").populate("paymentId", "transactionId");
+
+  return updatedOrder;
 }
 
 const createOrder = async (userId: string, payload: Partial<IOrder>) => {
