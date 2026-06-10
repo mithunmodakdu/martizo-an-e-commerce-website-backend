@@ -16,6 +16,7 @@ const createTransactionId = () => {
 };
 
 const getOrderByTransactionId = async (transactionId: string) => {
+  
   if (
     !transactionId ||
     transactionId === "undefined" ||
@@ -53,6 +54,11 @@ const getOrderByTransactionId = async (transactionId: string) => {
 
   return order[0];
 };
+
+const getOrderById = async(orderId: string) => {
+  const order = await Order.findById(orderId);
+  return order;
+}
 
 const getOrders = async () => {
   const orders = await Order.find().populate("userId", "name email");
@@ -200,6 +206,7 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
 
 export const OrderServices = {
   getOrderByTransactionId,
+  getOrderById,
   getOrders,
   updateOrderById,
   createOrder,
