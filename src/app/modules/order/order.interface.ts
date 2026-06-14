@@ -68,7 +68,7 @@ export interface IOrder {
   shippedAt?: Date | null;              
   outForDeliveryAt?: Date | null;       
   deliveredAt?: Date | null;        
-  estimatedDelivery?: Date | null;     
+  estimatedDeliveryAt?: Date | null;     
 
   cancelledAt?: Date | null;
   refundedAt?: Date | null;

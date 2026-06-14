@@ -55,10 +55,16 @@ const getOrderByTransactionId = async (transactionId: string) => {
   return order[0];
 };
 
-const getOrderById = async(orderId: string) => {
-  const order = await Order.findById(orderId);
+const getOrderByOrderNo = async(orderNo: string) => {
+  const order = await Order.findOne({orderNo}).populate("paymentId", "transactionId");
   return order;
 }
+
+const getOrderById = async(orderId: string) => {
+  const order = await Order.findById(orderId).populate("paymentId", "transactionId");
+  return order;
+}
+
 
 const getOrders = async () => {
   const orders = await Order.find().populate("userId", "name email");
@@ -206,6 +212,7 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
 
 export const OrderServices = {
   getOrderByTransactionId,
+  getOrderByOrderNo,
   getOrderById,
   getOrders,
   updateOrderById,
