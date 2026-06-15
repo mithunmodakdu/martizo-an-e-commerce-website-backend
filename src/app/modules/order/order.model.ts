@@ -65,7 +65,7 @@ export const OrderSchema = new Schema<IOrder>(
     processedAt: { type: Date },
     shippedAt: { type: Date },
     outForDeliveryAt: { type: Date },
-    estimatedDelivery: { type: Date },
+    estimatedDeliveryAt: { type: Date },
     deliveredAt: { type: Date },
     cancelledAt: { type: Date },
     refundedAt: { type: Date },

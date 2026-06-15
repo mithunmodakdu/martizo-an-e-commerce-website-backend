@@ -20,6 +20,19 @@ const getOrderByTransactionId = catchAsync(
   }
 );
 
+const getOrderByOrderNo = catchAsync(
+  async(req: Request, res: Response) => {
+    const orderNo = req.params.orderNo;
+    const result = await OrderServices.getOrderByOrderNo(orderNo as string);
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: "Order data retrieved successfully",
+      data: result
+    })
+  }
+)
+
 const getOrderById = catchAsync(
   async(req: Request, res: Response) => {
     const orderId = req.params.id;
@@ -80,6 +93,7 @@ const createOrder = catchAsync(
 
 export const OrderControllers = {
   getOrderByTransactionId,
+  getOrderByOrderNo,
   getOrderById,
   getOrders,
   updateOrderById,

@@ -12,6 +12,13 @@ router.get(
   checkAuth(...Object.values(ERole)),
   OrderControllers.getOrderByTransactionId,
 );
+
+router.get(
+  "/get-order/:orderNo",
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
+  OrderControllers.getOrderByOrderNo
+);
+
 router.get(
   "/:id",
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
