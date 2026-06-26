@@ -48,7 +48,8 @@ const getOrderById = catchAsync(
 
 const getOrders = catchAsync(
   async(req: Request, res: Response) => {
-    const result = await OrderServices.getOrders();
+    const query = req.query;
+    const result = await OrderServices.getOrders(query as Record<string, string>);
 
     sendResponse(res, {
       success: true,

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EPaymentMethod } from "../order/order.interface";
 import { Order } from "../order/order.model";
 import { EPaymentStatus } from "../payment/payment.interface";
 import { Payment } from "../payment/payment.model";

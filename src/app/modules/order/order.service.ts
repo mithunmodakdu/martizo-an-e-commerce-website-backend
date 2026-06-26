@@ -10,13 +10,14 @@ import { IUser } from "../user/user.interface";
 import { SSLCommerzServices } from "../sslCommerz/sslCommerz.service";
 import { generateInvoiceNo } from "./invoiceCounter.model";
 import { generateOrderNo } from "./orderCounter.model";
+import { QueryBuilder } from "../../utils/QueryBuilder";
+import { orderSearchableFields } from "./order.constants";
 
 const createTransactionId = () => {
   return `tran_id_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 };
 
 const getOrderByTransactionId = async (transactionId: string) => {
-  
   if (
     !transactionId ||
     transactionId === "undefined" ||
@@ -55,27 +56,55 @@ const getOrderByTransactionId = async (transactionId: string) => {
   return order[0];
 };
 
-const getOrderByOrderNo = async(orderNo: string) => {
-  const order = await Order.findOne({orderNo}).populate("paymentId", "transactionId");
+const getOrderByOrderNo = async (orderNo: string) => {
+  const order = await Order.findOne({ orderNo }).populate(
+    "paymentId",
+    "transactionId",
+  );
   return order;
-}
-
-const getOrderById = async(orderId: string) => {
-  const order = await Order.findById(orderId).populate("paymentId", "transactionId");
-  return order;
-}
-
-
-const getOrders = async () => {
-  const orders = await Order.find().populate("userId", "name email");
-  return orders;
 };
 
-const updateOrderById = async(orderId: string, payload: Partial<IOrder>) => {
-  const updatedOrder = await Order.findByIdAndUpdate(orderId, payload, {runValidators: true, new: true}).populate("userId", "name email address").populate("paymentId", "transactionId");
+const getOrderById = async (orderId: string) => {
+  const order = await Order.findById(orderId).populate(
+    "paymentId",
+    "transactionId",
+  );
+  return order;
+};
+
+const getOrders = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(Order.find(), query);
+
+  const orders = await queryBuilder
+    .filter()
+    .search(orderSearchableFields)
+    .sort()
+    .fields()
+    .populate([
+      {path: "userId", select: "name email"}
+    ]);
+
+  const [data, meta] = await Promise.all([
+    orders.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return {
+    meta,
+    data,
+  };
+};
+
+const updateOrderById = async (orderId: string, payload: Partial<IOrder>) => {
+  const updatedOrder = await Order.findByIdAndUpdate(orderId, payload, {
+    runValidators: true,
+    new: true,
+  })
+    .populate("userId", "name email address")
+    .populate("paymentId", "transactionId");
 
   return updatedOrder;
-}
+};
 
 const createOrder = async (userId: string, payload: Partial<IOrder>) => {
   const session = await Order.startSession();
@@ -209,7 +238,6 @@ const createOrder = async (userId: string, payload: Partial<IOrder>) => {
   }
 };
 
-
 export const OrderServices = {
   getOrderByTransactionId,
   getOrderByOrderNo,
@@ -217,5 +245,4 @@ export const OrderServices = {
   getOrders,
   updateOrderById,
   createOrder,
-  
 };
