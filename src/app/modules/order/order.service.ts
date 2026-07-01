@@ -74,12 +74,14 @@ const getOrderById = async (orderId: string) => {
 
 const getOrders = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Order.find(), query);
+  console.log("query",query)
 
   const orders = await queryBuilder
     .filter()
     .search(orderSearchableFields)
     .sort()
     .fields()
+    .paginate()
     .populate([
       {path: "userId", select: "name email"}
     ]);
