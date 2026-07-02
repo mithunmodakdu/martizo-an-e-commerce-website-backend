@@ -74,8 +74,7 @@ const getOrderById = async (orderId: string) => {
 
 const getOrders = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Order.find(), query);
-  console.log("query",query)
-
+ 
   const orders = await queryBuilder
     .filter()
     .search(orderSearchableFields)
@@ -84,7 +83,10 @@ const getOrders = async (query: Record<string, string>) => {
     .paginate()
     .populate([
       {path: "userId", select: "name email"}
-    ]);
+    ])
+  
+      
+   
 
   const [data, meta] = await Promise.all([
     orders.build(),

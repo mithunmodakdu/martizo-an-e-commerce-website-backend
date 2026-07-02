@@ -39,10 +39,11 @@ export class QueryBuilder<T> {
   }
 
   sort(): this {
-    const sortField = this.query.sort || "createdAt";
-    const sortDirection = this.query.sortDirection || "desc";
-    const sortBy = sortDirection === "desc"? `-${sortField}` : sortField;
-    this.modelQuery = this.modelQuery.sort(sortBy);
+    const sortField = this.query.sortField || "createdAt";
+    const sortDir = this.query.sortDir === "asc" ? 1 : -1;
+    this.modelQuery = this.modelQuery.sort({
+      [sortField]: sortDir
+    });
     return this;
   }
 
