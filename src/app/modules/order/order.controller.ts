@@ -5,6 +5,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { IOrder } from "./order.interface";
+import { ObjectId } from "mongoose";
 
 const getOrderByTransactionId = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
@@ -42,6 +43,19 @@ const getOrderById = catchAsync(
       success: true,
       message: "Order data retrieved successfully",
       data: result
+    })
+  }
+)
+
+const deleteSelectedOrders = catchAsync(
+  async(req: Request, res: Response) => {
+    const {selectedOrderIds} = req.body;
+    await OrderServices.deleteSelectedOrders(selectedOrderIds as ObjectId[]);
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: "Selected orders have been deleted successfully.",
+      data: null
     })
   }
 )
@@ -110,6 +124,7 @@ export const OrderControllers = {
   getOrderByTransactionId,
   getOrderByOrderNo,
   getOrderById,
+  deleteSelectedOrders,
   deleteOrderById,
   getOrders,
   updateOrderById,
