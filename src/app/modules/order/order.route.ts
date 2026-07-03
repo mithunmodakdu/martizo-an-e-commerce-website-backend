@@ -24,11 +24,25 @@ router.get(
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
   OrderControllers.getOrderById
 );
+
+router.delete(
+  "/delete-selected-orders",
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
+  OrderControllers.deleteSelectedOrders
+);
+
+router.delete(
+  "/:id",
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
+  OrderControllers.deleteOrderById
+);
+
 router.get(
   "/",
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
   OrderControllers.getOrders,
 );
+
 router.patch(
   "/update/:id",
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
