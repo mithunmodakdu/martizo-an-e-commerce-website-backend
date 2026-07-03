@@ -72,6 +72,10 @@ const getOrderById = async (orderId: string) => {
   return order;
 };
 
+const deleteOrderById = async(orderId: string) => {
+  await Order.findByIdAndDelete(orderId);
+}
+
 const getOrders = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Order.find(), query);
  
@@ -246,6 +250,7 @@ export const OrderServices = {
   getOrderByTransactionId,
   getOrderByOrderNo,
   getOrderById,
+  deleteOrderById,
   getOrders,
   updateOrderById,
   createOrder,

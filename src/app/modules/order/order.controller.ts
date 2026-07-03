@@ -46,9 +46,23 @@ const getOrderById = catchAsync(
   }
 )
 
+const deleteOrderById = catchAsync(
+  async(req: Request, res: Response) => {
+    const orderId = req.params.id;
+    await OrderServices.deleteOrderById(orderId as string);
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: "This order deleted successfully.",
+      data: null
+    })
+  }
+)
+
 const getOrders = catchAsync(
   async(req: Request, res: Response) => {
     const query = req.query;
+  
     const result = await OrderServices.getOrders(query as Record<string, string>);
 
     sendResponse(res, {
@@ -96,6 +110,7 @@ export const OrderControllers = {
   getOrderByTransactionId,
   getOrderByOrderNo,
   getOrderById,
+  deleteOrderById,
   getOrders,
   updateOrderById,
   createOrder,

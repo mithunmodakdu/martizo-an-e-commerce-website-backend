@@ -24,6 +24,11 @@ router.get(
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
   OrderControllers.getOrderById
 );
+router.delete(
+  "/:id",
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
+  OrderControllers.deleteOrderById
+);
 router.get(
   "/",
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
