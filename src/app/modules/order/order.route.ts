@@ -8,6 +8,12 @@ import { CreateOrderZodSchema, UpdateOrderZodSchema } from "./order.validation";
 const router = Router();
 
 router.get(
+  "/",
+  checkAuth(...Object.values(ERole)),
+  OrderControllers.getOrderByUserId
+)
+
+router.get(
   "/transaction/:transactionId",
   checkAuth(...Object.values(ERole)),
   OrderControllers.getOrderByTransactionId,

@@ -6,6 +6,7 @@ import httpStatusCodes from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { IOrder } from "./order.interface";
 import { ObjectId } from "mongoose";
+import { Order } from "./order.model";
 
 const getOrderByTransactionId = catchAsync(
   async(req: Request, res: Response, next: NextFunction) => {
@@ -47,9 +48,22 @@ const getOrderById = catchAsync(
   }
 )
 
+const getOrderByUserId = catchAsync(
+  async(req: Request, res: Response) => {
+    const userId = req.user.userId as JwtPayload;
+    const result = await OrderServices.getOrderByUserId(userId); 
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCodes.OK,
+      message: "Your order retrieved successfully.",
+      data: result
+    })
+  }
+)
+
 const deleteSelectedOrders = catchAsync(
   async(req: Request, res: Response) => {
-    const {selectedOrderIds} = req.body;
+    const selectedOrderIds = req.body;
     await OrderServices.deleteSelectedOrders(selectedOrderIds as ObjectId[]);
     sendResponse(res, {
       statusCode: httpStatusCodes.OK,
@@ -124,6 +138,7 @@ export const OrderControllers = {
   getOrderByTransactionId,
   getOrderByOrderNo,
   getOrderById,
+  getOrderByUserId,
   deleteSelectedOrders,
   deleteOrderById,
   getOrders,
