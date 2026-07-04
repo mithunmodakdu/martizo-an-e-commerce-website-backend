@@ -73,6 +73,11 @@ const getOrderById = async (orderId: string) => {
   return order;
 };
 
+const getOrderByUserId = async(userId: string) => {
+  const order = await Order.find({userId});
+  return order;
+}
+
 const deleteSelectedOrders = async(selectedOrderIds: ObjectId[]) =>{
   await Order.deleteMany({_id: {$in: selectedOrderIds}});
 }
@@ -81,7 +86,6 @@ const deleteOrderById = async(orderId: string) => {
   await Order.findByIdAndDelete(orderId);
   
 }
-
 
 const getOrders = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Order.find(), query);
@@ -257,6 +261,7 @@ export const OrderServices = {
   getOrderByTransactionId,
   getOrderByOrderNo,
   getOrderById,
+  getOrderByUserId,
   deleteSelectedOrders,
   deleteOrderById,
   getOrders,
