@@ -8,7 +8,7 @@ import { CreateOrderZodSchema, UpdateOrderZodSchema } from "./order.validation";
 const router = Router();
 
 router.get(
-  "/",
+  "/user-orders",
   checkAuth(...Object.values(ERole)),
   OrderControllers.getOrderByUserId
 )

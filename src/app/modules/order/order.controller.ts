@@ -50,7 +50,7 @@ const getOrderById = catchAsync(
 
 const getOrderByUserId = catchAsync(
   async(req: Request, res: Response) => {
-    const userId = req.user.userId as JwtPayload;
+    const userId = req?.user?.userId as JwtPayload;
     const result = await OrderServices.getOrderByUserId(userId); 
     sendResponse(res, {
       success: true,
@@ -92,7 +92,7 @@ const getOrders = catchAsync(
     const query = req.query;
   
     const result = await OrderServices.getOrders(query as Record<string, string>);
-
+  
     sendResponse(res, {
       success: true,
       statusCode: httpStatusCodes.OK,
@@ -131,7 +131,6 @@ const createOrder = catchAsync(
     });
   },
 );
-
 
 
 export const OrderControllers = {
