@@ -90,7 +90,7 @@ const deleteOrderById = async(orderId: string) => {
 const getOrders = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Order.find(), query);
  
-  const orders = await queryBuilder
+  const orders = queryBuilder
     .filter()
     .search(orderSearchableFields)
     .sort()
@@ -99,15 +99,12 @@ const getOrders = async (query: Record<string, string>) => {
     .populate([
       {path: "userId", select: "name email"}
     ])
-  
-      
-   
 
   const [data, meta] = await Promise.all([
     orders.build(),
     queryBuilder.getMeta(),
   ]);
-
+  
   return {
     meta,
     data,
