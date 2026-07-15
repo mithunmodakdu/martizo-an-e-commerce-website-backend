@@ -277,6 +277,17 @@ const getOrdersStats = async () => {
     }
   ]);
 
+  const totalItemsPricePromise = Order.aggregate([
+    {
+      $group: {
+        _id: null,
+        totalItemsPrice: {
+          $sum: "$itemsPrice"
+        }
+      }
+    }
+  ]);
+
   const ordersInLastSevenDaysPromise = Order.countDocuments(
     {
       createdAt: {$gte: sevenDaysAgo}
@@ -296,6 +307,7 @@ const getOrdersStats = async () => {
     totalOrdersByStatus,
     orderPerProduct,
     avgItemsPrice,
+    totalItemsPrice,
     ordersInLastSevenDays,
     ordersInLastThirtyDays,
     totalDistinctUserInOrders
@@ -305,6 +317,7 @@ const getOrdersStats = async () => {
     totalOrdersByStatusPromise,
     orderPerProductPromise,
     avgItemsPricePromise,
+    totalItemsPricePromise,
     ordersInLastSevenDaysPromise,
     ordersInLastThirtyDaysPromise,
     totalDistinctUserInOrdersPromise
@@ -316,6 +329,7 @@ const getOrdersStats = async () => {
     totalOrdersByStatus,
     orderPerProduct,
     avgItemsPrice,
+    totalItemsPrice,
     ordersInLastSevenDays,
     ordersInLastThirtyDays,
     totalDistinctUserInOrders
