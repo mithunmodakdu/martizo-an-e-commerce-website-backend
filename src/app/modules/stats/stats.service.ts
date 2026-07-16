@@ -9,6 +9,10 @@ import { User } from "../user/user.model";
 const now = new Date();
 const sevenDaysAgo = new Date(now).setDate(now.getDate() - 7);
 const thirtyDaysAgo = new Date(now).setDate(now.getDate() - 30);
+const sixtyDaysAgo = new Date(now).setDate(now.getDate() - 60);
+const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
 
 const getUsersStats = async () => {
   const totalActiveUsersPromise = User.countDocuments({
@@ -153,7 +157,7 @@ const getProductsStats = async () => {
 
     // stage-6: unwind product array
     {
-      $unwind: "$product"
+      $unwind: "$product",
     },
 
     // stage-7: final shape
@@ -164,9 +168,9 @@ const getProductsStats = async () => {
         totalOrders: 1,
         totalQuantity: 1,
         "product.title": 1,
-        "product.slug": 1
-      }
-    }
+        "product.slug": 1,
+      },
+    },
   ]);
 
   const averageProductsPricePromise = Product.aggregate([
@@ -208,50 +212,50 @@ const getOrdersStats = async () => {
     {
       $group: {
         _id: "$status",
-        count: {$sum: 1}
-      }
-    }
+        count: { $sum: 1 },
+      },
+    },
   ]);
 
   const orderPerProductPromise = Order.aggregate([
     {
-      $unwind: "$items"
+      $unwind: "$items",
     },
 
     {
       $group: {
         _id: "$items.productId",
-        orderCount: {$sum: 1}
-      }
+        orderCount: { $sum: 1 },
+      },
     },
 
     {
-      $sort: {orderCount: -1}
+      $sort: { orderCount: -1 },
     },
 
     {
-      $limit: 10
+      $limit: 10,
     },
 
     {
       $lookup: {
         from: "products",
-        let: {productId: "$_id"},
+        let: { productId: "$_id" },
         pipeline: [
           {
             $match: {
               $expr: {
-                $eq: ["$_id", "$$productId"]
-              }
-            }
-          }
+                $eq: ["$_id", "$$productId"],
+              },
+            },
+          },
         ],
-        as: "product"
-      }
+        as: "product",
+      },
     },
 
     {
-      $unwind: "$product"
+      $unwind: "$product",
     },
 
     {
@@ -259,11 +263,9 @@ const getOrdersStats = async () => {
         _id: 0,
         orderCount: 1,
         "product.title": 1,
-        "product.slug": 1
-      }
-    }
-
-
+        "product.slug": 1,
+      },
+    },
   ]);
 
   const avgItemsPricePromise = Order.aggregate([
@@ -271,10 +273,10 @@ const getOrdersStats = async () => {
       $group: {
         _id: null,
         avgItemsPrice: {
-          $avg: "$itemsPrice"
-        }
-      }
-    }
+          $avg: "$itemsPrice",
+        },
+      },
+    },
   ]);
 
   const totalItemsPricePromise = Order.aggregate([
@@ -282,25 +284,64 @@ const getOrdersStats = async () => {
       $group: {
         _id: null,
         totalItemsPrice: {
+          $sum: "$itemsPrice",
+        },
+      },
+    },
+  ]);
+
+  const totalItemsPriceThisMonthPromise = Order.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: firstDayThisMonth,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalAmount: {
+          $sum: "$itemsPrice",
+        },
+      },
+    },
+  ]);
+
+  const totalItemsPriceLastMonthPromise = Order.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: firstDayLastMonth,
+          $lt: firstDayThisMonth
+        }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalAmount: {
           $sum: "$itemsPrice"
         }
       }
     }
   ]);
 
-  const ordersInLastSevenDaysPromise = Order.countDocuments(
-    {
-      createdAt: {$gte: sevenDaysAgo}
-    }
-  );
+  const ordersInLastSevenDaysPromise = Order.countDocuments({
+    createdAt: { $gte: sevenDaysAgo },
+  });
 
-  const ordersInLastThirtyDaysPromise = Order.countDocuments(
-    {
-      createdAt: {$gte: thirtyDaysAgo}
-    }
-  );
+  const ordersInLastThirtyDaysPromise = Order.countDocuments({
+    createdAt: { $gte: thirtyDaysAgo },
+  });
 
-  const totalDistinctUserInOrdersPromise = Order.distinct("userId").then((user: any) => user.length);
+  const ordersInLastSixtyDaysPromise = Order.countDocuments({
+    createdAt: { $gte: sixtyDaysAgo },
+  });
+
+  const totalDistinctUserInOrdersPromise = Order.distinct("userId").then(
+    (user: any) => user.length,
+  );
 
   const [
     totalOrders,
@@ -308,32 +349,38 @@ const getOrdersStats = async () => {
     orderPerProduct,
     avgItemsPrice,
     totalItemsPrice,
+    totalItemsPriceThisMonth,
+    totalItemsPriceLastMonth,
     ordersInLastSevenDays,
     ordersInLastThirtyDays,
-    totalDistinctUserInOrders
-
-   ] = await Promise.all([
+    ordersInLastSixtyDays,
+    totalDistinctUserInOrders,
+  ] = await Promise.all([
     totalOrdersPromise,
     totalOrdersByStatusPromise,
     orderPerProductPromise,
     avgItemsPricePromise,
     totalItemsPricePromise,
+    totalItemsPriceThisMonthPromise,
+    totalItemsPriceLastMonthPromise,
     ordersInLastSevenDaysPromise,
     ordersInLastThirtyDaysPromise,
-    totalDistinctUserInOrdersPromise
-
+    ordersInLastSixtyDaysPromise,
+    totalDistinctUserInOrdersPromise,
   ]);
 
   return {
     totalOrders,
     totalOrdersByStatus,
     orderPerProduct,
-    avgItemsPrice,
-    totalItemsPrice,
+    avgItemsPrice: avgItemsPrice[0].avgItemsPrice,
+    totalItemsPrice: totalItemsPrice[0].totalItemsPrice,
+    totalItemsPriceThisMonth: totalItemsPriceThisMonth[0].totalAmount,
+    totalItemsPriceLastMonth: totalItemsPriceLastMonth[0].totalAmount,
     ordersInLastSevenDays,
     ordersInLastThirtyDays,
-    totalDistinctUserInOrders
-
+    ordersInLastSixtyDays,
+    totalDistinctUserInOrders,
   };
 };
 
@@ -344,41 +391,40 @@ const getPaymentsStats = async () => {
     {
       $group: {
         _id: "$status",
-        count: {$sum: 1}
-      }
-    }
+        count: { $sum: 1 },
+      },
+    },
   ]);
 
   const totalRevenuePromise = Payment.aggregate([
     {
-      $match: {status: EPaymentStatus.PAID}
+      $match: { status: EPaymentStatus.PAID },
     },
 
     {
       $group: {
         _id: null,
-        totalRevenue: {$sum: "$amount"}
-      }
-    }
-
+        totalRevenue: { $sum: "$amount" },
+      },
+    },
   ]);
 
   const avgPaymentAmountPromise = Payment.aggregate([
     {
       $group: {
         _id: null,
-        avgPaymentAmount: {$avg: "$amount"}
-      }
-    }
+        avgPaymentAmount: { $avg: "$amount" },
+      },
+    },
   ]);
 
   const paymentGatewayDataPromise = Payment.aggregate([
     {
       $group: {
-        _id: {$ifNull: ["$paymentGatewayData.status", "UNKNOWN"]},
-        count: {$sum: 1}
-      }
-    }
+        _id: { $ifNull: ["$paymentGatewayData.status", "UNKNOWN"] },
+        count: { $sum: 1 },
+      },
+    },
   ]);
 
   const [
@@ -386,15 +432,13 @@ const getPaymentsStats = async () => {
     totalPaymentsByStatus,
     totalRevenue,
     avgPaymentAmount,
-    paymentGatewayData
-
+    paymentGatewayData,
   ] = await Promise.all([
     totalPaymentsPromise,
     totalPaymentsByStatusPromise,
     totalRevenuePromise,
     avgPaymentAmountPromise,
-    paymentGatewayDataPromise
-
+    paymentGatewayDataPromise,
   ]);
 
   return {
@@ -402,7 +446,7 @@ const getPaymentsStats = async () => {
     totalPaymentsByStatus,
     totalRevenue,
     avgPaymentAmount,
-    paymentGatewayData
+    paymentGatewayData,
   };
 };
 
