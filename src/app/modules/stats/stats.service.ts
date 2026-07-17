@@ -279,6 +279,21 @@ const getOrdersStats = async () => {
     },
   ]);
 
+  const avgItemsPriceUptoLastMonthPromise = Order.aggregate([
+    {
+      $match: {
+        createdAt: {$lt: firstDayThisMonth}
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        avgAmount: {$avg: "$itemsPrice"}
+      }
+    }
+  ]);
+
+
   const totalItemsPricePromise = Order.aggregate([
     {
       $group: {
@@ -348,6 +363,7 @@ const getOrdersStats = async () => {
     totalOrdersByStatus,
     orderPerProduct,
     avgItemsPrice,
+    avgItemsPriceUptoLastMonth,
     totalItemsPrice,
     totalItemsPriceThisMonth,
     totalItemsPriceLastMonth,
@@ -360,6 +376,7 @@ const getOrdersStats = async () => {
     totalOrdersByStatusPromise,
     orderPerProductPromise,
     avgItemsPricePromise,
+    avgItemsPriceUptoLastMonthPromise,
     totalItemsPricePromise,
     totalItemsPriceThisMonthPromise,
     totalItemsPriceLastMonthPromise,
@@ -374,6 +391,7 @@ const getOrdersStats = async () => {
     totalOrdersByStatus,
     orderPerProduct,
     avgItemsPrice: avgItemsPrice[0].avgItemsPrice,
+    avgItemsPriceUptoLastMonth: avgItemsPriceUptoLastMonth[0].avgAmount,
     totalItemsPrice: totalItemsPrice[0].totalItemsPrice,
     totalItemsPriceThisMonth: totalItemsPriceThisMonth[0].totalAmount,
     totalItemsPriceLastMonth: totalItemsPriceLastMonth[0].totalAmount,
