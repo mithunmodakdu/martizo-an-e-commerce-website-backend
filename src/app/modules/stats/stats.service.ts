@@ -12,6 +12,8 @@ const thirtyDaysAgo = new Date(now).setDate(now.getDate() - 30);
 const sixtyDaysAgo = new Date(now).setDate(now.getDate() - 60);
 const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+const firstDay12MonthAgo = new Date(now.getFullYear(), now.getMonth() - 12, 1);
+
 
 
 const getUsersStats = async () => {
@@ -375,6 +377,42 @@ const getOrdersStats = async () => {
     (user: any) => user.length,
   );
 
+  const monthlyOrdersAndRevenuePromise = Order.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: firstDay12MonthAgo,
+          $lt: firstDayThisMonth
+        }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          year: {$year: "$createdAt"},
+          month: {$month: "$createdAt"},
+        },
+        totalOrders: {$sum: 1},
+        totalRevenue: {$sum: "$itemsPrice"}
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        year: "$_id.year",
+        month: "$_id.month",
+        totalOrders: 1,
+        totalRevenue: 1
+      }
+    },
+    {
+      $sort: {
+        year: 1,
+        month: 1
+      }
+    }
+  ]);
+
   const [
     totalOrders,
     totalOrdersByStatus,
@@ -388,6 +426,7 @@ const getOrdersStats = async () => {
     ordersInLastThirtyDays,
     ordersInLastSixtyDays,
     totalDistinctUserInOrders,
+    monthlyOrdersAndRevenue
   ] = await Promise.all([
     totalOrdersPromise,
     totalOrdersByStatusPromise,
@@ -401,21 +440,23 @@ const getOrdersStats = async () => {
     ordersInLastThirtyDaysPromise,
     ordersInLastSixtyDaysPromise,
     totalDistinctUserInOrdersPromise,
+    monthlyOrdersAndRevenuePromise
   ]);
 
   return {
     totalOrders,
     totalOrdersByStatus,
     orderPerProduct,
-    avgItemsPrice: avgItemsPrice[0].avgItemsPrice,
-    avgItemsPriceUptoLastMonth: avgItemsPriceUptoLastMonth[0].avgAmount,
-    totalItemsPrice: totalItemsPrice[0].totalItemsPrice,
-    totalItemsPriceThisMonth: totalItemsPriceThisMonth[0].totalAmount,
-    totalItemsPriceLastMonth: totalItemsPriceLastMonth[0].totalAmount,
+    avgItemsPrice: avgItemsPrice[0]?.avgItemsPrice,
+    avgItemsPriceUptoLastMonth: avgItemsPriceUptoLastMonth[0]?.avgAmount,
+    totalItemsPrice: totalItemsPrice[0]?.totalItemsPrice,
+    totalItemsPriceThisMonth: totalItemsPriceThisMonth[0]?.totalAmount,
+    totalItemsPriceLastMonth: totalItemsPriceLastMonth[0]?.totalAmount,
     ordersInLastSevenDays,
     ordersInLastThirtyDays,
     ordersInLastSixtyDays,
     totalDistinctUserInOrders,
+    monthlyOrdersAndRevenue
   };
 };
 
