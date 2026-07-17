@@ -32,6 +32,17 @@ const getUsersStats = async () => {
     createdAt: { $gte: thirtyDaysAgo },
   });
 
+  const newUsersThisMonthPromise = User.countDocuments({
+    createdAt: {$gte: firstDayThisMonth}
+  });
+
+  const newUsersLastMonthPromise = User.countDocuments({
+    createdAt: {
+      $gte: firstDayLastMonth,
+      $lt: firstDayThisMonth
+    }
+  })
+
   const totalUsersByRolePromise = User.aggregate([
     {
       $group: {
@@ -47,6 +58,8 @@ const getUsersStats = async () => {
     totalBlockedUsers,
     newTotalUsersInLastSevenDays,
     newTotalUsersInLastThirtyDays,
+    newUsersThisMonth,
+    newUsersLastMonth,
     totalUsersByRole,
   ] = await Promise.all([
     totalActiveUsersPromise,
@@ -54,6 +67,8 @@ const getUsersStats = async () => {
     totalBlockedUsersPromise,
     newTotalUsersInLastSevenDaysPromise,
     newTotalUsersInLastThirtyDaysPromise,
+    newUsersThisMonthPromise,
+    newUsersLastMonthPromise,
     totalUsersByRolePromise,
   ]);
 
@@ -63,6 +78,8 @@ const getUsersStats = async () => {
     totalBlockedUsers,
     newTotalUsersInLastSevenDays,
     newTotalUsersInLastThirtyDays,
+    newUsersThisMonth,
+    newUsersLastMonth,
     totalUsersByRole,
   };
 };
