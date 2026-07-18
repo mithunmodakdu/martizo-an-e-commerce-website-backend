@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { _discriminatedUnion } from "zod/v4/core";
 import { Order } from "../order/order.model";
 import { EPaymentStatus } from "../payment/payment.interface";
 import { Payment } from "../payment/payment.model";
@@ -287,6 +288,27 @@ const getOrdersStats = async () => {
     },
   ]);
 
+  const ordersPerCategoryPromise = Order.aggregate([
+    {
+      $unwind: "$items"
+    },
+    {
+      $group: {
+        _id: "$items.categoryName",
+        totalOrders: {
+          $sum: 1
+        }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        category: "$_id",
+        totalOrders: 1
+      }
+    }
+  ]);
+
   const avgItemsPricePromise = Order.aggregate([
     {
       $group: {
@@ -417,6 +439,7 @@ const getOrdersStats = async () => {
     totalOrders,
     totalOrdersByStatus,
     orderPerProduct,
+    ordersPerCategory,
     avgItemsPrice,
     avgItemsPriceUptoLastMonth,
     totalItemsPrice,
@@ -431,6 +454,7 @@ const getOrdersStats = async () => {
     totalOrdersPromise,
     totalOrdersByStatusPromise,
     orderPerProductPromise,
+    ordersPerCategoryPromise,
     avgItemsPricePromise,
     avgItemsPriceUptoLastMonthPromise,
     totalItemsPricePromise,
@@ -447,6 +471,7 @@ const getOrdersStats = async () => {
     totalOrders,
     totalOrdersByStatus,
     orderPerProduct,
+    ordersPerCategory,
     avgItemsPrice: avgItemsPrice[0]?.avgItemsPrice,
     avgItemsPriceUptoLastMonth: avgItemsPriceUptoLastMonth[0]?.avgAmount,
     totalItemsPrice: totalItemsPrice[0]?.totalItemsPrice,
