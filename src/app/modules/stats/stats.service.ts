@@ -15,8 +15,6 @@ const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 const firstDay12MonthAgo = new Date(now.getFullYear(), now.getMonth() - 12, 1);
 
-
-
 const getUsersStats = async () => {
   const totalActiveUsersPromise = User.countDocuments({
     isActive: EIsActive.ACTIVE,
@@ -36,15 +34,15 @@ const getUsersStats = async () => {
   });
 
   const newUsersThisMonthPromise = User.countDocuments({
-    createdAt: {$gte: firstDayThisMonth}
+    createdAt: { $gte: firstDayThisMonth },
   });
 
   const newUsersLastMonthPromise = User.countDocuments({
     createdAt: {
       $gte: firstDayLastMonth,
-      $lt: firstDayThisMonth
-    }
-  })
+      $lt: firstDayThisMonth,
+    },
+  });
 
   const totalUsersByRolePromise = User.aggregate([
     {
@@ -202,18 +200,73 @@ const getProductsStats = async () => {
     },
   ]);
 
+  const topProductsByRevenuePromise = Order.aggregate([
+    {
+      $unwind: "$items",
+    },
+    {
+      $set: {
+        sellingPrice: {
+          $cond: [
+            {
+              $gt: ["$items.price.sale", 0],
+            },
+            "$items.price.sale",
+            "$items.price.regular",
+          ],
+        },
+      },
+    },
+    {
+      $group: {
+        _id: "$items.name",
+        productPrice: {
+          $first: "$items.price",
+        },
+
+        totalQuantity: {
+          $sum: "$items.quantity",
+        },
+        totalRevenue: {
+          $sum: {
+            $multiply: ["$sellingPrice", "$items.quantity"],
+          },
+        },
+      },
+    },
+    {
+      $sort: {
+        totalRevenue: -1,
+      },
+    },
+    {
+      $limit: 5,
+    },
+    {
+      $project: {
+        _id: 0,
+        productName: "$_id",
+        productPrice: 1,
+        totalQuantity: 1,
+        totalRevenue: 1,
+      },
+    },
+  ]);
+
   const [
     totalProducts,
     totalProductsByCategory,
     totalProductsByBrandName,
     totalHighestOrderedProducts,
     averageProductsPrice,
+    topProductsByRevenue,
   ] = await Promise.all([
     totalProductsPromise,
     totalProductsByCategoryPromise,
     totalProductsByBrandNamePromise,
     totalHighestOrderedProductsPromise,
     averageProductsPricePromise,
+    topProductsByRevenuePromise,
   ]);
 
   return {
@@ -222,6 +275,7 @@ const getProductsStats = async () => {
     totalProductsByBrandName,
     totalHighestOrderedProducts,
     averageProductsPrice,
+    topProductsByRevenue,
   };
 };
 
@@ -290,23 +344,28 @@ const getOrdersStats = async () => {
 
   const ordersPerCategoryPromise = Order.aggregate([
     {
-      $unwind: "$items"
+      $unwind: "$items",
     },
     {
       $group: {
         _id: "$items.categoryName",
         totalOrders: {
-          $sum: 1
-        }
-      }
+          $sum: 1,
+        },
+      },
     },
     {
       $project: {
         _id: 0,
         category: "$_id",
-        totalOrders: 1
-      }
-    }
+        totalOrders: 1,
+      },
+    },
+    {
+      $sort: {
+        totalOrders: -1,
+      },
+    },
   ]);
 
   const avgItemsPricePromise = Order.aggregate([
@@ -323,17 +382,16 @@ const getOrdersStats = async () => {
   const avgItemsPriceUptoLastMonthPromise = Order.aggregate([
     {
       $match: {
-        createdAt: {$lt: firstDayThisMonth}
-      }
+        createdAt: { $lt: firstDayThisMonth },
+      },
     },
     {
       $group: {
         _id: null,
-        avgAmount: {$avg: "$itemsPrice"}
-      }
-    }
+        avgAmount: { $avg: "$itemsPrice" },
+      },
+    },
   ]);
-
 
   const totalItemsPricePromise = Order.aggregate([
     {
@@ -369,18 +427,18 @@ const getOrdersStats = async () => {
       $match: {
         createdAt: {
           $gte: firstDayLastMonth,
-          $lt: firstDayThisMonth
-        }
-      }
+          $lt: firstDayThisMonth,
+        },
+      },
     },
     {
       $group: {
         _id: null,
         totalAmount: {
-          $sum: "$itemsPrice"
-        }
-      }
-    }
+          $sum: "$itemsPrice",
+        },
+      },
+    },
   ]);
 
   const ordersInLastSevenDaysPromise = Order.countDocuments({
@@ -404,19 +462,19 @@ const getOrdersStats = async () => {
       $match: {
         createdAt: {
           $gte: firstDay12MonthAgo,
-          $lt: firstDayThisMonth
-        }
-      }
+          $lt: firstDayThisMonth,
+        },
+      },
     },
     {
       $group: {
         _id: {
-          year: {$year: "$createdAt"},
-          month: {$month: "$createdAt"},
+          year: { $year: "$createdAt" },
+          month: { $month: "$createdAt" },
         },
-        totalOrders: {$sum: 1},
-        totalRevenue: {$sum: "$itemsPrice"}
-      }
+        totalOrders: { $sum: 1 },
+        totalRevenue: { $sum: "$itemsPrice" },
+      },
     },
     {
       $project: {
@@ -424,15 +482,15 @@ const getOrdersStats = async () => {
         year: "$_id.year",
         month: "$_id.month",
         totalOrders: 1,
-        totalRevenue: 1
-      }
+        totalRevenue: 1,
+      },
     },
     {
       $sort: {
         year: 1,
-        month: 1
-      }
-    }
+        month: 1,
+      },
+    },
   ]);
 
   const [
@@ -449,7 +507,7 @@ const getOrdersStats = async () => {
     ordersInLastThirtyDays,
     ordersInLastSixtyDays,
     totalDistinctUserInOrders,
-    monthlyOrdersAndRevenue
+    monthlyOrdersAndRevenue,
   ] = await Promise.all([
     totalOrdersPromise,
     totalOrdersByStatusPromise,
@@ -464,7 +522,7 @@ const getOrdersStats = async () => {
     ordersInLastThirtyDaysPromise,
     ordersInLastSixtyDaysPromise,
     totalDistinctUserInOrdersPromise,
-    monthlyOrdersAndRevenuePromise
+    monthlyOrdersAndRevenuePromise,
   ]);
 
   return {
@@ -481,7 +539,7 @@ const getOrdersStats = async () => {
     ordersInLastThirtyDays,
     ordersInLastSixtyDays,
     totalDistinctUserInOrders,
-    monthlyOrdersAndRevenue
+    monthlyOrdersAndRevenue,
   };
 };
 
