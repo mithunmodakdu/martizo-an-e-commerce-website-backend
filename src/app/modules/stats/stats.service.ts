@@ -202,18 +202,43 @@ const getProductsStats = async () => {
     },
   ]);
 
+  const topProductsByRevenuePromise = Order.aggregate([
+    {
+      $unwind: "$items"
+    },
+    {
+      $sort: {
+        "items.price.regular": -1,
+        "items.price.sale": -1,
+        "items.quantity": -1
+      }
+    },
+    {
+      $limit: 5
+    },
+    {
+      $project: {
+        "items.name": 1,
+        "items.price": 1,
+        "items.quantity": 1,
+      }
+    }
+  ]); 
+
   const [
     totalProducts,
     totalProductsByCategory,
     totalProductsByBrandName,
     totalHighestOrderedProducts,
     averageProductsPrice,
+    topProductsByRevenue,
   ] = await Promise.all([
     totalProductsPromise,
     totalProductsByCategoryPromise,
     totalProductsByBrandNamePromise,
     totalHighestOrderedProductsPromise,
     averageProductsPricePromise,
+    topProductsByRevenuePromise
   ]);
 
   return {
@@ -222,6 +247,7 @@ const getProductsStats = async () => {
     totalProductsByBrandName,
     totalHighestOrderedProducts,
     averageProductsPrice,
+    topProductsByRevenue
   };
 };
 
@@ -305,6 +331,11 @@ const getOrdersStats = async () => {
         _id: 0,
         category: "$_id",
         totalOrders: 1
+      }
+    },
+    {
+      $sort: {
+        totalOrders: -1
       }
     }
   ]);
