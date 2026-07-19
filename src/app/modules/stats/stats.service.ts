@@ -216,11 +216,20 @@ const getProductsStats = async () => {
     {
       $limit: 5
     },
+    // {
+    //   $project: {
+    //     _id: 0,
+    //     "items.name": 1,
+    //     "items.price": 1,
+    //     "items.quantity": 1,
+    //   }
+    // },
     {
       $project: {
-        "items.name": 1,
-        "items.price": 1,
-        "items.quantity": 1,
+        _id: 0,
+        productName: "$items.name",
+        productPrice: "$items.price",
+        quantity: "$items.quantity"
       }
     }
   ]); 
