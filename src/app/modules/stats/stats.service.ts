@@ -493,6 +493,30 @@ const getOrdersStats = async () => {
     },
   ]);
 
+  const latest14daysOrdersAndRevenuePromise = Order.aggregate([
+    {
+      $group: {
+        _id: "$createdAt",
+        totalRevenue: {
+          $sum: "$itemsPrice"
+        }
+      }
+    },
+    {
+      $sort: {createdAt: -1}
+    },
+    {
+      $limit: 14
+    },
+    {
+      $project: {
+        _id: 0,
+        date: "$_id",
+        totalRevenue: 1
+      }
+    }
+  ]) 
+
   const [
     totalOrders,
     totalOrdersByStatus,
@@ -508,6 +532,7 @@ const getOrdersStats = async () => {
     ordersInLastSixtyDays,
     totalDistinctUserInOrders,
     monthlyOrdersAndRevenue,
+    latest14daysOrdersAndRevenue
   ] = await Promise.all([
     totalOrdersPromise,
     totalOrdersByStatusPromise,
@@ -523,6 +548,7 @@ const getOrdersStats = async () => {
     ordersInLastSixtyDaysPromise,
     totalDistinctUserInOrdersPromise,
     monthlyOrdersAndRevenuePromise,
+    latest14daysOrdersAndRevenuePromise
   ]);
 
   return {
@@ -540,6 +566,7 @@ const getOrdersStats = async () => {
     ordersInLastSixtyDays,
     totalDistinctUserInOrders,
     monthlyOrdersAndRevenue,
+    latest14daysOrdersAndRevenue
   };
 };
 
