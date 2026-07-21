@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { _discriminatedUnion } from "zod/v4/core";
 import { Order } from "../order/order.model";
 import { EPaymentStatus } from "../payment/payment.interface";
 import { Payment } from "../payment/payment.model";
@@ -9,6 +8,8 @@ import { User } from "../user/user.model";
 
 const now = new Date();
 const sevenDaysAgo = new Date(now).setDate(now.getDate() - 7);
+const fourteenDaysAgo = new Date(now);
+fourteenDaysAgo.setDate(now.getDate() - 14);
 const thirtyDaysAgo = new Date(now).setDate(now.getDate() - 30);
 const sixtyDaysAgo = new Date(now).setDate(now.getDate() - 60);
 const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -493,7 +494,15 @@ const getOrdersStats = async () => {
     },
   ]);
 
-  const latest14daysOrdersAndRevenuePromise = Order.aggregate([
+  const last14daysOrdersAndRevenuePromise = Order.aggregate([
+   {
+    $match: {
+      createdAt: {
+        $gte: fourteenDaysAgo
+      }
+    }
+   },
+  
     {
       $group: {
         _id: "$createdAt",
@@ -504,9 +513,6 @@ const getOrdersStats = async () => {
     },
     {
       $sort: {createdAt: -1}
-    },
-    {
-      $limit: 14
     },
     {
       $project: {
@@ -532,7 +538,7 @@ const getOrdersStats = async () => {
     ordersInLastSixtyDays,
     totalDistinctUserInOrders,
     monthlyOrdersAndRevenue,
-    latest14daysOrdersAndRevenue
+    last14daysOrdersAndRevenue
   ] = await Promise.all([
     totalOrdersPromise,
     totalOrdersByStatusPromise,
@@ -548,7 +554,7 @@ const getOrdersStats = async () => {
     ordersInLastSixtyDaysPromise,
     totalDistinctUserInOrdersPromise,
     monthlyOrdersAndRevenuePromise,
-    latest14daysOrdersAndRevenuePromise
+    last14daysOrdersAndRevenuePromise
   ]);
 
   return {
@@ -566,7 +572,7 @@ const getOrdersStats = async () => {
     ordersInLastSixtyDays,
     totalDistinctUserInOrders,
     monthlyOrdersAndRevenue,
-    latest14daysOrdersAndRevenue
+    last14daysOrdersAndRevenue
   };
 };
 
