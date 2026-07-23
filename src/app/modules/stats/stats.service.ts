@@ -495,33 +495,67 @@ const getOrdersStats = async () => {
   ]);
 
   const last14daysOrdersAndRevenuePromise = Order.aggregate([
-   {
-    $match: {
-      createdAt: {
-        $gte: fourteenDaysAgo
-      }
-    }
-   },
-  
+    {
+      $match: {
+        createdAt: {
+          $gte: fourteenDaysAgo,
+        },
+      },
+    },
+
     {
       $group: {
-        _id: "$createdAt",
+        _id: {
+          $dateToString: {
+            format: "%Y-%m-%d",
+            date: "$createdAt",
+          },
+        },
+        totalOrders: {
+          $sum: 1,
+        },
+
         totalRevenue: {
-          $sum: "$itemsPrice"
-        }
-      }
+          $sum: "$itemsPrice",
+        },
+      },
     },
-    {
-      $sort: {createdAt: -1}
-    },
+
     {
       $project: {
         _id: 0,
+
         date: "$_id",
-        totalRevenue: 1
-      }
-    }
-  ]) 
+
+        month: {
+          $dateToString: {
+            format: "%B",
+            date: {
+              $dateFromString: {
+                dateString: "$_id",
+                format: "%Y-%m-%d",
+              },
+            },
+          },
+        },
+
+        day: {
+          $dayOfMonth: {
+            $dateFromString: {
+              dateString: "$_id",
+              format: "%Y-%m-%d",
+            },
+          },
+        },
+
+        totalRevenue: 1,
+        totalOrders: 1,
+      },
+    },
+    {
+      $sort: { day: 1 },
+    },
+  ]);
 
   const [
     totalOrders,
@@ -538,7 +572,7 @@ const getOrdersStats = async () => {
     ordersInLastSixtyDays,
     totalDistinctUserInOrders,
     monthlyOrdersAndRevenue,
-    last14daysOrdersAndRevenue
+    last14daysOrdersAndRevenue,
   ] = await Promise.all([
     totalOrdersPromise,
     totalOrdersByStatusPromise,
@@ -554,7 +588,7 @@ const getOrdersStats = async () => {
     ordersInLastSixtyDaysPromise,
     totalDistinctUserInOrdersPromise,
     monthlyOrdersAndRevenuePromise,
-    last14daysOrdersAndRevenuePromise
+    last14daysOrdersAndRevenuePromise,
   ]);
 
   return {
@@ -572,7 +606,7 @@ const getOrdersStats = async () => {
     ordersInLastSixtyDays,
     totalDistinctUserInOrders,
     monthlyOrdersAndRevenue,
-    last14daysOrdersAndRevenue
+    last14daysOrdersAndRevenue,
   };
 };
 
