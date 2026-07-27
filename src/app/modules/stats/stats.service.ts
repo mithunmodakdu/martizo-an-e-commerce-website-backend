@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import mongoose from "mongoose";
 import { Order } from "../order/order.model";
 import { EPaymentStatus } from "../payment/payment.interface";
 import { Payment } from "../payment/payment.model";
 import { Product } from "../product/product.model";
 import { EIsActive } from "../user/user.interface";
 import { User } from "../user/user.model";
+import { Wishlist } from "../wishlist/wishlist.model";
 
 const now = new Date();
 const sevenDaysAgo = new Date(now).setDate(now.getDate() - 7);
@@ -15,6 +17,45 @@ const sixtyDaysAgo = new Date(now).setDate(now.getDate() - 60);
 const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 const firstDay12MonthAgo = new Date(now.getFullYear(), now.getMonth() - 12, 1);
+
+const getMyStats = async(userId: string) => {
+  const userObjectId = new mongoose.Types.ObjectId(userId);
+  const myTotalOrdersPromise = Order.countDocuments({userId});
+  const myTotalItemsInWishlistPromise = Wishlist.aggregate([
+    {
+      $match: {userId: userObjectId}
+    },
+    {
+      $unwind: "$items"
+    },
+    {
+      $group: {
+        _id: "$userId",
+        count: {$sum: 1}
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        count: 1
+      }
+    }
+  ])
+
+  const [
+    myTotalOrders,
+    myTotalItemsInWishlist
+
+  ] = await Promise.all([
+    myTotalOrdersPromise,
+    myTotalItemsInWishlistPromise
+  ]);
+
+  return {
+    myTotalOrders,
+    myTotalItemsInWishlist: myTotalItemsInWishlist[0].count
+  }
+}
 
 const getUsersStats = async () => {
   const totalActiveUsersPromise = User.countDocuments({
@@ -677,6 +718,7 @@ const getPaymentsStats = async () => {
 };
 
 export const StatsServices = {
+  getMyStats,
   getUsersStats,
   getProductsStats,
   getOrdersStats,
