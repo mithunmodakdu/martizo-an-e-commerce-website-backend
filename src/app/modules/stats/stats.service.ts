@@ -7,6 +7,7 @@ import { Product } from "../product/product.model";
 import { EIsActive } from "../user/user.interface";
 import { User } from "../user/user.model";
 import { Wishlist } from "../wishlist/wishlist.model";
+import { Cart } from "../cart/cart.model";
 
 const now = new Date();
 const sevenDaysAgo = new Date(now).setDate(now.getDate() - 7);
@@ -41,19 +42,23 @@ const getMyStats = async(userId: string) => {
       }
     }
   ])
+  const myTotalCartItemsPromise = Cart.findOne({userId}).select("totalItems -_id");
 
   const [
     myTotalOrders,
-    myTotalItemsInWishlist
+    myTotalItemsInWishlist,
+    myTotalCartItems
 
   ] = await Promise.all([
     myTotalOrdersPromise,
-    myTotalItemsInWishlistPromise
+    myTotalItemsInWishlistPromise,
+    myTotalCartItemsPromise
   ]);
 
   return {
     myTotalOrders,
-    myTotalItemsInWishlist: myTotalItemsInWishlist[0].count
+    myTotalItemsInWishlist: myTotalItemsInWishlist[0].count,
+    myTotalCartItems: myTotalCartItems?.totalItems
   }
 }
 
