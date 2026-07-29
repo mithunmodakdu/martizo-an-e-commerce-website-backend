@@ -40,6 +40,10 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    loyaltyPoints: {
+    type: Number,
+    default: 0
+}
   },
   {
     timestamps: true,
