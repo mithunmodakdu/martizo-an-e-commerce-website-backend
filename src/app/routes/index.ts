@@ -11,6 +11,8 @@ import { PaymentRoutes } from "../modules/payment/payment.route";
 import { OTPRoutes } from "../modules/otp/otp.route";
 import { StatsRoutes } from "../modules/stats/stats.route";
 import { WishlistRoutes } from "../modules/wishlist/wishlist.route";
+import { path } from "pdfkit";
+import { LoyaltyRoutes } from "../modules/loyalty/loyalty.route";
 
 export const router = Router();
 
@@ -62,6 +64,10 @@ const moduleRoutes = [
   {
     path: "/wishlist",
     route: WishlistRoutes
+  },
+  {
+    path: "/loyalty-points",
+    route: LoyaltyRoutes
   }
 ];
 

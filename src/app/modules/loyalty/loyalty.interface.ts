@@ -1,21 +1,14 @@
-import { Document, Types } from "mongoose";
+import { Types } from "mongoose";
 
-export type TLoyaltyReason =
-  | 'ORDER_EARN'
-  | 'ORDER_REDEEM'
-  | 'ORDER_REFUND_REVERSAL'
-  | 'SIGNUP_BONUS'
-  | 'REFERRAL_BONUS'
-  | 'MANUAL_ADJUSTMENT'
-  | 'EXPIRY';
+export interface ILoyalty {
+  user: Types.ObjectId;
+  order: Types.ObjectId;
 
-export interface ILoyaltyTransaction extends Document {
-  userId: Types.ObjectId;
-  orderId?: Types.ObjectId;
-  points: number;          // positive = credit, negative = debit
-  balanceAfter: number;    // snapshot for fast reads/debugging
-  reason: TLoyaltyReason;
-  expiresAt?: Date;        // for earned points that expire
-  meta?: Record<string, unknown>;
-  createdAt: Date;
+  type: "EARN" | "REDEEM" | "REFUND" | "BONUS" | "EXPIRE";
+
+  points: number;
+
+  description?: string;
+
+  expiresAt?: Date;
 }

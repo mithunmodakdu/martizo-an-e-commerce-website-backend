@@ -31,6 +31,7 @@ export interface IUser {
   isActive: EIsActive;
   isDeleted: boolean;
   isVerified: boolean;
+  loyaltyPoints: number;
   
 
 }

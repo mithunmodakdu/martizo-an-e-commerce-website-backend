@@ -1,26 +1,41 @@
-import { model, Schema } from "mongoose";
-import { ILoyaltyTransaction } from "./loyalty.interface";
+import { Schema, model } from "mongoose";
+import { ILoyalty } from "./loyalty.interface";
 
-const loyaltyTransactionSchema = new Schema<ILoyaltyTransaction>(
+const loyaltySchema = new Schema<ILoyalty>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    orderId: { type: Schema.Types.ObjectId, ref: 'Order' },
-    points: { type: Number, required: true },
-    balanceAfter: { type: Number, required: true },
-    reason: {
-      type: String,
-      enum: ['ORDER_EARN', 'ORDER_REDEEM', 'ORDER_REFUND_REVERSAL', 'SIGNUP_BONUS', 'REFERRAL_BONUS', 'MANUAL_ADJUSTMENT', 'EXPIRY'],
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
-    expiresAt: { type: Date, index: true },
-    meta: { type: Schema.Types.Mixed },
+
+    order: {
+      type: Schema.Types.ObjectId,
+      ref: "Order",
+      required: true,
+    },
+
+    type: {
+      type: String,
+      enum: ["EARN", "REDEEM", "REFUND", "BONUS", "EXPIRE"],
+      required: true,
+    },
+
+    points: {
+      type: Number,
+      required: true,
+    },
+
+    description: String,
+
+    expiresAt: Date,
   },
-  { timestamps: { createdAt: true, updatedAt: false } }
+  {
+    timestamps: true,
+  }
 );
 
-loyaltyTransactionSchema.index({ userId: 1, createdAt: -1 });
-
-export const LoyaltyTransaction = model<ILoyaltyTransaction>(
-  'LoyaltyTransaction',
-  loyaltyTransactionSchema
+export const Loyalty = model<ILoyalty>(
+  "Loyalty",
+  loyaltySchema
 );
