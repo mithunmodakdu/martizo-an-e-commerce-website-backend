@@ -1,53 +1,107 @@
 import mongoose from "mongoose";
-import AppError from "../../errorHelpers/AppError";
-import { TLoyaltyReason } from "./loyalty.interface";
+import { Loyalty } from "./loyalty.model";
 import { User } from "../user/user.model";
-import { LoyaltyTransaction } from "./loyalty.model";
+import { Order } from "../order/order.model";
+import { EOrderStatus } from "../order/order.interface";
 
-export async function addPoints(
-  userId: string,
-  points: number,
-  reason: TLoyaltyReason,
-  opts: { orderId?: string; expiresAt?: Date; meta?: Record<string, unknown> } = {}
-) {
-  if (points <= 0) throw new AppError( 400, 'Points to add must be positive');
-
+const earnPoints = async (orderId: string) => {
   const session = await mongoose.startSession();
 
   try {
-    let result;
+    session.startTransaction();
 
-    await session.withTransaction(async () => {
-      const user = await User.findByIdAndUpdate(
-        userId,
-        { $inc: { loyaltyPoints: points } },
-        { new: true, session }
+    const order = await Order.findById(orderId).session(session);
+
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    if (order.status !== EOrderStatus.DELIVERED) {
+      throw new Error(
+        "Points can only be earned after delivery"
       );
+    }
 
-      if (!user) throw new AppError(404, 'User not found');
+    /**
+     * Prevent duplicate rewards
+     */
 
-      const [txn] = await LoyaltyTransaction.create(
-        [
-          {
-            user: userId,
-            order: opts.orderId,
-            points,
-            balanceAfter: user.loyaltyPoints,
-            reason,
-            expiresAt: opts.expiresAt,
-            meta: opts.meta,
-          },
-        ],
-        { session }
-      );
+    const alreadyRewarded = await Loyalty.findOne({
+      order: order._id,
+      type: "EARN",
+    }).session(session);
 
-      result = txn;
-    });
+    if (alreadyRewarded) {
+      throw new Error("Points already awarded.");
+    }
 
-    return result;
-    
+    /**
+     * Business Rule
+     *
+     * 100 BDT = 1 point
+     */
+
+    const earnedPoints = Math.floor(
+      order.totalPrice / 100
+    );
+
+    /**
+     * Update user balance
+     */
+
+    await User.findByIdAndUpdate(
+      order.userId,
+      {
+        $inc: {
+          loyaltyPoints: earnedPoints,
+        },
+      },
+      {
+        session,
+      }
+    );
+
+    /**
+     * Save history
+     */
+
+    await Loyalty.create(
+      [
+        {
+          user: order.userId,
+          order: order._id,
+
+          type: "EARN",
+
+          points: earnedPoints,
+
+          description: `Earned ${earnedPoints} points from Order #${order._id}`,
+
+          expiresAt: new Date(
+            Date.now() +
+              365 * 24 * 60 * 60 * 1000
+          ),
+        },
+      ],
+      {
+        session,
+      }
+    );
+
+    await session.commitTransaction();
+
+    return {
+      success: true,
+      earnedPoints,
+    };
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
   } finally {
     session.endSession();
   }
-}
+};
 
+export const LoyaltyService = {
+  earnPoints,
+};
