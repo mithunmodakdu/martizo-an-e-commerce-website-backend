@@ -1,14 +1,40 @@
 import { Types } from "mongoose";
 
-export interface ILoyalty {
-  user: Types.ObjectId;
-  order: Types.ObjectId;
-
-  type: "EARN" | "REDEEM" | "REFUND" | "BONUS" | "EXPIRE";
-
-  points: number;
-
-  description?: string;
-
-  expiresAt?: Date;
+export interface ILoyaltyAccount {
+  userId: Types.ObjectId;
+  totalPoints: number;
+  lifetimeEarned: number;
+  lifetimeRedeemed: number;
+  lifetimeExpired: number;
 }
+
+export type ILoyaltyAccountDocument = ILoyaltyAccount & Document;
+
+
+export enum LoyaltyTransactionType {
+  EARN = 'EARN',
+  REDEEM = 'REDEEM',
+  EXPIRE = 'EXPIRE',
+  ADJUST = 'ADJUST',
+  REVERSE = 'REVERSE',
+}
+
+export interface ILoyaltyTransaction {
+  userId: Types.ObjectId;
+  type: LoyaltyTransactionType;
+  points: number; // always stored as a positive value; `type` gives direction
+  remainingPoints: number; // only meaningful for EARN batches; used for FIFO redeem/expire
+  orderId?: Types.ObjectId;
+  description: string;
+  expiresAt?: Date; // only set for EARN batches
+  isExpired: boolean;
+  metadata?: Record<string, unknown>;
+}
+
+export type ILoyaltyTransactionDocument = ILoyaltyTransaction & Document;
+
+
+
+
+
+
