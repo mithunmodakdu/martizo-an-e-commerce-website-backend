@@ -1,14 +1,15 @@
 import { Types } from "mongoose";
 
-export interface ILoyalty {
-  user: Types.ObjectId;
-  order: Types.ObjectId;
-
-  type: "EARN" | "REDEEM" | "REFUND" | "BONUS" | "EXPIRE";
-
-  points: number;
-
-  description?: string;
-
-  expiresAt?: Date;
+// :::: Loyalty Account :::: 
+export interface ILoyaltyAccount {
+  userId: Types.ObjectId;
+  totalPoints: number;
+  lifetimeEarned: number;
+  lifetimeRedeemed: number;
+  lifetimeExpired: number;
 }
+
+export type ILoyaltyAccountDocument = ILoyaltyAccount & Document;
+
+
+

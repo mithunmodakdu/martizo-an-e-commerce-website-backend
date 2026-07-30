@@ -1,41 +1,19 @@
 import { Schema, model } from "mongoose";
-import { ILoyalty } from "./loyalty.interface";
+import { ILoyaltyAccountDocument } from "./loyalty.interface";
 
-const loyaltySchema = new Schema<ILoyalty>(
+// :::: Loyalty Account :::: 
+const loyaltyAccountSchema = new Schema<ILoyaltyAccountDocument>(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    order: {
-      type: Schema.Types.ObjectId,
-      ref: "Order",
-      required: true,
-    },
-
-    type: {
-      type: String,
-      enum: ["EARN", "REDEEM", "REFUND", "BONUS", "EXPIRE"],
-      required: true,
-    },
-
-    points: {
-      type: Number,
-      required: true,
-    },
-
-    description: String,
-
-    expiresAt: Date,
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+    totalPoints: { type: Number, default: 0, min: 0 },
+    lifetimeEarned: { type: Number, default: 0, min: 0 },
+    lifetimeRedeemed: { type: Number, default: 0, min: 0 },
+    lifetimeExpired: { type: Number, default: 0, min: 0 },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true },
 );
 
-export const Loyalty = model<ILoyalty>(
-  "Loyalty",
-  loyaltySchema
+export const LoyaltyAccount = model<ILoyaltyAccountDocument>(
+  'LoyaltyAccount',
+  loyaltyAccountSchema,
 );
