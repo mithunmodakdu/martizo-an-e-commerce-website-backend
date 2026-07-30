@@ -64,10 +64,6 @@ const moduleRoutes = [
   {
     path: "/wishlist",
     route: WishlistRoutes
-  },
-  {
-    path: "/loyalty-points",
-    route: LoyaltyRoutes
   }
 ];
 
