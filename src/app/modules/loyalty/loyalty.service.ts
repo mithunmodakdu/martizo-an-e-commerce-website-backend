@@ -1,7 +1,6 @@
-import { ClientSession } from "mongoose";
+import  { ClientSession } from "mongoose";
 import { LoyaltyAccount } from "./loyalty.model";
 
-// :::: Loyalty Account :::: 
 
 export const getOrCreateLoyaltyAccount = async(userId: string, session?: ClientSession) => {
   let loyaltyAccount = await LoyaltyAccount.findOne({userId}).session(session?? null);
@@ -25,3 +24,7 @@ export const getOrCreateLoyaltyAccount = async(userId: string, session?: ClientS
 
   return loyaltyAccount;
 }
+
+
+
+
