@@ -22,16 +22,24 @@ export enum LoyaltyTransactionType {
 export interface ILoyaltyTransaction {
   userId: Types.ObjectId;
   type: LoyaltyTransactionType;
-  points: number; // always stored as a positive value; `type` gives direction
-  remainingPoints: number; // only meaningful for EARN batches; used for FIFO redeem/expire
+  points: number; 
+  remainingPoints: number; 
   orderId?: Types.ObjectId;
   description: string;
-  expiresAt?: Date; // only set for EARN batches
+  expiresAt?: Date; 
   isExpired: boolean;
   metadata?: Record<string, unknown>;
 }
 
 export type ILoyaltyTransactionDocument = ILoyaltyTransaction & Document;
+
+export interface IEarnLoyaltyPointsPayload {
+  userId: string;
+  orderAmount: number; 
+  orderId?: string;
+  description?: string;
+}
+
 
 
 
