@@ -1,48 +1,18 @@
 import { Types } from "mongoose";
 
+export type TLoyaltyTier =
+  | "BRONZE"
+  | "SILVER"
+  | "GOLD"
+  | "PLATINUM";
+
 export interface ILoyaltyAccount {
   userId: Types.ObjectId;
-  totalPoints: number;
+  availablePoints: number;
+  pendingPoints: number;
   lifetimeEarned: number;
   lifetimeRedeemed: number;
-  lifetimeExpired: number;
+  tier: TLoyaltyTier;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
-
-export type ILoyaltyAccountDocument = ILoyaltyAccount & Document;
-
-
-export enum LoyaltyTransactionType {
-  EARN = 'EARN',
-  REDEEM = 'REDEEM',
-  EXPIRE = 'EXPIRE',
-  ADJUST = 'ADJUST',
-  REVERSE = 'REVERSE',
-}
-
-export interface ILoyaltyTransaction {
-  userId: Types.ObjectId;
-  type: LoyaltyTransactionType;
-  points: number; 
-  remainingPoints: number; 
-  orderId?: Types.ObjectId;
-  description: string;
-  expiresAt?: Date; 
-  isExpired: boolean;
-  metadata?: Record<string, unknown>;
-}
-
-export type ILoyaltyTransactionDocument = ILoyaltyTransaction & Document;
-
-export interface IEarnLoyaltyPointsPayload {
-  userId: string;
-  orderAmount: number; 
-  orderId?: string;
-  description?: string;
-}
-
-
-
-
-
-
-
