@@ -2,6 +2,7 @@ import { uploadBufferToCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import { generateInvoicePDF, IInvoiceData } from "../../utils/invoice";
 import { sendEmail } from "../../utils/sendEmail";
+import { earnLoyaltyPoints, LoyaltyService } from "../loyalty/loyalty.service";
 import { EOrderStatus, IOrder } from "../order/order.interface";
 import { Order } from "../order/order.model";
 import { SSLCommerzServices } from "../sslCommerz/sslCommerz.service";
@@ -10,12 +11,12 @@ import { EPaymentStatus } from "./payment.interface";
 import { Payment } from "./payment.model";
 import httpStatusCodes from "http-status-codes";
 
-const getPaymentByTransactionId = async(transactionId: string) => {
+const getPaymentByTransactionId = async (transactionId: string) => {
   // console.log(transactionId)
-  const payment = await Payment.findOne({transactionId: transactionId});
-  console.log(payment)
+  const payment = await Payment.findOne({ transactionId: transactionId });
+  console.log(payment);
   return payment;
-}
+};
 
 const successPayment = async (query: Record<string, string>) => {
   const session = await Order.startSession();
@@ -25,7 +26,7 @@ const successPayment = async (query: Record<string, string>) => {
     const updatedPayment = await Payment.findOneAndUpdate(
       { transactionId: query.transactionId },
       { status: EPaymentStatus.PAID },
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     );
 
     const updatedOrder = await Order.findByIdAndUpdate(
@@ -33,22 +34,28 @@ const successPayment = async (query: Record<string, string>) => {
       {
         status: EOrderStatus.PAID,
       },
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     ).populate("userId", "name email address city phone");
 
-    if(!updatedOrder){
-      throw new AppError(httpStatusCodes.NOT_FOUND, "Updated Order is NOT  Found")
+
+    if (!updatedOrder) {
+      throw new AppError(
+        httpStatusCodes.NOT_FOUND,
+        "Updated Order is NOT  Found",
+      );
     }
 
     const invoiceData: IInvoiceData = {
       invoiceNo: updatedOrder.invoiceNo,
-      date:  new Date(updatedOrder.createdAt as Date).toLocaleDateString("en-GB"),
+      date: new Date(updatedOrder.createdAt as Date).toLocaleDateString(
+        "en-GB",
+      ),
       customerInfo: {
         name: (updatedOrder.userId as unknown as IUser).name,
         email: (updatedOrder.userId as unknown as IUser).email,
         address: (updatedOrder.userId as unknown as IUser).address as string,
         city: (updatedOrder.userId as unknown as IUser).city as string,
-        phone: (updatedOrder.userId as unknown as IUser).phone as string
+        phone: (updatedOrder.userId as unknown as IUser).phone as string,
       },
       shippingInfo: {
         name: updatedOrder.shippingAddress.name,
@@ -60,24 +67,31 @@ const successPayment = async (query: Record<string, string>) => {
       subtotal: updatedOrder.itemsPrice,
       shippingCost: updatedOrder.shippingPrice,
       tax: updatedOrder.taxPrice,
-      total: updatedOrder.totalPrice
+      total: updatedOrder.totalPrice,
     };
 
     const pdfBuffer = await generateInvoicePDF(invoiceData);
     // console.log(pdfBuffer)
 
-    if(!pdfBuffer){
+    if (!pdfBuffer) {
       throw new AppError(401, "Error in generating invoice pdf");
     }
 
-    const pdfCloudinaryResult = await uploadBufferToCloudinary(pdfBuffer, "invoice");
+    const pdfCloudinaryResult = await uploadBufferToCloudinary(
+      pdfBuffer,
+      "invoice",
+    );
     // console.log(pdfCloudinaryResult)
 
-    if(!pdfCloudinaryResult){
-      throw new AppError(401, "Error in uploading pdf in cloudinary")
+    if (!pdfCloudinaryResult) {
+      throw new AppError(401, "Error in uploading pdf in cloudinary");
     }
 
-    await Payment.findByIdAndUpdate(updatedPayment?._id, {invoiceUrl: pdfCloudinaryResult.secure_url}, {runValidators: true, session})
+    await Payment.findByIdAndUpdate(
+      updatedPayment?._id,
+      { invoiceUrl: pdfCloudinaryResult.secure_url },
+      { runValidators: true, session },
+    );
 
     await sendEmail({
       to: (updatedOrder.userId as unknown as IUser).email,
@@ -88,19 +102,19 @@ const successPayment = async (query: Record<string, string>) => {
         {
           filename: "invoice.pdf",
           content: pdfBuffer,
-          contentType: "application/pdf"
-        }
-      ]
-    })
+          contentType: "application/pdf",
+        },
+      ],
+    });
 
     await session.commitTransaction();
     session.endSession();
 
     return {
       success: true,
-      message: "Thank you for your Payment. Your payment completed successfully",
+      message:
+        "Thank you for your Payment. Your payment completed successfully",
     };
-
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -108,19 +122,22 @@ const successPayment = async (query: Record<string, string>) => {
   }
 };
 
-const getInvoiceDownloadUrl = async(paymentId: string) => {
+const getInvoiceDownloadUrl = async (paymentId: string) => {
   const payment = await Payment.findById(paymentId).select("invoiceUrl");
 
-  if(!payment){
+  if (!payment) {
     throw new AppError(httpStatusCodes.NOT_FOUND, "Payment NOT Found");
   }
 
-  if(!payment.invoiceUrl){
-    throw new AppError(httpStatusCodes.NOT_FOUND, "Payment Invoice URL NOT Found");
+  if (!payment.invoiceUrl) {
+    throw new AppError(
+      httpStatusCodes.NOT_FOUND,
+      "Payment Invoice URL NOT Found",
+    );
   }
 
   return payment.invoiceUrl;
-}
+};
 
 const failPayment = async (query: Record<string, string>) => {
   const session = await Order.startSession();
@@ -130,7 +147,7 @@ const failPayment = async (query: Record<string, string>) => {
     const updatedPayment = await Payment.findOneAndUpdate(
       { transactionId: query.transactionId },
       { status: EPaymentStatus.FAILED },
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     );
 
     await Order.findByIdAndUpdate(
@@ -138,7 +155,7 @@ const failPayment = async (query: Record<string, string>) => {
       {
         status: EOrderStatus.FAILED,
       },
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     );
 
     await session.commitTransaction();
@@ -163,7 +180,7 @@ const cancelPayment = async (query: Record<string, string>) => {
     const updatedPayment = await Payment.findOneAndUpdate(
       { transactionId: query.transactionId },
       { status: EPaymentStatus.CANCELLED },
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     );
 
     await Order.findByIdAndUpdate(
@@ -171,7 +188,7 @@ const cancelPayment = async (query: Record<string, string>) => {
       {
         status: EOrderStatus.CANCELLED,
       },
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     );
 
     await session.commitTransaction();
@@ -220,7 +237,6 @@ const initPayment = async (orderId: string) => {
     paymentGateWayUrl: sslPayment.GatewayPageURL,
   };
 };
-
 
 export const PaymentServices = {
   getPaymentByTransactionId,
