@@ -7,19 +7,21 @@ import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { userSearchableFields } from "./user.constants";
+import mongoose from "mongoose";
+import { LoyaltyAccount } from "../loyalty/loyalty.model";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
 
   const isUserExist = await User.findOne({ email });
 
-  // if(isUserExist){
-  //   throw new AppError(httpStatusCodes.BAD_REQUEST, "User already exist")
-  // }
+  if (isUserExist) {
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "User already exist");
+  }
 
   const hashedPassword = await bcryptjs.hash(
     password as string,
-    Number(envVars.BCRYPT_SALT_ROUND)
+    Number(envVars.BCRYPT_SALT_ROUND),
   );
 
   const autProvider: IAuthProvider = {
@@ -27,20 +29,59 @@ const createUser = async (payload: Partial<IUser>) => {
     providerId: email as string,
   };
 
-  const user = await User.create({
-    email,
-    password: hashedPassword,
-    auths: [autProvider],
-    ...rest,
-  });
+  const session = await mongoose.startSession();
 
-  return user;
+  try {
+    let createdUser;
+
+    await session.withTransaction(async () => {
+      // 1. create user
+      const users = await User.create(
+        [
+          {
+            email,
+            password: hashedPassword,
+            auths: [autProvider],
+            ...rest,
+          },
+        ],
+        { session },
+      );
+
+      createdUser = users[0];
+
+      // 2. Create Loyalty Account
+      await LoyaltyAccount.create(
+        [
+          {
+            userId: createdUser._id,
+            availablePoints: 0,
+            pendingPoints: 0,
+            lifetimeEarned: 0,
+            lifetimeRedeemed: 0,
+            tier: "BRONZE",
+          },
+        ],
+        {
+          session,
+        },
+      );
+      
+    });
+
+    return createdUser;
+
+  } finally {
+    await session.endSession();
+  }
+
+ 
 };
 
 const updateUser = async (
   userId: string,
   payload: Partial<IUser>,
-  decodedToken: JwtPayload
+  decodedToken: JwtPayload,
 ) => {
   const isUserExist = await User.findById(userId);
 
@@ -51,7 +92,7 @@ const updateUser = async (
   if (payload.email) {
     throw new AppError(
       httpStatusCodes.FORBIDDEN,
-      "You can not change your email."
+      "You can not change your email.",
     );
   }
 
@@ -59,7 +100,7 @@ const updateUser = async (
     if (decodedToken.role === ERole.USER) {
       throw new AppError(
         httpStatusCodes.FORBIDDEN,
-        "Its forbidden for you to change the role."
+        "Its forbidden for you to change the role.",
       );
     }
 
@@ -69,7 +110,7 @@ const updateUser = async (
     ) {
       throw new AppError(
         httpStatusCodes.FORBIDDEN,
-        "Its forbidden for you to change the role."
+        "Its forbidden for you to change the role.",
       );
     }
   }
@@ -78,7 +119,7 @@ const updateUser = async (
     if (decodedToken.role === ERole.USER) {
       throw new AppError(
         httpStatusCodes.FORBIDDEN,
-        "Its forbidden for you to update this."
+        "Its forbidden for you to update this.",
       );
     }
   }
@@ -86,7 +127,7 @@ const updateUser = async (
   if (payload.password) {
     payload.password = await bcryptjs.hash(
       payload.password,
-      Number(envVars.BCRYPT_SALT_ROUND)
+      Number(envVars.BCRYPT_SALT_ROUND),
     );
   }
 
@@ -119,14 +160,14 @@ const getAllUsers = async (query: Record<string, string>) => {
   };
 };
 
-const getMe = async(userId: string) => {
+const getMe = async (userId: string) => {
   const existedUser = await User.findById(userId).select("-password");
   return existedUser;
-}
+};
 
 export const UserServices = {
   createUser,
   updateUser,
   getAllUsers,
-  getMe
+  getMe,
 };

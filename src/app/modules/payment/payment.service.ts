@@ -45,17 +45,6 @@ const successPayment = async (query: Record<string, string>) => {
       );
     }
 
-    const loyaltyPayload = {
-      userId: updatedOrder.userId._id, 
-      orderAmount:updatedOrder.itemsPrice, 
-      orderId: updatedOrder._id, 
-      description: `Loyalty points added for order no. ${updatedOrder.orderNo}`
-    }
-
-    
-    const loyaltyPoints = await LoyaltyService.earnLoyaltyPoints(loyaltyPayload);
-    console.log(loyaltyPoints)
-
     const invoiceData: IInvoiceData = {
       invoiceNo: updatedOrder.invoiceNo,
       date: new Date(updatedOrder.createdAt as Date).toLocaleDateString(
