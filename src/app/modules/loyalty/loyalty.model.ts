@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { ILoyaltyAccount } from "./loyalty.interface";
+import { ILoyaltyAccount, ILoyaltyTransaction } from "./loyalty.interface";
 
 const loyaltyAccountSchema = new Schema<ILoyaltyAccount>(
   {
@@ -17,9 +17,7 @@ const loyaltyAccountSchema = new Schema<ILoyaltyAccount>(
     },
 
     pendingPoints: {
-      type: Number,
-      default: 0,
-      min: 0,
+      type: Number
     },
 
     lifetimeEarned: {
@@ -50,3 +48,59 @@ export const LoyaltyAccount = model<ILoyaltyAccount>(
   loyaltyAccountSchema,
 );
 
+const loyaltyTransactionSchema = new Schema<ILoyaltyTransaction>(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    loyaltyAccountId: {
+      type: Schema.Types.ObjectId,
+      ref: "LoyaltyAccount",
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ["EARN", "REDEEM", "EXPIRE", "REVERSE", "BONUS", "ADJUSTMENT"],
+      required: true,
+    },
+    reason: {
+      type: String,
+      enum: [
+        "ORDER",
+        "SIGNUP",
+        "FIRST_ORDER",
+        "REFERRAL",
+        "REVIEW",
+        "BIRTHDAY",
+        "CAMPAIGN",
+        "ADMIN_ADJUSTMENT",
+      ],
+      required: true,
+    },
+    points: {
+      type: Number,
+      required: true,
+      min: 1
+    },
+    referenceId: {
+      type: Schema.Types.ObjectId,
+    },
+    referenceType: {
+      type: String,
+      enum: ["ORDER", "REVIEW", "REFERRAL"],
+    },
+    description: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+export const LoyaltyTransaction = model<ILoyaltyTransaction>(
+  "LoyaltyTransaction",
+  loyaltyTransactionSchema,
+);

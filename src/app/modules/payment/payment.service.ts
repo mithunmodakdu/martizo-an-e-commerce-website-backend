@@ -2,7 +2,8 @@ import { uploadBufferToCloudinary } from "../../config/cloudinary.config";
 import AppError from "../../errorHelpers/AppError";
 import { generateInvoicePDF, IInvoiceData } from "../../utils/invoice";
 import { sendEmail } from "../../utils/sendEmail";
-import { earnLoyaltyPoints, LoyaltyService } from "../loyalty/loyalty.service";
+import { IEarnPointsPayload } from "../loyalty/loyalty.interface";
+import { earnLoyaltyPoints, LoyaltyService, LoyaltyServices } from "../loyalty/loyalty.service";
 import { EOrderStatus, IOrder } from "../order/order.interface";
 import { Order } from "../order/order.model";
 import { SSLCommerzServices } from "../sslCommerz/sslCommerz.service";
@@ -45,6 +46,16 @@ const successPayment = async (query: Record<string, string>) => {
       );
     }
 
+    // loyalty points
+    const earnLoyaltyPointsPayload: IEarnPointsPayload = {
+      userId: updatedOrder.userId._id,
+      orderId: updatedOrder._id,
+      eligibleOrderAmount: updatedOrder.itemsPrice
+    }
+
+    await LoyaltyServices.earnPointsFromOrder(earnLoyaltyPointsPayload, session)
+
+    // invoice
     const invoiceData: IInvoiceData = {
       invoiceNo: updatedOrder.invoiceNo,
       date: new Date(updatedOrder.createdAt as Date).toLocaleDateString(
