@@ -17,9 +17,7 @@ const loyaltyAccountSchema = new Schema<ILoyaltyAccount>(
     },
 
     pendingPoints: {
-      type: Number,
-      default: 0,
-      min: 0,
+      type: Number
     },
 
     lifetimeEarned: {
@@ -80,6 +78,11 @@ const loyaltyTransactionSchema = new Schema<ILoyaltyTransaction>(
         "ADMIN_ADJUSTMENT",
       ],
       required: true,
+    },
+    points: {
+      type: Number,
+      required: true,
+      min: 1
     },
     referenceId: {
       type: Schema.Types.ObjectId,

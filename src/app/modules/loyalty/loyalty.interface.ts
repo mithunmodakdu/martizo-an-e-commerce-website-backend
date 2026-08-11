@@ -5,7 +5,7 @@ export type TLoyaltyTier = "BRONZE" | "SILVER" | "GOLD" | "PLATINUM";
 export interface ILoyaltyAccount {
   userId: Types.ObjectId;
   availablePoints: number;
-  pendingPoints: number;
+  pendingPoints?: number;
   lifetimeEarned: number;
   lifetimeRedeemed: number;
   tier: TLoyaltyTier;
@@ -48,5 +48,11 @@ export interface ILoyaltyTransaction {
 
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface IEarnPointsPayload {
+  userId: Types.ObjectId;
+  orderId: Types.ObjectId;
+  eligibleOrderAmount: number;
 }
 
