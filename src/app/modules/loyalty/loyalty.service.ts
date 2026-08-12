@@ -1,6 +1,32 @@
 import { ClientSession } from "mongoose";
-import { IEarnPointsPayload, ILoyaltyTransaction } from "./loyalty.interface";
+import {
+  IEarnPointsPayload,
+  ILoyaltyTransaction,
+  ITierThreshold,
+  TLoyaltyTier,
+} from "./loyalty.interface";
 import { LoyaltyAccount, LoyaltyTransaction } from "./loyalty.model";
+
+// 1 point per 100 BDT of eligible order amount
+const CURRENCY_UNIT = 100;
+const POINTS_FOR_CURRENCY_UNIT = 1;
+
+const TIER_THRESHOLDS: ITierThreshold[] = [
+  { tier: "PLATINUM", minLifetimeEarned: 20000 },
+  { tier: "GOLD", minLifetimeEarned: 8000 },
+  { tier: "SILVER", minLifetimeEarned: 2000 },
+  { tier: "BRONZE", minLifetimeEarned: 0 },
+];
+
+const calculateTier = (lifeTimeEarned: number): TLoyaltyTier => {
+  const match = TIER_THRESHOLDS.find(
+    (item) => lifeTimeEarned >= item.minLifetimeEarned,
+  );
+  return match?.tier ?? "BRONZE";
+};
+
+const calculateEarnedPoints = (eligibleOrderAmount: number): number =>
+  Math.floor((eligibleOrderAmount / CURRENCY_UNIT) * POINTS_FOR_CURRENCY_UNIT);
 
 const createLoyaltyTransaction = async (
   data: ILoyaltyTransaction,
@@ -43,8 +69,7 @@ const earnPointsFromOrder = async (
   // Increase loyalty balance
   loyaltyAccount.availablePoints += points;
   loyaltyAccount.lifetimeEarned += points;
-  await loyaltyAccount.save({session}); 
-
+  await loyaltyAccount.save({ session });
 };
 
 export const LoyaltyServices = {

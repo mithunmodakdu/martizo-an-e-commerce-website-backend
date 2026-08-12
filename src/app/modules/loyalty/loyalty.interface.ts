@@ -2,6 +2,11 @@ import { Types } from "mongoose";
 
 export type TLoyaltyTier = "BRONZE" | "SILVER" | "GOLD" | "PLATINUM";
 
+export interface ITierThreshold {
+  tier: TLoyaltyTier;
+  minLifetimeEarned: number;
+}
+
 export interface ILoyaltyAccount {
   userId: Types.ObjectId;
   availablePoints: number;
