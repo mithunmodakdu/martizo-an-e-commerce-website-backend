@@ -2,6 +2,11 @@ import { Types } from "mongoose";
 
 export type TLoyaltyTier = "BRONZE" | "SILVER" | "GOLD" | "PLATINUM";
 
+export interface ITierThreshold {
+  tier: TLoyaltyTier;
+  minLifetimeEarned: number;
+}
+
 export interface ILoyaltyAccount {
   userId: Types.ObjectId;
   availablePoints: number;
@@ -40,9 +45,12 @@ export interface ILoyaltyTransaction {
   reason: TLoyaltyTransactionReason;
 
   points: number;
+  balanceAfter: number;
 
   referenceId?: Types.ObjectId;
   referenceType?: "ORDER" | "REVIEW" | "REFERRAL";
+
+  reversalOf?: Types.ObjectId;
 
   description?: string;
 

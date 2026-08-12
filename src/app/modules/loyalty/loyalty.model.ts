@@ -17,7 +17,7 @@ const loyaltyAccountSchema = new Schema<ILoyaltyAccount>(
     },
 
     pendingPoints: {
-      type: Number
+      type: Number,
     },
 
     lifetimeEarned: {
@@ -82,7 +82,10 @@ const loyaltyTransactionSchema = new Schema<ILoyaltyTransaction>(
     points: {
       type: Number,
       required: true,
-      min: 1
+      min: 1,
+    },
+    balanceAfter: {
+      type: Number,
     },
     referenceId: {
       type: Schema.Types.ObjectId,
@@ -90,6 +93,9 @@ const loyaltyTransactionSchema = new Schema<ILoyaltyTransaction>(
     referenceType: {
       type: String,
       enum: ["ORDER", "REVIEW", "REFERRAL"],
+    },
+    reversalOf: {
+      type: Schema.Types.ObjectId,
     },
     description: {
       type: String,
