@@ -6,6 +6,8 @@ import {
   TLoyaltyTier,
 } from "./loyalty.interface";
 import { LoyaltyAccount, LoyaltyTransaction } from "./loyalty.model";
+import AppError from "../../errorHelpers/AppError";
+import httpStatusCodes from "http-status-codes";
 
 // 1 point per 100 BDT of eligible order amount
 const CURRENCY_UNIT = 100;
@@ -27,7 +29,6 @@ const calculateTier = (lifeTimeEarned: number): TLoyaltyTier => {
 
 const calculateEarnedPoints = (eligibleOrderAmount: number): number =>
   Math.floor((eligibleOrderAmount / CURRENCY_UNIT) * POINTS_FOR_CURRENCY_UNIT);
-
 
 const getOrCreateLoyaltyAccount = async (
   userId: Types.ObjectId,
@@ -57,6 +58,74 @@ const getOrCreateLoyaltyAccount = async (
   }
 
   return loyaltyAccount;
+};
+
+const writeLoyaltyLedgerEntry = async (
+  params: {
+    userId: Types.ObjectId;
+    points: number;
+    type: ILoyaltyTransaction["type"];
+    reason: ILoyaltyTransaction["reason"];
+    referenceId?: Types.ObjectId;
+    referenceType?: ILoyaltyTransaction["referenceType"];
+    reversalOf?: Types.ObjectId;
+    description?: string;
+  },
+  session: ClientSession,
+) => {
+  // loyalty Account related
+  const loyaltyAccount = await getOrCreateLoyaltyAccount(
+    params.userId,
+    session,
+  );
+
+  const nextAvailablePoints = loyaltyAccount.availablePoints + params.points;
+
+  if (nextAvailablePoints < 0) {
+    throw new AppError(
+      httpStatusCodes.BAD_REQUEST,
+      "Insufficient loyalty points balance",
+    );
+  }
+
+  loyaltyAccount.availablePoints = nextAvailablePoints;
+
+  if (params.points > 0 && ["EARN", "BONUS"].includes(params.type)) {
+    loyaltyAccount.lifetimeEarned += params.points;
+  }
+
+  if (params.type === "REDEEM") {
+    loyaltyAccount.lifetimeRedeemed += Math.abs(params.points);
+  }
+
+  loyaltyAccount.tier = calculateTier(loyaltyAccount.lifetimeEarned);
+
+  await loyaltyAccount.save({ session });
+
+  // loyalty transaction related
+  const [loyaltyTransaction] = await LoyaltyTransaction.create(
+    [
+      {
+        userId: params.userId,
+        loyaltyAccountId: loyaltyAccount._id,
+        type: params.type,
+        reason: params.reason,
+        points: params.points,
+        balanceAfter: loyaltyAccount.availablePoints,
+        referenceId: params.referenceId,
+        referenceType: params.referenceType,
+        reversalOf: params.reversalOf,
+        description: params.description,
+      },
+    ],
+    { session },
+  );
+
+  // return
+  return {
+    loyaltyAccount,
+    loyaltyTransaction
+  }
 };
 
 const createLoyaltyTransaction = async (
@@ -106,4 +175,6 @@ const earnPointsFromOrder = async (
 export const LoyaltyServices = {
   getOrCreateLoyaltyAccount,
   earnPointsFromOrder,
+  calculateTier,
+  calculateEarnedPoints,
 };

@@ -45,9 +45,12 @@ export interface ILoyaltyTransaction {
   reason: TLoyaltyTransactionReason;
 
   points: number;
+  balanceAfter: number;
 
   referenceId?: Types.ObjectId;
   referenceType?: "ORDER" | "REVIEW" | "REFERRAL";
+
+  reversalOf?: Types.ObjectId;
 
   description?: string;
 
