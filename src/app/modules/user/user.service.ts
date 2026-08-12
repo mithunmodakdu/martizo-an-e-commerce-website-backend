@@ -9,6 +9,7 @@ import { QueryBuilder } from "../../utils/QueryBuilder";
 import { userSearchableFields } from "./user.constants";
 import mongoose from "mongoose";
 import { LoyaltyAccount } from "../loyalty/loyalty.model";
+import { LoyaltyServices } from "../loyalty/loyalty.service";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
@@ -51,22 +52,8 @@ const createUser = async (payload: Partial<IUser>) => {
       createdUser = users[0];
 
       // 2. Create Loyalty Account
-      await LoyaltyAccount.create(
-        [
-          {
-            userId: createdUser._id,
-            availablePoints: 0,
-            pendingPoints: 0,
-            lifetimeEarned: 0,
-            lifetimeRedeemed: 0,
-            tier: "BRONZE",
-          },
-        ],
-        {
-          session,
-        },
-      );
-      
+      await LoyaltyServices.getOrCreateLoyaltyAccount(createdUser._id, session);
+     
     });
 
     return createdUser;

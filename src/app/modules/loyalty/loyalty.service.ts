@@ -1,4 +1,4 @@
-import { ClientSession } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import {
   IEarnPointsPayload,
   ILoyaltyTransaction,
@@ -27,6 +27,37 @@ const calculateTier = (lifeTimeEarned: number): TLoyaltyTier => {
 
 const calculateEarnedPoints = (eligibleOrderAmount: number): number =>
   Math.floor((eligibleOrderAmount / CURRENCY_UNIT) * POINTS_FOR_CURRENCY_UNIT);
+
+
+const getOrCreateLoyaltyAccount = async (
+  userId: Types.ObjectId,
+  session?: ClientSession,
+) => {
+  let loyaltyAccount = await LoyaltyAccount.findOne({ userId }).session(
+    session ?? null,
+  );
+
+  if (!loyaltyAccount) {
+    const createdLoyaltyAccount = await LoyaltyAccount.create(
+      [
+        {
+          userId,
+          availablePoints: 0,
+          pendingPoints: 0,
+          lifetimeEarned: 0,
+          lifetimeRedeemed: 0,
+          tier: "BRONZE",
+        },
+      ],
+      {
+        session,
+      },
+    );
+    loyaltyAccount = createdLoyaltyAccount[0];
+  }
+
+  return loyaltyAccount;
+};
 
 const createLoyaltyTransaction = async (
   data: ILoyaltyTransaction,
@@ -73,5 +104,6 @@ const earnPointsFromOrder = async (
 };
 
 export const LoyaltyServices = {
+  getOrCreateLoyaltyAccount,
   earnPointsFromOrder,
 };
