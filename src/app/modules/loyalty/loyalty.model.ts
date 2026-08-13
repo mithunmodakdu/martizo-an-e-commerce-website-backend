@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { ILoyaltyAccount, ILoyaltyTransaction } from "./loyalty.interface";
+import { ILoyaltyAccount, ILoyaltyTransaction, TLoyaltyTransactionReason, TLoyaltyTransactionType } from "./loyalty.interface";
 
 const loyaltyAccountSchema = new Schema<ILoyaltyAccount>(
   {
@@ -8,6 +8,7 @@ const loyaltyAccountSchema = new Schema<ILoyaltyAccount>(
       ref: "User",
       required: true,
       unique: true,
+      index: true
     },
 
     availablePoints: {
@@ -54,15 +55,17 @@ const loyaltyTransactionSchema = new Schema<ILoyaltyTransaction>(
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true
     },
     loyaltyAccountId: {
       type: Schema.Types.ObjectId,
       ref: "LoyaltyAccount",
       required: true,
+      index: true
     },
     type: {
       type: String,
-      enum: ["EARN", "REDEEM", "EXPIRE", "REVERSE", "BONUS", "ADJUSTMENT"],
+      enum: ["EARN", "REDEEM", "EXPIRE", "REVERSE", "BONUS", "ADJUSTMENT"] satisfies TLoyaltyTransactionType[],
       required: true,
     },
     reason: {
@@ -76,16 +79,21 @@ const loyaltyTransactionSchema = new Schema<ILoyaltyTransaction>(
         "BIRTHDAY",
         "CAMPAIGN",
         "ADMIN_ADJUSTMENT",
-      ],
+      ] satisfies TLoyaltyTransactionReason[],
       required: true,
     },
     points: {
       type: Number,
       required: true,
-      min: 1,
+      validate: {
+        validator: (v: number) => Number.isInteger(v) && v !== 0,
+        message: "Points must be a non-zero integer."
+      }
     },
     balanceAfter: {
       type: Number,
+      required: true,
+      min: 0
     },
     referenceId: {
       type: Schema.Types.ObjectId,
@@ -96,15 +104,34 @@ const loyaltyTransactionSchema = new Schema<ILoyaltyTransaction>(
     },
     reversalOf: {
       type: Schema.Types.ObjectId,
+      ref: "LoyaltyTransaction"
+    },
+    isReversed: {
+      type: Boolean,
+      default: false
     },
     description: {
       type: String,
+      trim: true,
+      maxLength: 300
     },
   },
   {
     timestamps: true,
   },
 );
+
+// Index for getting a user's transactions
+loyaltyTransactionSchema.index({userId: 1, createdAt: -1});
+
+// Unique index to prevent duplicate transactions
+loyaltyTransactionSchema.index(
+  {userId: 1, referenceId: 1, type: 1},
+  {
+    unique: true, 
+    partialFilterExpression: {referenceId: {$exists: true}}
+  }
+)
 
 export const LoyaltyTransaction = model<ILoyaltyTransaction>(
   "LoyaltyTransaction",

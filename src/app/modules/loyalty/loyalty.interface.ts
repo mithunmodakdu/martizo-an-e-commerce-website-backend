@@ -51,6 +51,7 @@ export interface ILoyaltyTransaction {
   referenceType?: "ORDER" | "REVIEW" | "REFERRAL";
 
   reversalOf?: Types.ObjectId;
+  isReversed?: boolean,
 
   description?: string;
 
