@@ -2,6 +2,7 @@ import mongoose, { ClientSession, Types } from "mongoose";
 import {
   IEarnPointsPayload,
   ILoyaltyTransaction,
+  IRedeemPointsPayload,
   ITierThreshold,
   TLoyaltyTier,
 } from "./loyalty.interface";
@@ -181,10 +182,44 @@ const earnLoyaltyPoints = async (payload: IEarnPointsPayload) => {
   }
 };
 
+const redeemLoyaltyPoints = async(payload: IRedeemPointsPayload) => {
+    if (payload.points <= 0) {
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "Redeem points must be positive");
+  }
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    const result = await writeLoyaltyLedgerEntry(
+      {
+        userId: payload.userId,
+        points: -Math.abs(payload.points),
+        type: "REDEEM",
+        reason: "REDEMPTION",
+        referenceId: payload.orderId,
+        referenceType: payload.orderId ? "ORDER" : undefined,
+        description: payload.description ?? "Points redeemed",
+      },
+      session,
+    );
+
+    await session.commitTransaction();
+    return result;
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
+  }
+
+}
+
 export const LoyaltyServices = {
   getLoyaltyAccountByUserId,
   getOrCreateLoyaltyAccount,
   earnLoyaltyPoints,
+  redeemLoyaltyPoints,
   calculateTier,
   calculateEarnedPoints,
 };

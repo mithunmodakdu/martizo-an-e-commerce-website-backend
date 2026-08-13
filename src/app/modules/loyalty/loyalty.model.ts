@@ -72,6 +72,7 @@ const loyaltyTransactionSchema = new Schema<ILoyaltyTransaction>(
       type: String,
       enum: [
         "ORDER",
+        "REDEMPTION",
         "SIGNUP",
         "FIRST_ORDER",
         "REFERRAL",

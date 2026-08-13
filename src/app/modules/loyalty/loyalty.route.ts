@@ -11,4 +11,10 @@ router.get(
   LoyaltyController.getLoyaltyAccountByUserId
 );
 
+router.post(
+  "/redeem-points",
+  checkAuth(...Object.values(ERole)),
+  LoyaltyController.redeemLoyaltyPoints
+)
+
 export const LoyaltyRoutes = router;
