@@ -30,6 +30,14 @@ const calculateTier = (lifeTimeEarned: number): TLoyaltyTier => {
 const calculateEarnedPoints = (eligibleOrderAmount: number): number =>
   Math.floor((eligibleOrderAmount / CURRENCY_UNIT) * POINTS_FOR_CURRENCY_UNIT);
 
+const getLoyaltyAccountByUserId = async(userId: Types.ObjectId) => {
+  const loyaltyAccount = await LoyaltyAccount.findOne({userId});
+  if(!loyaltyAccount){
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Your Loyalty Account Not Found")
+  }
+  return loyaltyAccount;
+}
+
 const getOrCreateLoyaltyAccount = async (
   userId: Types.ObjectId,
   session?: ClientSession,
@@ -174,6 +182,7 @@ const earnLoyaltyPoints = async (payload: IEarnPointsPayload) => {
 };
 
 export const LoyaltyServices = {
+  getLoyaltyAccountByUserId,
   getOrCreateLoyaltyAccount,
   earnLoyaltyPoints,
   calculateTier,
