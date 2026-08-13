@@ -28,6 +28,7 @@ export type TLoyaltyTransactionType =
 
 export type TLoyaltyTransactionReason =
   | "ORDER"
+  | "REDEMPTION"
   | "SIGNUP"
   | "FIRST_ORDER"
   | "REFERRAL"
@@ -51,6 +52,7 @@ export interface ILoyaltyTransaction {
   referenceType?: "ORDER" | "REVIEW" | "REFERRAL";
 
   reversalOf?: Types.ObjectId;
+  isReversed?: boolean,
 
   description?: string;
 
@@ -62,5 +64,12 @@ export interface IEarnPointsPayload {
   userId: Types.ObjectId;
   orderId: Types.ObjectId;
   eligibleOrderAmount: number;
+}
+
+export interface IRedeemPointsPayload {
+  userId: Types.ObjectId;
+  orderId?: Types.ObjectId;
+  points: number;
+  description?: string;
 }
 

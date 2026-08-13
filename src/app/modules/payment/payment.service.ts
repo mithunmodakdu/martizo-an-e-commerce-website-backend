@@ -53,7 +53,7 @@ const successPayment = async (query: Record<string, string>) => {
       eligibleOrderAmount: updatedOrder.itemsPrice
     }
 
-    await LoyaltyServices.earnPointsFromOrder(earnLoyaltyPointsPayload, session)
+    await LoyaltyServices.earnLoyaltyPoints(earnLoyaltyPointsPayload);
 
     // invoice
     const invoiceData: IInvoiceData = {

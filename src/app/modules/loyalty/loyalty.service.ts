@@ -1,7 +1,8 @@
-import { ClientSession, Types } from "mongoose";
+import mongoose, { ClientSession, Types } from "mongoose";
 import {
   IEarnPointsPayload,
   ILoyaltyTransaction,
+  IRedeemPointsPayload,
   ITierThreshold,
   TLoyaltyTier,
 } from "./loyalty.interface";
@@ -29,6 +30,14 @@ const calculateTier = (lifeTimeEarned: number): TLoyaltyTier => {
 
 const calculateEarnedPoints = (eligibleOrderAmount: number): number =>
   Math.floor((eligibleOrderAmount / CURRENCY_UNIT) * POINTS_FOR_CURRENCY_UNIT);
+
+const getLoyaltyAccountByUserId = async(userId: Types.ObjectId) => {
+  const loyaltyAccount = await LoyaltyAccount.findOne({userId});
+  if(!loyaltyAccount){
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Your Loyalty Account Not Found")
+  }
+  return loyaltyAccount;
+}
 
 const getOrCreateLoyaltyAccount = async (
   userId: Types.ObjectId,
@@ -124,57 +133,93 @@ const writeLoyaltyLedgerEntry = async (
   // return
   return {
     loyaltyAccount,
-    loyaltyTransaction
+    loyaltyTransaction,
+  };
+};
+
+const earnLoyaltyPoints = async (payload: IEarnPointsPayload) => {
+  const points = calculateEarnedPoints(payload.eligibleOrderAmount);
+
+  if (points <= 0) {
+    throw new AppError(
+      httpStatusCodes.BAD_REQUEST,
+      "Order amount does not qualify for any loyalty points",
+    );
+  }
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    const result = await writeLoyaltyLedgerEntry(
+        {
+        userId: payload.userId,
+        points,
+        type: "EARN",
+        reason: "ORDER",
+        referenceId: payload.orderId,
+        referenceType: "ORDER",
+        description: `Earned from order ${payload.orderId.toString()}`,
+      },
+      session
+    );
+
+    await session.commitTransaction();
+
+    return result;
+
+  } catch (error) {
+    await session.abortTransaction();
+
+    if(error instanceof Error && "code" in error && (error as {code?: number}).code === 11000){
+      throw new AppError(httpStatusCodes.CONFLICT, "Points have already been earned for this order")
+    }
+
+    throw error;
+
+  }finally{
+    session.endSession();
   }
 };
 
-const createLoyaltyTransaction = async (
-  data: ILoyaltyTransaction,
-  session?: ClientSession,
-) => {
-  const createdLoyaltyTransaction = await LoyaltyTransaction.create([data], {
-    session,
-  });
-  return createdLoyaltyTransaction[0];
-};
-
-const earnPointsFromOrder = async (
-  payload: IEarnPointsPayload,
-  session?: ClientSession,
-) => {
-  const { userId, orderId, eligibleOrderAmount } = payload;
-  const points = Math.floor(eligibleOrderAmount / 100);
-
-  const loyaltyAccount = await LoyaltyAccount.findOne({ userId });
-
-  if (!loyaltyAccount) {
-    throw new Error(`No loyalty account found for user ${userId}`);
+const redeemLoyaltyPoints = async(payload: IRedeemPointsPayload) => {
+    if (payload.points <= 0) {
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "Redeem points must be positive");
   }
 
-  // create Loyalty Transaction
-  await createLoyaltyTransaction(
-    {
-      userId,
-      loyaltyAccountId: loyaltyAccount._id,
-      type: "EARN",
-      reason: "ORDER",
-      points,
-      referenceId: orderId,
-      referenceType: "ORDER",
-      description: `Earned ${points} points for order ${orderId}`,
-    },
-    session,
-  );
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
 
-  // Increase loyalty balance
-  loyaltyAccount.availablePoints += points;
-  loyaltyAccount.lifetimeEarned += points;
-  await loyaltyAccount.save({ session });
-};
+    const result = await writeLoyaltyLedgerEntry(
+      {
+        userId: payload.userId,
+        points: -Math.abs(payload.points),
+        type: "REDEEM",
+        reason: "REDEMPTION",
+        referenceId: payload.orderId,
+        referenceType: payload.orderId ? "ORDER" : undefined,
+        description: payload.description ?? "Points redeemed",
+      },
+      session,
+    );
+
+    await session.commitTransaction();
+    return result;
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
+  }
+
+}
 
 export const LoyaltyServices = {
+  getLoyaltyAccountByUserId,
   getOrCreateLoyaltyAccount,
-  earnPointsFromOrder,
+  earnLoyaltyPoints,
+  redeemLoyaltyPoints,
   calculateTier,
   calculateEarnedPoints,
 };
