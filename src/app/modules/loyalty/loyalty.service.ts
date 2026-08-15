@@ -1,5 +1,6 @@
 import mongoose, { ClientSession, Types } from "mongoose";
 import {
+  IBonusPointsPayload,
   IEarnPointsPayload,
   ILoyaltyTransaction,
   IRedeemPointsPayload,
@@ -215,11 +216,45 @@ const redeemLoyaltyPoints = async(payload: IRedeemPointsPayload) => {
 
 }
 
+const bonusLoyaltyPoints = async (payload: IBonusPointsPayload) => {
+  if (payload.points <= 0) {
+    throw new AppError(httpStatusCodes.BAD_REQUEST, "Bonus Loyalty points must be positive");
+  }
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    const result = await writeLoyaltyLedgerEntry(
+      {
+        userId: payload.userId,
+        points: payload.points,
+        type: "BONUS",
+        reason: payload.reason,
+        referenceId: payload.referenceId,
+        referenceType: payload.referenceType,
+        description: payload.description,
+      },
+      session,
+    );
+
+    await session.commitTransaction();
+    return result;
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
+  }
+};
+
+
 export const LoyaltyServices = {
   getLoyaltyAccountByUserId,
   getOrCreateLoyaltyAccount,
   earnLoyaltyPoints,
   redeemLoyaltyPoints,
+  bonusLoyaltyPoints,
   calculateTier,
   calculateEarnedPoints,
 };

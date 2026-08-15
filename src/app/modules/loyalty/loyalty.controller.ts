@@ -39,7 +39,29 @@ const redeemLoyaltyPoints = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const bonusLoyaltyPoints = catchAsync(async (req, res) => {
+  const result = await LoyaltyServices.bonusLoyaltyPoints({
+    userId: req?.user?.userId,
+    points: req.body.points,
+    reason: req.body.reason,
+    referenceId: req.body.referenceId
+      ? req.body.referenceId
+      : undefined,
+    referenceType: req.body.referenceType,
+    description: req.body.description,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatusCodes.CREATED,
+    success: true,
+    message: "Bonus loyalty points granted successfully",
+    data: result,
+  });
+});
+
+
 export const LoyaltyController = {
   getLoyaltyAccountByUserId,
   redeemLoyaltyPoints,
+  bonusLoyaltyPoints
 };
