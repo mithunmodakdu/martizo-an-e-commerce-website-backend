@@ -15,6 +15,12 @@ router.post(
   "/redeem-points",
   checkAuth(...Object.values(ERole)),
   LoyaltyController.redeemLoyaltyPoints
+);
+
+router.post(
+  "/bonus-points",
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
+  LoyaltyController.bonusLoyaltyPoints
 )
 
 export const LoyaltyRoutes = router;

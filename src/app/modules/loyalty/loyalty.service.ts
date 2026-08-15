@@ -254,6 +254,7 @@ export const LoyaltyServices = {
   getOrCreateLoyaltyAccount,
   earnLoyaltyPoints,
   redeemLoyaltyPoints,
+  bonusLoyaltyPoints,
   calculateTier,
   calculateEarnedPoints,
 };
