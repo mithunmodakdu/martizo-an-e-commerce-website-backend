@@ -73,3 +73,13 @@ export interface IRedeemPointsPayload {
   description?: string;
 }
 
+export interface IBonusPointsPayload {
+  userId: Types.ObjectId;
+  points: number;
+  reason: TLoyaltyTransactionReason;
+  referenceId?: Types.ObjectId;
+  referenceType?: "ORDER" | "REVIEW" | "REFERRAL";
+  description?: string;
+}
+
+
