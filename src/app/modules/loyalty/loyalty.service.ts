@@ -5,6 +5,7 @@ import {
   IEarnPointsPayload,
   ILoyaltyTransaction,
   IRedeemPointsPayload,
+  ITierProgress,
   ITierThreshold,
   TLoyaltyTier,
 } from "./loyalty.interface";
@@ -30,6 +31,25 @@ const calculateTier = (lifeTimeEarned: number): TLoyaltyTier => {
   return match?.tier ?? "BRONZE";
 };
 
+const getTierProgress = (lifetimeEarned: number): ITierProgress => {
+  
+  const currentIndex = TIER_THRESHOLDS.findIndex((item) => lifetimeEarned >= item.minLifetimeEarned )
+
+  const current = TIER_THRESHOLDS[currentIndex];
+
+  // the tier "above" current is the previous element in the array
+  const next = currentIndex > 0 ? TIER_THRESHOLDS[currentIndex - 1] : null;
+
+  return {
+    currentTier: current.tier as TLoyaltyTier,
+    nextTier: next ? (next.tier as TLoyaltyTier) : null,
+    pointsToNextTier: next ? next.minLifetimeEarned - lifetimeEarned : null,
+    currentTierMin: current.minLifetimeEarned,
+    nextTierMin: next ? next.minLifetimeEarned : null
+  }
+};
+
+
 const calculateEarnedPoints = (eligibleOrderAmount: number): number =>
   Math.floor((eligibleOrderAmount / CURRENCY_UNIT) * POINTS_FOR_CURRENCY_UNIT);
 
@@ -42,6 +62,23 @@ const getLoyaltyAccountByUserId = async (userId: Types.ObjectId) => {
     );
   }
   return loyaltyAccount;
+};
+
+const getLoyaltyAccountWithProgress = async (userId: Types.ObjectId) => {
+  const loyaltyAccount = await LoyaltyAccount.findOne({ userId });
+  if (!loyaltyAccount) {
+    throw new AppError(
+      httpStatusCodes.NOT_FOUND,
+      "Your Loyalty Account Not Found",
+    );
+  }
+
+  const progress = getTierProgress(loyaltyAccount.lifetimeEarned);
+
+  return {
+    ...loyaltyAccount.toObject(),
+    ...progress
+  };
 };
 
 const getOrCreateLoyaltyAccount = async (
@@ -339,6 +376,7 @@ const reverseLoyaltyTransaction = async(transactionId: Types.ObjectId) => {
 
 export const LoyaltyServices = {
   getLoyaltyAccountByUserId,
+  getLoyaltyAccountWithProgress,
   getOrCreateLoyaltyAccount,
   earnLoyaltyPoints,
   redeemLoyaltyPoints,

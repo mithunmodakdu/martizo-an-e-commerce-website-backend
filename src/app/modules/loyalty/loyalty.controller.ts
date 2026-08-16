@@ -19,6 +19,19 @@ const getLoyaltyAccountByUserId = catchAsync(
   },
 );
 
+const getLoyaltyAccountWithProgress = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req?.user?.userId as Types.ObjectId;
+    const result = await LoyaltyServices.getLoyaltyAccountWithProgress(userId);
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: "Your Loyalty Account with progress retrieved successfully.",
+      data: result,
+    });
+  },
+);
+
 const redeemLoyaltyPoints = catchAsync(async (req: Request, res: Response) => {
   const userId = req?.user?.userId as Types.ObjectId;
 
@@ -88,6 +101,7 @@ const reverseLoyaltyTransaction = catchAsync(async (req, res) => {
 
 export const LoyaltyController = {
   getLoyaltyAccountByUserId,
+  getLoyaltyAccountWithProgress,
   redeemLoyaltyPoints,
   bonusLoyaltyPoints,
   adjustLoyaltyPoints,

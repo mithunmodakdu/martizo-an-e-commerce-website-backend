@@ -1,11 +1,20 @@
 import { Types } from "mongoose";
 
-export type TLoyaltyTier = "BRONZE" | "SILVER" | "GOLD" | "PLATINUM";
+export type TLoyaltyTier = "PLATINUM" | "GOLD" | "SILVER" | "BRONZE";
 
 export interface ITierThreshold {
   tier: TLoyaltyTier;
   minLifetimeEarned: number;
 }
+
+export interface ITierProgress {
+  currentTier: TLoyaltyTier;
+  nextTier: TLoyaltyTier | null;   // null when already at the top tier
+  pointsToNextTier: number | null; // null when there's no next tier
+  currentTierMin: number;
+  nextTierMin: number | null;
+}
+
 
 export interface ILoyaltyAccount {
   userId: Types.ObjectId;

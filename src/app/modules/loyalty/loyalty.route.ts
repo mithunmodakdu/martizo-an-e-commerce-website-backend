@@ -11,6 +11,12 @@ router.get(
   LoyaltyController.getLoyaltyAccountByUserId
 );
 
+router.get(
+  "/my-account-with-progress",
+  checkAuth(...Object.values(ERole)),
+  LoyaltyController.getLoyaltyAccountWithProgress
+);
+
 router.post(
   "/redeem-points",
   checkAuth(...Object.values(ERole)),
