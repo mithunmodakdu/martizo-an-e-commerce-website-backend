@@ -49,6 +49,14 @@ const getTierProgress = (lifetimeEarned: number): ITierProgress => {
   }
 };
 
+const LOYALTY_POINTS_EXPIRY_MONTHS = 12;
+
+const calculateExpiryDate = (earnedAt: Date): Date => {
+  const expiryDate = new Date(earnedAt);
+  expiryDate.setMonth(expiryDate.getMonth() + LOYALTY_POINTS_EXPIRY_MONTHS);
+  return expiryDate;
+};
+
 
 const calculateEarnedPoints = (eligibleOrderAmount: number): number =>
   Math.floor((eligibleOrderAmount / CURRENCY_UNIT) * POINTS_FOR_CURRENCY_UNIT);
@@ -74,10 +82,12 @@ const getLoyaltyAccountWithProgress = async (userId: Types.ObjectId) => {
   }
 
   const progress = getTierProgress(loyaltyAccount.lifetimeEarned);
+  const expiryDate = calculateExpiryDate(loyaltyAccount.updatedAt as Date)
 
   return {
     ...loyaltyAccount.toObject(),
-    ...progress
+    ...progress,
+    expiryDate
   };
 };
 
