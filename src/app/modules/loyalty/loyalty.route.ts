@@ -23,4 +23,10 @@ router.post(
   LoyaltyController.bonusLoyaltyPoints
 )
 
+router.post(
+  "/adjust-points",
+  checkAuth(ERole.ADMIN, ERole.SUPER_ADMIN),
+  LoyaltyController.adjustLoyaltyPoints
+)
+
 export const LoyaltyRoutes = router;

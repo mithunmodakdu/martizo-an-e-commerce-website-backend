@@ -44,9 +44,7 @@ const bonusLoyaltyPoints = catchAsync(async (req, res) => {
     userId: req?.user?.userId,
     points: req.body.points,
     reason: req.body.reason,
-    referenceId: req.body.referenceId
-      ? req.body.referenceId
-      : undefined,
+    referenceId: req.body.referenceId ? req.body.referenceId : undefined,
     referenceType: req.body.referenceType,
     description: req.body.description,
   });
@@ -59,9 +57,25 @@ const bonusLoyaltyPoints = catchAsync(async (req, res) => {
   });
 });
 
+const adjustLoyaltyPoints = catchAsync(async (req, res) => {
+  const result = await LoyaltyServices.adjustLoyaltyPoints({
+    userId: req?.user?.userId,
+    points: req.body.points,
+    reason: req.body.reason,
+    description: req.body.description,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatusCodes.CREATED,
+    success: true,
+    message: "Loyalty points adjusted successfully",
+    data: result,
+  });
+});
 
 export const LoyaltyController = {
   getLoyaltyAccountByUserId,
   redeemLoyaltyPoints,
-  bonusLoyaltyPoints
+  bonusLoyaltyPoints,
+  adjustLoyaltyPoints,
 };

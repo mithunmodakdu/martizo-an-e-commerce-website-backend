@@ -1,5 +1,6 @@
 import mongoose, { ClientSession, Types } from "mongoose";
 import {
+  IAdjustPointsPayload,
   IBonusPointsPayload,
   IEarnPointsPayload,
   ILoyaltyTransaction,
@@ -32,13 +33,16 @@ const calculateTier = (lifeTimeEarned: number): TLoyaltyTier => {
 const calculateEarnedPoints = (eligibleOrderAmount: number): number =>
   Math.floor((eligibleOrderAmount / CURRENCY_UNIT) * POINTS_FOR_CURRENCY_UNIT);
 
-const getLoyaltyAccountByUserId = async(userId: Types.ObjectId) => {
-  const loyaltyAccount = await LoyaltyAccount.findOne({userId});
-  if(!loyaltyAccount){
-    throw new AppError(httpStatusCodes.NOT_FOUND, "Your Loyalty Account Not Found")
+const getLoyaltyAccountByUserId = async (userId: Types.ObjectId) => {
+  const loyaltyAccount = await LoyaltyAccount.findOne({ userId });
+  if (!loyaltyAccount) {
+    throw new AppError(
+      httpStatusCodes.NOT_FOUND,
+      "Your Loyalty Account Not Found",
+    );
   }
   return loyaltyAccount;
-}
+};
 
 const getOrCreateLoyaltyAccount = async (
   userId: Types.ObjectId,
@@ -153,7 +157,7 @@ const earnLoyaltyPoints = async (payload: IEarnPointsPayload) => {
     session.startTransaction();
 
     const result = await writeLoyaltyLedgerEntry(
-        {
+      {
         userId: payload.userId,
         points,
         type: "EARN",
@@ -162,23 +166,28 @@ const earnLoyaltyPoints = async (payload: IEarnPointsPayload) => {
         referenceType: "ORDER",
         description: `Earned from order ${payload.orderId.toString()}`,
       },
-      session
+      session,
     );
 
     await session.commitTransaction();
 
     return result;
-
   } catch (error) {
     await session.abortTransaction();
 
-    if(error instanceof Error && "code" in error && (error as {code?: number}).code === 11000){
-      throw new AppError(httpStatusCodes.CONFLICT, "Points have already been earned for this order")
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      (error as { code?: number }).code === 11000
+    ) {
+      throw new AppError(
+        httpStatusCodes.CONFLICT,
+        "Points have already been earned for this order",
+      );
     }
 
     throw error;
-
-  }finally{
+  } finally {
     session.endSession();
   }
 };
@@ -216,9 +225,13 @@ const redeemLoyaltyPoints = async(payload: IRedeemPointsPayload) => {
 
 }
 
+
 const bonusLoyaltyPoints = async (payload: IBonusPointsPayload) => {
   if (payload.points <= 0) {
-    throw new AppError(httpStatusCodes.BAD_REQUEST, "Bonus Loyalty points must be positive");
+    throw new AppError(
+      httpStatusCodes.BAD_REQUEST,
+      "Bonus Loyalty points must be positive",
+    );
   }
 
   const session = await mongoose.startSession();
@@ -240,14 +253,37 @@ const bonusLoyaltyPoints = async (payload: IBonusPointsPayload) => {
 
     await session.commitTransaction();
     return result;
-  } catch (err) {
+  } catch (error) {
     await session.abortTransaction();
-    throw err;
+    throw error;
   } finally {
     session.endSession();
   }
 };
 
+const adjustLoyaltyPoints = async(payload: IAdjustPointsPayload) => {
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+    const result = await writeLoyaltyLedgerEntry({
+      userId: payload.userId,
+      points: payload.points,
+      type: "ADJUSTMENT",
+      reason: payload.reason,
+      description: payload.description ?? "Manual admin adjustment"
+    }, session)
+
+    await session.commitTransaction();
+    return result;
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  }finally{
+    session.endSession();
+  }
+}
 
 export const LoyaltyServices = {
   getLoyaltyAccountByUserId,
@@ -255,6 +291,5 @@ export const LoyaltyServices = {
   earnLoyaltyPoints,
   redeemLoyaltyPoints,
   bonusLoyaltyPoints,
-  calculateTier,
-  calculateEarnedPoints,
+  adjustLoyaltyPoints
 };

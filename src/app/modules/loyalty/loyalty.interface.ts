@@ -82,4 +82,11 @@ export interface IBonusPointsPayload {
   description?: string;
 }
 
+export interface IAdjustPointsPayload {
+  userId: Types.ObjectId;
+  points: number;  // signed: positive credits, negative debits
+  reason: TLoyaltyTransactionReason;
+  description?: string;
+}
+
 
