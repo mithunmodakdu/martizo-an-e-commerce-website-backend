@@ -25,8 +25,14 @@ router.post(
 
 router.post(
   "/adjust-points",
-  checkAuth(ERole.ADMIN, ERole.SUPER_ADMIN),
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
   LoyaltyController.adjustLoyaltyPoints
+)
+
+router.post(
+  "/reverse-transaction/:transactionId",
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
+  LoyaltyController.reverseLoyaltyTransaction
 )
 
 export const LoyaltyRoutes = router;

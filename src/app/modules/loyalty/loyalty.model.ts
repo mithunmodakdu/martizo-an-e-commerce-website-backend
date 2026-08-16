@@ -80,6 +80,7 @@ const loyaltyTransactionSchema = new Schema<ILoyaltyTransaction>(
         "BIRTHDAY",
         "CAMPAIGN",
         "ADMIN_ADJUSTMENT",
+        "CORRECTION",
       ] satisfies TLoyaltyTransactionReason[],
       required: true,
     },
@@ -101,7 +102,7 @@ const loyaltyTransactionSchema = new Schema<ILoyaltyTransaction>(
     },
     referenceType: {
       type: String,
-      enum: ["ORDER", "REVIEW", "REFERRAL"],
+      enum: ["ORDER", "REVIEW", "REFERRAL", "LOYALTY_TRANSACTION"],
     },
     reversalOf: {
       type: Schema.Types.ObjectId,

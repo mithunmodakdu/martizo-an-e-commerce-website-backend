@@ -192,9 +192,12 @@ const earnLoyaltyPoints = async (payload: IEarnPointsPayload) => {
   }
 };
 
-const redeemLoyaltyPoints = async(payload: IRedeemPointsPayload) => {
-    if (payload.points <= 0) {
-    throw new AppError(httpStatusCodes.BAD_REQUEST, "Redeem points must be positive");
+const redeemLoyaltyPoints = async (payload: IRedeemPointsPayload) => {
+  if (payload.points <= 0) {
+    throw new AppError(
+      httpStatusCodes.BAD_REQUEST,
+      "Redeem points must be positive",
+    );
   }
 
   const session = await mongoose.startSession();
@@ -222,9 +225,7 @@ const redeemLoyaltyPoints = async(payload: IRedeemPointsPayload) => {
   } finally {
     session.endSession();
   }
-
-}
-
+};
 
 const bonusLoyaltyPoints = async (payload: IBonusPointsPayload) => {
   if (payload.points <= 0) {
@@ -261,28 +262,79 @@ const bonusLoyaltyPoints = async (payload: IBonusPointsPayload) => {
   }
 };
 
-const adjustLoyaltyPoints = async(payload: IAdjustPointsPayload) => {
-
+const adjustLoyaltyPoints = async (payload: IAdjustPointsPayload) => {
   const session = await mongoose.startSession();
 
   try {
     session.startTransaction();
-    const result = await writeLoyaltyLedgerEntry({
-      userId: payload.userId,
-      points: payload.points,
-      type: "ADJUSTMENT",
-      reason: payload.reason,
-      description: payload.description ?? "Manual admin adjustment"
-    }, session)
+    const result = await writeLoyaltyLedgerEntry(
+      {
+        userId: payload.userId,
+        points: payload.points,
+        type: "ADJUSTMENT",
+        reason: payload.reason,
+        description: payload.description ?? "Manual admin adjustment",
+      },
+      session,
+    );
 
     await session.commitTransaction();
     return result;
   } catch (error) {
     await session.abortTransaction();
     throw error;
-  }finally{
+  } finally {
     session.endSession();
   }
+};
+
+const reverseLoyaltyTransaction = async(transactionId: Types.ObjectId) => {
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+    const originalTransaction = await LoyaltyTransaction.findById(transactionId).session(session);
+
+    if(!originalTransaction){
+      throw new AppError(httpStatusCodes.NOT_FOUND, "Loyalty Transaction not found")
+    }
+
+    if(originalTransaction.isReversed){
+      throw new AppError(httpStatusCodes.BAD_REQUEST, "Loyalty Transaction already reversed.")
+    }
+
+    if(originalTransaction.type === "REVERSE"){
+      throw new AppError(httpStatusCodes.BAD_REQUEST, "Can not reverse a reversal")
+    }
+
+    const result = await writeLoyaltyLedgerEntry(
+       {
+        userId: originalTransaction.userId,
+        points: -originalTransaction.points,
+        type: "REVERSE",
+        reason: "CORRECTION",
+        referenceId: originalTransaction._id,
+        referenceType: "LOYALTY_TRANSACTION",
+        reversalOf: originalTransaction._id,
+        description: `Reversal of transaction ${originalTransaction._id.toString()}`,
+      },
+      session
+    )
+
+    originalTransaction.isReversed = true;
+    await originalTransaction.save({session});
+
+    await session.commitTransaction();
+
+    return result;
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  }finally{
+    session.endSession()
+  }
+    
+  
 }
 
 export const LoyaltyServices = {
@@ -291,5 +343,6 @@ export const LoyaltyServices = {
   earnLoyaltyPoints,
   redeemLoyaltyPoints,
   bonusLoyaltyPoints,
-  adjustLoyaltyPoints
+  adjustLoyaltyPoints,
+  reverseLoyaltyTransaction
 };

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { LoyaltyServices } from "./loyalty.service";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
 import { IRedeemPointsPayload } from "./loyalty.interface";
@@ -73,9 +73,23 @@ const adjustLoyaltyPoints = catchAsync(async (req, res) => {
   });
 });
 
+const reverseLoyaltyTransaction = catchAsync(async (req, res) => {
+  const result = await LoyaltyServices.reverseLoyaltyTransaction(
+    new mongoose.Types.ObjectId(req?.params?.transactionId as string),
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatusCodes.OK,
+    success: true,
+    message: "Loyalty Transaction reversed successfully",
+    data: result,
+  });
+});
+
 export const LoyaltyController = {
   getLoyaltyAccountByUserId,
   redeemLoyaltyPoints,
   bonusLoyaltyPoints,
   adjustLoyaltyPoints,
+  reverseLoyaltyTransaction,
 };

@@ -35,7 +35,8 @@ export type TLoyaltyTransactionReason =
   | "REVIEW"
   | "BIRTHDAY"
   | "CAMPAIGN"
-  | "ADMIN_ADJUSTMENT";
+  | "ADMIN_ADJUSTMENT"
+  | "CORRECTION";
 
 
 export interface ILoyaltyTransaction {
@@ -49,7 +50,7 @@ export interface ILoyaltyTransaction {
   balanceAfter: number;
 
   referenceId?: Types.ObjectId;
-  referenceType?: "ORDER" | "REVIEW" | "REFERRAL";
+  referenceType?: "ORDER" | "REVIEW" | "REFERRAL" | "LOYALTY_TRANSACTION";
 
   reversalOf?: Types.ObjectId;
   isReversed?: boolean,
