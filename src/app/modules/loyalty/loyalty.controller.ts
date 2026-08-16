@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { catchAsync } from "../../utils/catchAsync";
 import { LoyaltyServices } from "./loyalty.service";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
 import { IRedeemPointsPayload } from "./loyalty.interface";
@@ -14,6 +14,19 @@ const getLoyaltyAccountByUserId = catchAsync(
       statusCode: httpStatusCodes.OK,
       success: true,
       message: "Your Loyalty Account retrieved successfully.",
+      data: result,
+    });
+  },
+);
+
+const getLoyaltyAccountWithProgress = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req?.user?.userId as Types.ObjectId;
+    const result = await LoyaltyServices.getLoyaltyAccountWithProgress(userId);
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: "Your Loyalty Account with progress retrieved successfully.",
       data: result,
     });
   },
@@ -44,9 +57,7 @@ const bonusLoyaltyPoints = catchAsync(async (req, res) => {
     userId: req?.user?.userId,
     points: req.body.points,
     reason: req.body.reason,
-    referenceId: req.body.referenceId
-      ? req.body.referenceId
-      : undefined,
+    referenceId: req.body.referenceId ? req.body.referenceId : undefined,
     referenceType: req.body.referenceType,
     description: req.body.description,
   });
@@ -59,9 +70,40 @@ const bonusLoyaltyPoints = catchAsync(async (req, res) => {
   });
 });
 
+const adjustLoyaltyPoints = catchAsync(async (req, res) => {
+  const result = await LoyaltyServices.adjustLoyaltyPoints({
+    userId: req?.user?.userId,
+    points: req.body.points,
+    reason: req.body.reason,
+    description: req.body.description,
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatusCodes.CREATED,
+    success: true,
+    message: "Loyalty points adjusted successfully",
+    data: result,
+  });
+});
+
+const reverseLoyaltyTransaction = catchAsync(async (req, res) => {
+  const result = await LoyaltyServices.reverseLoyaltyTransaction(
+    new mongoose.Types.ObjectId(req?.params?.transactionId as string),
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatusCodes.OK,
+    success: true,
+    message: "Loyalty Transaction reversed successfully",
+    data: result,
+  });
+});
 
 export const LoyaltyController = {
   getLoyaltyAccountByUserId,
+  getLoyaltyAccountWithProgress,
   redeemLoyaltyPoints,
-  bonusLoyaltyPoints
+  bonusLoyaltyPoints,
+  adjustLoyaltyPoints,
+  reverseLoyaltyTransaction,
 };

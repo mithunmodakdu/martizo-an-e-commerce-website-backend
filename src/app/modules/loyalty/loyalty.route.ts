@@ -11,6 +11,12 @@ router.get(
   LoyaltyController.getLoyaltyAccountByUserId
 );
 
+router.get(
+  "/my-account-with-progress",
+  checkAuth(...Object.values(ERole)),
+  LoyaltyController.getLoyaltyAccountWithProgress
+);
+
 router.post(
   "/redeem-points",
   checkAuth(...Object.values(ERole)),
@@ -21,6 +27,18 @@ router.post(
   "/bonus-points",
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
   LoyaltyController.bonusLoyaltyPoints
+)
+
+router.post(
+  "/adjust-points",
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
+  LoyaltyController.adjustLoyaltyPoints
+)
+
+router.post(
+  "/reverse-transaction/:transactionId",
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
+  LoyaltyController.reverseLoyaltyTransaction
 )
 
 export const LoyaltyRoutes = router;

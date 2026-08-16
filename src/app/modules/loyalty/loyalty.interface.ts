@@ -1,11 +1,20 @@
 import { Types } from "mongoose";
 
-export type TLoyaltyTier = "BRONZE" | "SILVER" | "GOLD" | "PLATINUM";
+export type TLoyaltyTier = "PLATINUM" | "GOLD" | "SILVER" | "BRONZE";
 
 export interface ITierThreshold {
   tier: TLoyaltyTier;
   minLifetimeEarned: number;
 }
+
+export interface ITierProgress {
+  currentTier: TLoyaltyTier;
+  nextTier: TLoyaltyTier | null;   // null when already at the top tier
+  pointsToNextTier: number | null; // null when there's no next tier
+  currentTierMin: number;
+  nextTierMin: number | null;
+}
+
 
 export interface ILoyaltyAccount {
   userId: Types.ObjectId;
@@ -35,7 +44,8 @@ export type TLoyaltyTransactionReason =
   | "REVIEW"
   | "BIRTHDAY"
   | "CAMPAIGN"
-  | "ADMIN_ADJUSTMENT";
+  | "ADMIN_ADJUSTMENT"
+  | "CORRECTION";
 
 
 export interface ILoyaltyTransaction {
@@ -49,7 +59,7 @@ export interface ILoyaltyTransaction {
   balanceAfter: number;
 
   referenceId?: Types.ObjectId;
-  referenceType?: "ORDER" | "REVIEW" | "REFERRAL";
+  referenceType?: "ORDER" | "REVIEW" | "REFERRAL" | "LOYALTY_TRANSACTION";
 
   reversalOf?: Types.ObjectId;
   isReversed?: boolean,
@@ -79,6 +89,13 @@ export interface IBonusPointsPayload {
   reason: TLoyaltyTransactionReason;
   referenceId?: Types.ObjectId;
   referenceType?: "ORDER" | "REVIEW" | "REFERRAL";
+  description?: string;
+}
+
+export interface IAdjustPointsPayload {
+  userId: Types.ObjectId;
+  points: number;  // signed: positive credits, negative debits
+  reason: TLoyaltyTransactionReason;
   description?: string;
 }
 
