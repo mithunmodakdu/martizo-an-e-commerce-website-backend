@@ -13,6 +13,38 @@ import { LoyaltyAccount, LoyaltyTransaction } from "./loyalty.model";
 import AppError from "../../errorHelpers/AppError";
 import httpStatusCodes from "http-status-codes";
 
+const now = new Date();
+const thirtyDaysAgo = new Date(now);
+thirtyDaysAgo.setDate(now.getDate() - 30)
+
+const getEarnedPointsInLastMonth = async(userId: Types.ObjectId) => {
+  const earnedPoints = await LoyaltyTransaction.aggregate([
+    {
+      $match: {
+        userId: new mongoose.Types.ObjectId(userId),
+        createdAt: {$gte: thirtyDaysAgo}
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalPointsInLastMonth : {$sum: "$points"}
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        totalPointsInLastMonth: 1
+      }
+    }
+   
+
+  ])
+
+  return earnedPoints[0];
+
+}
+
 // 1 point per 100 BDT of eligible order amount
 const CURRENCY_UNIT = 100;
 const POINTS_FOR_CURRENCY_UNIT = 1;
@@ -384,7 +416,10 @@ const reverseLoyaltyTransaction = async(transactionId: Types.ObjectId) => {
   
 }
 
+
+
 export const LoyaltyServices = {
+  getEarnedPointsInLastMonth,
   getLoyaltyAccountByUserId,
   getLoyaltyAccountWithProgress,
   getOrCreateLoyaltyAccount,
