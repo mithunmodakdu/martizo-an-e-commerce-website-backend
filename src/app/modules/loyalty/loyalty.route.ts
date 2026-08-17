@@ -6,6 +6,12 @@ import { LoyaltyController } from "./loyalty.controller";
 const router = Router();
 
 router.get(
+  "/earned-points-last-month",
+  checkAuth(...Object.values(ERole)),
+  LoyaltyController.getEarnedPointsInLastMonth
+)
+
+router.get(
   "/my-account",
   checkAuth(...Object.values(ERole)),
   LoyaltyController.getLoyaltyAccountByUserId

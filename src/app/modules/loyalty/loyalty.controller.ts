@@ -6,6 +6,20 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatusCodes from "http-status-codes";
 import { IRedeemPointsPayload } from "./loyalty.interface";
 
+const getEarnedPointsInLastMonth = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await LoyaltyServices.getEarnedPointsInLastMonth(
+      req?.user?.userId as Types.ObjectId);
+    
+    sendResponse(res, {
+      statusCode: httpStatusCodes.OK,
+      success: true,
+      message: "Earned Points in Last Month retrieved successfully.",
+      data: result
+    })
+  },
+);
+
 const getLoyaltyAccountByUserId = catchAsync(
   async (req: Request, res: Response) => {
     const userId = req?.user?.userId as Types.ObjectId;
@@ -100,6 +114,7 @@ const reverseLoyaltyTransaction = catchAsync(async (req, res) => {
 });
 
 export const LoyaltyController = {
+  getEarnedPointsInLastMonth,
   getLoyaltyAccountByUserId,
   getLoyaltyAccountWithProgress,
   redeemLoyaltyPoints,
