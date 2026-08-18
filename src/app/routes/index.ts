@@ -13,6 +13,7 @@ import { StatsRoutes } from "../modules/stats/stats.route";
 import { WishlistRoutes } from "../modules/wishlist/wishlist.route";
 import { path } from "pdfkit";
 import { LoyaltyRoutes } from "../modules/loyalty/loyalty.route";
+import { ReviewRoutes } from "../modules/review/review.route";
 
 export const router = Router();
 
@@ -68,6 +69,10 @@ const moduleRoutes = [
   {
     path: "/loyalty",
     route: LoyaltyRoutes
+  },
+  {
+    path: "reviews",
+    route: ReviewRoutes
   }
 ];
 

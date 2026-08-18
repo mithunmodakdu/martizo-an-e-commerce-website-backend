@@ -1,14 +1,14 @@
 import { Model, Types } from "mongoose";
 
 export enum EReviewStatus {
-  PENDING = 'PENDING',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
 }
 
 export enum EVoteType {
-  HELPFUL = 'HELPFUL',
-  UNHELPFUL = 'UNHELPFUL'
+  HELPFUL = "HELPFUL",
+  UNHELPFUL = "UNHELPFUL",
 }
 
 export interface IReviewImage {
@@ -44,5 +44,10 @@ export interface IReview {
 }
 
 export interface IReviewModel extends Model<IReview> {
-  calculateAverageRatings(productId: Types.ObjectId) : Promise<void>
+  calculateAverageRatings(productId: Types.ObjectId): Promise<void>;
 }
+
+export type TCreateReviewPayload = Pick<
+  IReview,
+  "productId" | "rating" | "title" | "comment" | "images"
+>;
