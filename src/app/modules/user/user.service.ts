@@ -8,7 +8,6 @@ import { JwtPayload } from "jsonwebtoken";
 import { QueryBuilder } from "../../utils/QueryBuilder";
 import { userSearchableFields } from "./user.constants";
 import mongoose from "mongoose";
-import { LoyaltyAccount } from "../loyalty/loyalty.model";
 import { LoyaltyServices } from "../loyalty/loyalty.service";
 
 const createUser = async (payload: Partial<IUser>) => {
