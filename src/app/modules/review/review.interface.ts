@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Model, Types } from "mongoose";
 
 export enum EReviewStatus {
   PENDING = 'PENDING',
@@ -19,7 +19,7 @@ export interface IReviewImage {
 export interface IAdminReply {
   comment: string;
   repliedBy: Types.ObjectId;
-  repliedAt: Types.ObjectId;
+  repliedAt: Date;
 }
 
 export interface IReview {
@@ -41,4 +41,8 @@ export interface IReview {
 
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface IReviewModel extends Model<IReview> {
+  calculateAverageRatings(productId: Types.ObjectId) : Promise<void>
 }
