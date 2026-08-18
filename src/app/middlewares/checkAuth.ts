@@ -3,9 +3,10 @@ import { verifyToken } from "../utils/jwt";
 import { envVars } from "../config/env";
 import AppError from "../errorHelpers/AppError";
 import httpStatusCodes from "http-status-codes";
-import { JwtPayload } from "jsonwebtoken";
+// import { JwtPayload } from "jsonwebtoken";
 import { User } from "../modules/user/user.model";
 import { EIsActive } from "../modules/user/user.interface";
+import { CustomJwtPayload } from "../../types/jwt";
 
 export const checkAuth = (...authRoles : string[]) => async(req: Request, res: Response, next: NextFunction) => {
   // console.log(authRoles)
@@ -18,7 +19,7 @@ export const checkAuth = (...authRoles : string[]) => async(req: Request, res: R
       throw new AppError(httpStatusCodes.UNAUTHORIZED, "You are not logged in. Please log in.")
     }
 
-    const verifiedToken = verifyToken(accessToken as string, envVars.JWT_SECRET) as JwtPayload;
+    const verifiedToken = verifyToken(accessToken as string, envVars.JWT_SECRET) as CustomJwtPayload;
 
     const existedUser = await User.findOne({email: verifiedToken.email})
 

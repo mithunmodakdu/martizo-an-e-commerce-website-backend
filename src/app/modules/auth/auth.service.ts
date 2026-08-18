@@ -10,7 +10,7 @@ import { envVars } from "../../config/env";
 import { EIsActive, IAuthProvider } from "../user/user.interface";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../../utils/sendEmail";
-import { generateInvoicePDF } from "../../utils/invoice";
+
 
 const getNewAccessToken = async (refreshToken: string) => {
   const newAccessToken = await createNewAccessTokenWithRefreshToken(
