@@ -51,3 +51,5 @@ export type TCreateReviewPayload = Pick<
   IReview,
   "productId" | "rating" | "title" | "comment" | "images"
 >;
+
+export type TUpdateReviewPayload = Partial<Pick<IReview, "rating" | "title" | "comment" | "images">>

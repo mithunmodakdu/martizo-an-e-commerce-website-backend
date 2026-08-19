@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { EReviewStatus, TCreateReviewPayload } from "./review.interface";
+import { EReviewStatus, TCreateReviewPayload, TUpdateReviewPayload } from "./review.interface";
 import { Review } from "./review.model";
 import AppError from "../../errorHelpers/AppError";
 import httpStatusCodes from "http-status-codes";
@@ -54,6 +54,28 @@ const createReview = async (
   return review;
 };
 
+const updateReview = async(userId: string, reviewId: string, payload: TUpdateReviewPayload) => {
+  const existedReview = await Review.findById(reviewId);
+  
+  if(!existedReview){
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found.")
+  }
+
+  if(existedReview.userId.toString() !== userId){
+    throw new AppError(httpStatusCodes.FORBIDDEN, "You can only edit your own review.")
+  }
+
+  Object.assign(existedReview, payload);
+
+  existedReview.status = EReviewStatus.PENDING;
+
+  await existedReview.save();
+
+  return existedReview;
+}
+
+
 export const ReviewService = {
   createReview,
+  updateReview 
 };
