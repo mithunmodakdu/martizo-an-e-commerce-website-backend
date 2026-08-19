@@ -1,0 +1,23 @@
+import z from "zod";
+
+const reviewImageZodSchema = z.object({
+  url: z.url(),
+  publicId: z.string().optional(),
+});
+
+export const createReviewZodSchema = z.object({
+  productId: z.string({ message: "Product id is required" }),
+  rating: z
+    .number({ message: "Rating is required" })
+    .min(1, "Rating must be at least 1")
+    .max(5, "Rating cannot exceed 5"),
+  title: z.string().max(120).optional(),
+  comment: z
+    .string({ message: "Comment is required" })
+    .min(5, "Comment must be at least 5 characters")
+    .max(2000),
+  images: z
+    .array(reviewImageZodSchema)
+    .max(5, "Maximum 5 images allowed")
+    .optional(),
+});
