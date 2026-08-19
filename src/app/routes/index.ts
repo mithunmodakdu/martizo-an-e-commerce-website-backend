@@ -71,7 +71,7 @@ const moduleRoutes = [
     route: LoyaltyRoutes
   },
   {
-    path: "reviews",
+    path: "/reviews",
     route: ReviewRoutes
   }
 ];
