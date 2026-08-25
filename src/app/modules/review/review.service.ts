@@ -1,9 +1,10 @@
 import { Types } from "mongoose";
-import { EReviewStatus, TCreateReviewPayload, TUpdateReviewPayload } from "./review.interface";
+import { EReviewStatus, EVoteType, TCreateReviewPayload, TUpdateReviewPayload } from "./review.interface";
 import { Review } from "./review.model";
 import AppError from "../../errorHelpers/AppError";
 import httpStatusCodes from "http-status-codes";
 import { Order } from "../order/order.model";
+import { ERole } from "../user/user.interface";
 
 const checkVerifiedPurchase = async (
   userId: Types.ObjectId,
@@ -74,8 +75,36 @@ const updateReview = async(userId: string, reviewId: string, payload: TUpdateRev
   return existedReview;
 }
 
+const deleteReview = async(userId: string, userRole: string, reviewId: string) => {
+  
+  const existedReview = await Review.findById(reviewId);
+  
+  if(!existedReview){
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found")
+  }
+
+  const isReviewOwner = existedReview.userId.toString() === userId;
+  const isSuperAdmin = ERole.SUPER_ADMIN === userRole;
+  const isAdmin = ERole.ADMIN === userRole;
+
+  if(!isReviewOwner && !isSuperAdmin && !isAdmin){
+    throw new AppError(httpStatusCodes.FORBIDDEN, 'You are not allowed to delete this review')
+  }
+
+  await Review.findOneAndDelete({_id: reviewId});
+
+  return null;
+}
+
+const voteReview = async(userId: string, reviewId: string, voteType: EVoteType) => {
+  console.log(userId, reviewId, voteType)
+
+}
+
 
 export const ReviewService = {
   createReview,
-  updateReview 
+  updateReview,
+  deleteReview,
+  voteReview
 };
