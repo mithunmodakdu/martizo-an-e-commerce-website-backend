@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { EReviewStatus, TCreateReviewPayload, TUpdateReviewPayload } from "./review.interface";
+import { EReviewStatus, EVoteType, TCreateReviewPayload, TUpdateReviewPayload } from "./review.interface";
 import { Review } from "./review.model";
 import AppError from "../../errorHelpers/AppError";
 import httpStatusCodes from "http-status-codes";
@@ -96,9 +96,15 @@ const deleteReview = async(userId: string, userRole: string, reviewId: string) =
   return null;
 }
 
+const voteReview = async(userId: string, reviewId: string, voteType: EVoteType) => {
+  console.log(userId, reviewId, voteType)
+
+}
+
 
 export const ReviewService = {
   createReview,
   updateReview,
-  deleteReview
+  deleteReview,
+  voteReview
 };

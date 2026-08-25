@@ -31,11 +31,10 @@ const updateReview = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteReview = catchAsync(async (req: Request, res: Response) => {
-  
   await ReviewService.deleteReview(
     req.user.userId,
     req.user.role,
-    req.params.reviewId as string
+    req.params.reviewId as string,
   );
 
   sendResponse(res, {
@@ -46,8 +45,25 @@ const deleteReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const voteReview = catchAsync(async (req: Request, res: Response) => {
+  const { voteType } = req.body;
+  const result = await ReviewService.voteReview(
+    req.user.userId,
+    req.params.reviewId as string,
+    voteType,
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatusCodes.OK,
+    success: true,
+    message: "Vote recorded successfully",
+    data: result,
+  });
+});
+
 export const ReviewController = {
   createReview,
   updateReview,
-  deleteReview
+  deleteReview,
+  voteReview,
 };

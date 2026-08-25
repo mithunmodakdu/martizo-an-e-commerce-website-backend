@@ -27,4 +27,10 @@ router.delete(
   ReviewController.deleteReview
 )
 
+router.post(
+  "/:reviewId/vote",
+  checkAuth(...Object.values(ERole)),
+  ReviewController.voteReview
+)
+
 export const ReviewRoutes = router;
