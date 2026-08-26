@@ -1,4 +1,5 @@
 import z from "zod";
+import { EReviewStatus, EVoteType } from "./review.interface";
 
 const reviewImageZodSchema = z.object({
   url: z.url(),
@@ -39,3 +40,11 @@ export const updateReviewZodSchema = z.object({
     .max(5, "Maximum 5 images allowed")
     .optional(),
 });
+
+export const voteReviewZodSchema = z.object({
+  voteType: z.enum([EVoteType.HELPFUL, EVoteType.UNHELPFUL], {message: "Vote type must be either HELPFUL or UNHELPFUL."})
+})
+
+export const moderateReviewZodSchema = z.object({
+  status: z.enum([EReviewStatus.APPROVED, EReviewStatus.REJECTED], {message: "Review status must be either APPROVED or REJECTED"})
+})

@@ -1,5 +1,10 @@
 import { Types } from "mongoose";
-import { EReviewStatus, EVoteType, TCreateReviewPayload, TUpdateReviewPayload } from "./review.interface";
+import {
+  EReviewStatus,
+  EVoteType,
+  TCreateReviewPayload,
+  TUpdateReviewPayload,
+} from "./review.interface";
 import { Review } from "./review.model";
 import AppError from "../../errorHelpers/AppError";
 import httpStatusCodes from "http-status-codes";
@@ -9,7 +14,7 @@ import { ERole } from "../user/user.interface";
 const checkVerifiedPurchase = async (
   userId: Types.ObjectId,
   productId: Types.ObjectId,
-): Promise<{isVerified: boolean; orderId?: Types.ObjectId}> => {
+): Promise<{ isVerified: boolean; orderId?: Types.ObjectId }> => {
   const order = await Order.findOne({
     userId,
     status: "DELIVERED",
@@ -51,19 +56,26 @@ const createReview = async (
     helpfulVote: [],
     unhelpfulVote: [],
   });
-  
+
   return review;
 };
 
-const updateReview = async(userId: string, reviewId: string, payload: TUpdateReviewPayload) => {
+const updateReview = async (
+  userId: string,
+  reviewId: string,
+  payload: TUpdateReviewPayload,
+) => {
   const existedReview = await Review.findById(reviewId);
-  
-  if(!existedReview){
-    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found.")
+
+  if (!existedReview) {
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found.");
   }
 
-  if(existedReview.userId.toString() !== userId){
-    throw new AppError(httpStatusCodes.FORBIDDEN, "You can only edit your own review.")
+  if (existedReview.userId.toString() !== userId) {
+    throw new AppError(
+      httpStatusCodes.FORBIDDEN,
+      "You can only edit your own review.",
+    );
   }
 
   Object.assign(existedReview, payload);
@@ -73,38 +85,97 @@ const updateReview = async(userId: string, reviewId: string, payload: TUpdateRev
   await existedReview.save();
 
   return existedReview;
-}
+};
 
-const deleteReview = async(userId: string, userRole: string, reviewId: string) => {
-  
+const deleteReview = async (
+  userId: string,
+  userRole: string,
+  reviewId: string,
+) => {
   const existedReview = await Review.findById(reviewId);
-  
-  if(!existedReview){
-    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found")
+
+  if (!existedReview) {
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found");
   }
 
   const isReviewOwner = existedReview.userId.toString() === userId;
   const isSuperAdmin = ERole.SUPER_ADMIN === userRole;
   const isAdmin = ERole.ADMIN === userRole;
 
-  if(!isReviewOwner && !isSuperAdmin && !isAdmin){
-    throw new AppError(httpStatusCodes.FORBIDDEN, 'You are not allowed to delete this review')
+  if (!isReviewOwner && !isSuperAdmin && !isAdmin) {
+    throw new AppError(
+      httpStatusCodes.FORBIDDEN,
+      "You are not allowed to delete this review",
+    );
   }
 
-  await Review.findOneAndDelete({_id: reviewId});
+  await Review.findOneAndDelete({ _id: reviewId });
 
   return null;
-}
+};
 
-const voteReview = async(userId: string, reviewId: string, voteType: EVoteType) => {
-  console.log(userId, reviewId, voteType)
+const voteReview = async (
+  userId: string,
+  reviewId: string,
+  voteType: EVoteType,
+) => {
+  const userObjectId = new Types.ObjectId(userId);
+  const existedReview = await Review.findById(reviewId);
 
-}
+  if (!existedReview) {
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found");
+  }
 
+  const hasHelpfulVote = existedReview.helpfulVote.some((id) =>
+    id.equals(userObjectId),
+  );
+  const hasUnhelpfulVote = existedReview.unhelpfulVote.some((id) =>
+    id.equals(userObjectId),
+  );
+
+  existedReview.helpfulVote = existedReview.helpfulVote.filter(
+    (id) => !id.equals(userObjectId),
+  );
+  existedReview.unhelpfulVote = existedReview.unhelpfulVote.filter(
+    (id) => !id.equals(userObjectId),
+  );
+
+  if (voteType === EVoteType.HELPFUL && !hasHelpfulVote) {
+    existedReview.helpfulVote.push(userObjectId);
+  } else if (voteType === EVoteType.UNHELPFUL && !hasUnhelpfulVote) {
+    existedReview.unhelpfulVote.push(userObjectId);
+  }
+
+  await existedReview.save();
+
+  return existedReview;
+};
+
+const moderateReview = async (reviewId: string, status: EReviewStatus) => {
+  if (status === EReviewStatus.PENDING) {
+    throw new AppError(
+      httpStatusCodes.BAD_REQUEST,
+      "Cannot set review status back to PENDING",
+    );
+  }
+
+  const review = await Review.findByIdAndUpdate(
+    reviewId,
+    { status },
+    { new: true, runValidators: true },
+  );
+
+  if(!review){
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found")
+  }
+
+  return review;
+};
 
 export const ReviewService = {
   createReview,
   updateReview,
   deleteReview,
-  voteReview
+  voteReview,
+  moderateReview,
 };
