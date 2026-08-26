@@ -97,7 +97,28 @@ const deleteReview = async(userId: string, userRole: string, reviewId: string) =
 }
 
 const voteReview = async(userId: string, reviewId: string, voteType: EVoteType) => {
-  console.log(userId, reviewId, voteType)
+  const userObjectId = new Types.ObjectId(userId);
+  const existedReview = await Review.findById(reviewId);
+  
+  if(!existedReview){
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found");
+  }
+
+  const hasHelpfulVote = existedReview.helpfulVote.some(id => id.equals(userObjectId));
+  const hasUnhelpfulVote = existedReview.unhelpfulVote.some(id => id.equals(userObjectId));
+
+  existedReview.helpfulVote = existedReview.helpfulVote.filter(id => !id.equals(userObjectId));
+  existedReview.unhelpfulVote = existedReview.unhelpfulVote.filter(id => !id.equals(userObjectId));
+
+  if(voteType === EVoteType.HELPFUL && !hasHelpfulVote){
+    existedReview.helpfulVote.push(userObjectId);
+  }else if(voteType === EVoteType.UNHELPFUL && !hasUnhelpfulVote){
+    existedReview.unhelpfulVote.push(userObjectId);
+  }
+
+  await existedReview.save();
+  
+  return existedReview;
 
 }
 
