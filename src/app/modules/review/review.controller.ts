@@ -61,9 +61,25 @@ const voteReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const moderateReview = catchAsync(async (req: Request, res: Response) => {
+  const { status } = req.body;
+  const result = await ReviewService.moderateReview(
+    req.params.reviewId as string,
+    status
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatusCodes.OK,
+    success: true,
+    message: `Review status changed to ${status.toLowerCase()} successfully`,
+    data: result,
+  });
+});
+
 export const ReviewController = {
   createReview,
   updateReview,
   deleteReview,
   voteReview,
+  moderateReview
 };

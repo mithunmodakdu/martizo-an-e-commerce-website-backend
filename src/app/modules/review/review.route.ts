@@ -3,7 +3,7 @@ import { ReviewController } from "./review.controller";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { ERole } from "../user/user.interface";
 import { validateRequest } from "../../middlewares/validateRequest";
-import { createReviewZodSchema, updateReviewZodSchema } from "./review.validation";
+import { createReviewZodSchema, moderateReviewZodSchema, updateReviewZodSchema, voteReviewZodSchema } from "./review.validation";
 
 const router = Router();
 
@@ -30,7 +30,15 @@ router.delete(
 router.post(
   "/:reviewId/vote",
   checkAuth(...Object.values(ERole)),
+  validateRequest(voteReviewZodSchema),
   ReviewController.voteReview
+)
+
+router.patch(
+  "/:reviewId/moderate",
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
+  validateRequest(moderateReviewZodSchema),
+  ReviewController.moderateReview
 )
 
 export const ReviewRoutes = router;
