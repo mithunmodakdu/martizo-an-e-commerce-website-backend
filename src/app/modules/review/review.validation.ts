@@ -48,3 +48,7 @@ export const voteReviewZodSchema = z.object({
 export const moderateReviewZodSchema = z.object({
   status: z.enum([EReviewStatus.APPROVED, EReviewStatus.REJECTED], {message: "Review status must be either APPROVED or REJECTED"})
 })
+
+export const addAdminReplyZodSchema = z.object({
+  comment: z.string({message:  'Reply comment is required'}).min(2).max(1000)
+})
