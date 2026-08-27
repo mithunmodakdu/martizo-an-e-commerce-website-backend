@@ -3,7 +3,7 @@ import { ReviewController } from "./review.controller";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { ERole } from "../user/user.interface";
 import { validateRequest } from "../../middlewares/validateRequest";
-import { createReviewZodSchema, moderateReviewZodSchema, updateReviewZodSchema, voteReviewZodSchema } from "./review.validation";
+import { addAdminReplyZodSchema, createReviewZodSchema, moderateReviewZodSchema, updateReviewZodSchema, voteReviewZodSchema } from "./review.validation";
 
 const router = Router();
 
@@ -39,6 +39,13 @@ router.patch(
   checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
   validateRequest(moderateReviewZodSchema),
   ReviewController.moderateReview
+)
+
+router.patch(
+  "/:reviewId/add-reply",
+  checkAuth(ERole.SUPER_ADMIN, ERole.ADMIN),
+  validateRequest(addAdminReplyZodSchema),
+  ReviewController.addAdminReply
 )
 
 export const ReviewRoutes = router;

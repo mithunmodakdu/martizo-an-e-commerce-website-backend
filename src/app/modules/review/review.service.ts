@@ -165,8 +165,32 @@ const moderateReview = async (reviewId: string, status: EReviewStatus) => {
     { new: true, runValidators: true },
   );
 
-  if(!review){
-    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found")
+  if (!review) {
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found");
+  }
+
+  return review;
+};
+
+const addAdminReply = async (
+  adminId: string,
+  reviewId: string,
+  comment: string,
+) => {
+  const review = await Review.findByIdAndUpdate(
+    reviewId,
+    {
+      adminReply: {
+        comment,
+        repliedBy: new Types.ObjectId(adminId),
+        repliedAd: new Date(),
+      },
+    },
+    { runValidators: true, new: true },
+  );
+
+  if (!review) {
+    throw new AppError(httpStatusCodes.NOT_FOUND, "Review Not Found");
   }
 
   return review;
@@ -178,4 +202,5 @@ export const ReviewService = {
   deleteReview,
   voteReview,
   moderateReview,
+  addAdminReply,
 };
