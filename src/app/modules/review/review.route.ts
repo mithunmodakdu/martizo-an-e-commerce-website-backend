@@ -4,12 +4,14 @@ import { checkAuth } from "../../middlewares/checkAuth";
 import { ERole } from "../user/user.interface";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { addAdminReplyZodSchema, createReviewZodSchema, moderateReviewZodSchema, updateReviewZodSchema, voteReviewZodSchema } from "./review.validation";
+import { multerUpload } from "../../config/multer.config";
 
 const router = Router();
 
 router.post(
-  "/",
+  "/create",
   checkAuth(...Object.values(ERole)),
+  multerUpload.array("files", 5),
   validateRequest(createReviewZodSchema),
   ReviewController.createReview,
 );

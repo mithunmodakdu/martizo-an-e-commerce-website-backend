@@ -30,6 +30,7 @@ const createReview = async (
   userId: Types.ObjectId,
   payload: TCreateReviewPayload,
 ) => {
+  console.log(payload)
   const existedReview = await Review.findOne({
     userId,
     productId: payload.productId,
