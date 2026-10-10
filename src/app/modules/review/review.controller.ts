@@ -6,7 +6,17 @@ import httpStatusCodes from "http-status-codes";
 import { read } from "pdfkit";
 
 const createReview = catchAsync(async (req: Request, res: Response) => {
-  const result = await ReviewService.createReview(req.user.userId, req.body);
+  // console.log(req.body)
+  // console.log(req.files)
+
+  const files = req.files as Express.Multer.File[]
+
+  const payload = {
+    ...req.body,
+    images: files?.map((file) => ({url: file.path}))
+  }
+
+  const result = await ReviewService.createReview(req.user.userId, payload);
 
   sendResponse(res, {
     statusCode: httpStatusCodes.CREATED,
